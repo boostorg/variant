@@ -46,6 +46,8 @@
 #include "boost/type_traits/is_same.hpp"
 #include "boost/type_traits/type_with_alignment.hpp"
 
+#include "boost/apply_visitor.hpp"
+
 #include "boost/mpl/advance.hpp"
 #include "boost/mpl/apply.hpp"
 #include "boost/mpl/apply_if.hpp"
