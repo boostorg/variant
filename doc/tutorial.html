@@ -1,4 +1,4 @@
- <html>
+<html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
         <meta name="keywords" content="Variant, design pattern, generic programming, C++">
@@ -98,8 +98,8 @@ single parameter:<BR> <PRE>
 A typical implementation would probably use some sort of inheritance, to
 make it possible for a single function to return objects of three
 different types. This would lead to writing three adapter classes which
-will supply the semantics of the various types (<code>std::string</code>, 
-<code>int</code>s and <code>char*</code>) while inheriting (publicly) 
+will supply the semantics of the various types (<code>std::string</code>,
+<code>int</code>s and <code>char*</code>) while inheriting (publicly)
 from a common base class.<BR>
 On the other hand, by using <code>boost::variant</code> as the return type of
 the factory function, we end up with a clear, straight-forward, code:
@@ -130,7 +130,7 @@ factory_objects create(double obj_selector)
 
 
 // Define a visitor
-struct cout_printer : boost::generic_visitor&lt;void&gt;
+struct cout_printer : boost::static_visitor&lt;&gt;
 {
    template&lt;typename T&gt;
    void operator()(const T& t)
@@ -205,13 +205,13 @@ If one of these types is incomplete at the instantiation point, it must
 be enclosed inside an <code>incomplete&lt;&gt;</code> wrapper, as shown below:<br>
 <pre>
    struct jas1; // Forward declaration of jas1 (Just Another Struct)
-   typedef variant&lt;jas1, double, std::string&gt;
-      variant_type_6; // Error - jas1 is incomplete
+   variant&lt;jas1, double, std::string&gt; v6; // Error - 
+                                          // jas1 is incomplete
    struct jas1 { ... };
 
    struct jas2; // Forward declaration of jas2
-   typedef variant&lt;incomplete&lt;jas2&gt;, double, std::string&gt;
-      variant_type_7; // OK - incomplete&lt;&gt; is used for incomplete types
+   variant&lt;incomplete&lt;jas2&gt;, double, std::string&gt; v7; // OK -
+                                                      // incomplete&lt;&gt; is used for incomplete types
    struct jas2 { ... };
 </PRE>
 <br>
@@ -240,13 +240,13 @@ interchangeably.
 
    v1 = short(5);           // short -> int
    v1 = 5.9f;               // float -> double
-   v1 = unsigned char('x'); // unsigned char -> int
+   v1 = static_cast&lt;unsigned char&gt;('x'); // unsigned char -> int
 
 
    v1 = string("abc");    // Error! no implicit conversion from
                           //   string to int/char/double
 
-   v1 = long double(4.0); // Error! (ambiguity):
+   v1 = static_cast&lt;long double&gt;(4.0); // Error! (ambiguity):
                           //      long double -> double conversion
                           //      clashes with long double -> int conversion
 
@@ -258,7 +258,7 @@ interchangeably.
 
    struct class1
    {
-      class1(const char* s) { .. }
+      class1(const char* s = 0) { .. }
       ..
    };
 
@@ -266,11 +266,11 @@ interchangeably.
    {
       class2(const char* s) { .. }
       ..
-   }
+   };
 
    variant&lt;class1, double&gt; v3;
    v3 = 5;               // int -> double
-   v3 = class1("abc");   // class1 -> class1 
+   v3 = class1("abc");   // class1 -> class1
    v3 = "abc";           // const char* -> class1
 
    variant&lt;class1, class2&gt; v4;
@@ -390,45 +390,44 @@ chacne to inspect/modify <code>a_variant</code>'s value.<br>
 <BR>
 The following snip demonstrates the visitation facility using a concrete visitor class, <code>print_int_char_visitor</code>. The code will print "Char value: 'x'" and "Int value: 77" to <CODE>std::cout</CODE>:
 <PRE>
-   struct print_int_char_visitor
+   struct print_int_float_visitor
    {
       //result_type specifies the return type of operator()
       typedef void result_type;
 
       // Handle int values
-      void operator()(int x)
+      void operator()(int x) const
       {
          std::cout &lt;&lt; "Int value: " &lt;&lt; x &lt;&lt; std::endl;
       }
 
       // Handle char values
-      void operator()(char c)
+      void operator()(float x) const
       {
-         std::cout &lt;&lt; "Char value: '" &lt;&lt; c &lt;&lt; '\''
-            &lt;&lt; std::endl;
+         std::cout &lt;&lt; "Float value: " &lt;&lt; x &lt;&lt; std::endl;
       }
    };
    .
    .
-   variant&lt;int, char&gt; var = 'x';
+   variant&lt;int, float&gt; var = 53.22f;
 
    //Apply print_int_char_visitor to var.
-   apply_visitor(print_int_char_visitor(), var); // Output: "Char value: 'x'"
+   apply_visitor(print_int_float_visitor(), var); // Output: "Float value: 53.22"
 
    var = 77;
-   apply_visitor(print_int_char_visitor(), var); // Output: "Int value: 77"
+   apply_visitor(print_int_float_visitor(), var); // Output: "Int value: 77"
 
 </PRE>
 <BR>
 
-Note how <code>print_int_char_visitor</code> specifies the type of its return value thru a 
+Note how <code>print_int_char_visitor</code> specifies the type of its return value thru a
 nested type - <CODE>result_type</code>. This return value is also the value that is returned by <code>boost::apply_visitor()</code> to its caller.<br>
-The next code snip, demonstrate how <CODE>boost::generic_visitor&lt;T&gt;</code> can be used as a base
+The next code snip, demonstrate how <CODE>boost::static_visitor&lt;T&gt;</code> can be used as a base
 class to supply <CODE>result_type</CODE>'s definition. The visitor in this snip, <code>multiply_by_two</code> multiplies its operand by two and returns the result as an <code>int</code> value.
 <pre>
    struct multiply_by_two
-       :    boost::generic_visitor&lt;int&gt; // Return type is int,
-                                        // so derive from generic_visitor&lt;int&gt;
+       :    boost::static_visitor&lt;int&gt; // Return type is int,
+                                        // so derive from static_visitor&lt;int&gt;
    {
       template&lt;typename T&gt;
       int operator()(T t) const
@@ -451,16 +450,16 @@ one of the types a variant may hold (due to ambiguity/lack of conversion), a com
 is generated.
 <br>
 <PRE>
-   struct print_float_char : boost::generic_visitor&lt;void&gt;
+   struct print_int_char : boost::static_visitor&lt;void&gt;
    {
       // Handler *A*
-      void operator()(float f)
+      void operator()(int f) const
       {
-         std::cout &lt;&lt; "Float value: " &lt;&lt; f &lt;&lt; std::endl;
+         std::cout &lt;&lt; "Int value: " &lt;&lt; f &lt;&lt; std::endl;
       }
 
       // Handler *B*
-      void operator()(char c)
+      void operator()(char c) const
       {
          std::cout &lt;&lt; "Char value: '" &lt;&lt; c &lt;&lt; '\''
             &lt;&lt; std::endl;
@@ -468,32 +467,32 @@ is generated.
    };
    .
    .
-   variant&lt;int, char&gt; a = 88;            // a = int(88)
-   apply_visitor(print_float_char(), a); // Output: "Float value: 88.0"
+   variant&lt;short, char&gt; a = static_cast&lt;short&gt;(88);
+   apply_visitor(print_int_char(), a);   // Output: "Int value: 88.0"
                                          //   (int value intercepted by handler *A*)
 
    a = 'x';                              // a = 'x'
-   apply_visitor(print_float_char(), a); // Output: "Char value: 'x'"
+   apply_visitor(print_int_char(), a);   // Output: "Char value: 'x'"
 
-   variant&lt;int, char, void*> b = 88;     // b = int(88)
-   apply_visitor(print_float_char(), b); // Error!
-                                         //   void* cannot be handled by neither
-                                         //   handler (*A* or *B*)
+   variant&lt;int, char, void*&gt; b = 88;     // b = int(88)
+   apply_visitor(print_int_char(), b);   // Error! -
+                                         //    void* cannot be handled by neither
+                                         //    handler (*A* or *B*)
 
 </PRE>
 
 A "Catch-all" behavior can be achieved by supplying a templated form
 of <CODE>operator(): </CODE>
 <PRE>
-   struct ignore_non_ints_visitor : boost::generic_visitor&lt;void&gt;
+   struct ignore_non_ints_visitor : boost::static_visitor&lt;void&gt;
    {
-      void operator()(int t)
+      void operator()(int t) const
       {
          std::cout &lt;&lt; "Current value: " &lt;&lt; t &lt;&lt; std::endl;
       }
 
       template&lt;typename T&gt;
-      void operator()(T t)
+      void operator()(T t) const
       {
          // Catch all other types:
          std::cout &lt;&lt; "Ignore me" &lt;&lt; std::endl;
@@ -515,7 +514,7 @@ of <CODE>operator(): </CODE>
 A visitor may accept its operand using a "pass-by-reference" parameter passing scheme.
 This allows a visitor to mutate the variant-held value:
 <pre>
-   struct first_capital : boost::generic_visitor&lt;void&gt;
+   struct first_capital : boost::static_visitor&lt;void&gt;
    {
        void operator()(std::string& str) const
        {
@@ -526,15 +525,15 @@ This allows a visitor to mutate the variant-held value:
        {
            *str = toupper(*str);
        }
-   };   
+   };
 
-   struct printer : boost::generic_visitor&lt;void&gt;
+   struct printer : boost::static_visitor&lt;void&gt;
    {
        template&lt;typename T&gt;
        void operator()(const T& t) const
        {
            std::cout &lt;&lt; t &lt;&lt; std::endl;
-       }       
+       }
    };
    .
    .
@@ -550,16 +549,16 @@ This allows a visitor to mutate the variant-held value:
 
 The last sample shows persistency of visitors. Every visitor is actually a function-object, so its data members can be used to keep persistent data. The <code>int_accumulator</code> visitor uses <code>total_</code> to keep track of the total sum of its operands:
 <pre>
-   struct int_accumulator : boost::generic_visitor&lt;void&gt;
+   struct int_accumulator : boost::static_visitor&lt;void&gt;
    {
        int_accumulator() : total_(0) { }
 
-       void operator()(int x) 
+       void operator()(int x)
        {
            total_ += x;
        }
 
-       int total_;       
+       int total_;
    } ;
    .
    .
