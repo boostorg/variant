@@ -395,18 +395,6 @@ private:
     aligned_storage_t storage1_;
     aligned_storage_t storage2_;
 
-    void copy_into_storage1(const variant& operand)
-    {
-        operand.raw_apply_visitor(detail::variant::copy_into(storage1_.address()));
-        which_ = operand.which();
-    }
-
-    void copy_into_storage2(const variant& operand)
-    {
-        operand.raw_apply_visitor(detail::variant::copy_into(storage2_.address()));
-        which_ = -(operand.which() + 1);
-    }
-
     bool using_storage1() const
     {
         return which_ >= 0;
@@ -420,6 +408,27 @@ private:
     const aligned_storage_t& active_storage() const
     {
         return const_cast<variant* const>(this)->active_storage();
+    }
+
+    void assign(const variant& operand)
+    {
+        // Copy the content of operand into *this's inactive storage...
+        operand.raw_apply_visitor(
+              detail::variant::copy_into(
+                  ( using_storage1() ? storage2_ : storage1_ ).address()
+                )
+            );
+
+        // ...destroy the active storage of *this...
+        raw_apply_visitor(detail::variant::destroyer());
+
+        // ...and if *this _was_ using storage1...
+        if (using_storage1())
+            // ...then activate storage2:
+            which_ = -(operand.which() + 1);
+        else
+            // ...otherwise, activate storage1:
+            which_ = operand.which();
     }
 
 public:
@@ -652,7 +661,8 @@ public:
 
     variant(const variant& operand)
     {
-        copy_into_storage1(operand);
+        operand.raw_apply_visitor(detail::variant::copy_into(storage1_.address()));
+        which_ = operand.which();
     }
 
 private:
@@ -744,15 +754,6 @@ public:
     {
         // Visit *this's contents with a 'destroyer' visitor:
         raw_apply_visitor(detail::variant::destroyer());
-    }
-
-private:
-    void assign(const variant& operand)
-    {
-        if (using_storage1())
-            copy_into_storage2(operand);
-        else
-            copy_into_storage1(operand);
     }
 
 public: // modifiers
