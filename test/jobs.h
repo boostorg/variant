@@ -8,7 +8,6 @@
 #include <sstream>
 #include <algorithm>
 #include <typeinfo>
-#include <boost/variant.hpp>
 
 #include "varout.h"
 
