@@ -121,18 +121,14 @@ struct make_storage
 {
 private: // helpers, for metafunction result (below)
 
-    BOOST_STATIC_CONSTANT(
-          std::size_t
-        , max_size = (max_value< Types, mpl::sizeof_<mpl::_1> >::type::value)
-        );
-    BOOST_STATIC_CONSTANT(
-          std::size_t
-        , max_alignment = (max_value< Types, alignment_of<mpl::_1> >::type::value)
-        );
+    typedef typename max_value< Types, mpl::sizeof_<mpl::_1> >::type
+        max_size;
+    typedef typename max_value< Types, alignment_of<mpl::_1> >::type
+        max_alignment;
 
 public: // metafunction result
 
-    typedef aligned_storage<max_size, max_alignment>
+    typedef aligned_storage<max_size::value, max_alignment::value>
         type;
 
 };
@@ -463,23 +459,26 @@ public: // typedefs
 
 private: // static precondition assertions, cont.
 
-#if !defined(BOOST_MSVC)
-
-    // [Assert unique types: ommitted for compile-time complexity reasons.]
-    /**/
+    // [Assert unique types: ommitted due to compile-time complexity.]
+    /*
+    BOOST_STATIC_ASSERT((
+          mpl::equal<
+              types
+            , typename mpl::unique<types>::type
+            >::type::value
+        ));
+    */
 
     // [Assert no top-level const-qualified types:]
     BOOST_STATIC_ASSERT((
           mpl::equal_to<
-              mpl::count_if<
+              typename mpl::count_if<
                   types
                 , is_const<mpl::_>
-                >
+                >::type
             , mpl::size_t<0>
             >::type::value
         ));
-
-#endif // !defined(BOOST_MSVC)
 
 private: // representation
 
@@ -507,15 +506,23 @@ private: // representation
     int which_;
     compressed_pair< storage1_t,storage2_t > storage_;
 
+    static bool using_storage1_impl(mpl::true_)
+    {
+        // Since there is no storage2, we know storage1 is in use:
+        return true;
+    }
+
+    bool using_storage1_impl(mpl::false_) const
+    {
+        // Since a true second storage is in use (i.e. NOT null_storage), we must check:
+        return which_ >= 0;
+    }
+
     bool using_storage1() const
     {
-        // If a true second storage is in use (i.e. NOT null_storage)...
-        if (!is_same<storage2_t, detail::variant::null_storage>::value)
-            // ...then we must check the which_ value:
-            return which_ >= 0;
-
-        // Otherwise, we know storage1 is in use because there is no storage2:
-        return true;
+        return using_storage1_impl(
+              typename is_same<storage2_t, detail::variant::null_storage>::type()
+            );
     }
 
     void activate_storage1(int which)
@@ -551,7 +558,7 @@ private: // representation
 
 public: // queries
 
-    unsigned int which() const
+    int which() const
     {
         // If NOT using storage1...
         if (using_storage1() == false)
@@ -1283,7 +1290,7 @@ public: // queries
             , empty_it
             >::type empty_index;
 
-        return which() == empty_index;
+        return which() == empty_index::value;
     }
 
     const std::type_info& type() const
@@ -1298,7 +1305,7 @@ private: // helpers, for visitation support (below)
     static
         typename Visitor::result_type
     apply_visitor_impl(
-          const unsigned int var_which // [const-ness may aid in optimization by compiler]
+          const int var_which // [const-ness may aid in optimization by compiler]
         , Variant& var
         , Visitor& visitor
         , mpl::false_// is_last
@@ -1332,7 +1339,7 @@ private: // helpers, for visitation support (below)
     static
         typename Visitor::result_type
     apply_visitor_impl(
-          const unsigned int
+          const int
         , Variant&
         , Visitor&
         , mpl::true_// is_last
