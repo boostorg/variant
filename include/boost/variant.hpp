@@ -46,6 +46,7 @@
 #include "boost/mpl/apply_if.hpp"
 #include "boost/mpl/begin_end.hpp"
 #include "boost/mpl/bool_c.hpp"
+#include "boost/mpl/contains.hpp"
 #include "boost/mpl/distance.hpp"
 #include "boost/mpl/empty.hpp"
 #include "boost/mpl/comparison/equal_to.hpp"
@@ -718,16 +719,12 @@ private: // helpers, for structors (below)
 
     struct initializer_root
     {
-    private: // helpers, for static functions (below)
-
-        enum NotCallable { not_callable };
-
     public: // static functions
 
         // Root type must expose name "initialize," so
         // the following dummy function is provided:
 
-        static void initialize(NotCallable) { }
+        static void initialize();
 
     };
 
@@ -1025,22 +1022,13 @@ private: // helpers, for structors, cont. (below)
 
     };
 
-#if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
-
-public: // structors, cont.
-
-    template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename U)>
-    variant(const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand)
-    {
-        // Attempt a converting copy into *this's storage:
-        convert_copy_into visitor(storage_.first().address());
-        activate_storage1(
-              operand.raw_apply_visitor(visitor)
-            );
-    }
+private: // helpers for structors, cont. (below)
 
     template <typename T>
-    variant(const T& operand)
+    void copy_construct(
+          const T& operand
+        , mpl::false_c = mpl::false_c() // from_foreign_variant
+        )
     {
         // NOTE TO USER :
         // Compile error here indicates that the given type is not 
@@ -1055,36 +1043,45 @@ public: // structors, cont.
             );
     }
 
-#else// defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
+    template <typename Variant>
+    void copy_construct(
+          const Variant& operand
+        , mpl::true_c// from_foreign_variant
+        )
+    {
+        convert_copy_into visitor(storage_.first().address());
+        activate_storage1(
+              operand.raw_apply_visitor(visitor)
+            );
+    }
 
 private: // workaround, for structors, cont. (below)
+
+    // [While unnecessary for conforming compilers, this workaround doesn't break anything:]
 
     template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename U)>
     void constructor_simulated_partial_ordering(
           const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand
         , long)
     {
-        // Attempt a converting copy into *this's storage:
-        convert_copy_into visitor(storage_.first().address());
-        activate_storage1(
-              operand.raw_apply_visitor(visitor)
+        // [Determine if operand is a bounded type, or if it needs to be converted (foreign):]
+        typedef mpl::bool_c<
+              !mpl::contains<
+                  types
+                , boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES,U)>
+                >::type::value
+            > from_foreign_variant;
+
+        copy_construct(
+              operand
+            , from_foreign_variant()
             );
     }
 
     template <typename T>
     void constructor_simulated_partial_ordering(const T& operand, int)
     {
-        // NOTE TO USER :
-        // Compile error here indicates that the given type is not 
-        // unambiguously convertible to one of the variant's types
-        // (or that no conversion exists).
-        //
-        activate_storage1(
-              initializer::initialize(
-                  storage_.first().address()
-                , operand
-                )
-            );
+        copy_construct(operand);
     }
 
 public: // structors, cont.
@@ -1094,8 +1091,6 @@ public: // structors, cont.
     {
         constructor_simulated_partial_ordering(operand, 1L);
     }
-
-#endif // BOOST_NO_FUNCTION_TEMPLATE_ORDERING workaround
 
 private: // helpers, for modifiers (below)
 
