@@ -113,8 +113,7 @@ struct is_sequence
 
 namespace boost {
 
-namespace detail {
-namespace variant {
+namespace detail { namespace variant {
 
 // metafunction max_value
 //
@@ -404,8 +403,7 @@ struct make_variant_list
 
 #endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
 
-} // namespace variant
-} // namespace detail
+}} // namespace detail::variant
 
 //////////////////////////////////////////////////////////////////////////
 // class template variant (concept inspired by Andrei Alexandrescu)
@@ -445,7 +443,16 @@ template <
 
 >
 class variant
-//    : public static_visitable< boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)> >
+    : public static_visitable<
+          boost::variant<
+              A
+            , B
+            , BOOST_PP_ENUM_PARAMS(
+                  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+                , T
+                )
+            >
+        >
 
 #if defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
     , public detail::variant_workaround_base
@@ -1282,76 +1289,12 @@ void swap(
 }
 
 //////////////////////////////////////////////////////////////////////////
-// class template apply_visitor_traits<variant> specialization
-//
-// Enables the apply_visitor facility for variants.
-//
-
-#if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-
-template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
-struct static_visitable_traits<
-  boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>
->
-{
-private:
-    typedef boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>
-        variant_t;
-
-public:
-    template <typename Visitor>
-    static
-        typename Visitor::result_type
-    apply_visitor(Visitor& visitor, variant_t& operand)
-    {
-        return operand.apply_visitor(visitor);
-    }
-
-    template <typename Visitor>
-    static
-        typename Visitor::result_type
-    apply_visitor(Visitor& visitor, const variant_t& operand)
-    {
-        return operand.apply_visitor(visitor);
-    }
-};
-
-#else// defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-
-namespace detail {
-
-template <typename Visitor, BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
-    typename Visitor::result_type
-variant_apply_visitor(
-      Visitor& visitor
-    , boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>& operand
-    )
-{
-    return operand.apply_visitor(visitor);
-}
-
-template <typename Visitor, BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
-    typename Visitor::result_type
-variant_apply_visitor(
-      Visitor& visitor
-    , const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>& operand
-    )
-{
-    return operand.apply_visitor(visitor);
-}
-
-} // namespace detail
-
-#endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION workaround
-
-//////////////////////////////////////////////////////////////////////////
 // class template extract_traits<variant> specialization
 //
 // Enables the extract<T> facility for variants.
 //
 
-namespace detail {
-namespace variant {
+namespace detail { namespace variant {
 
 template <typename T>
 struct caster
@@ -1369,8 +1312,7 @@ struct caster
     }
 };
 
-} // namespace variant
-} // namespace detail
+}} // namespace detail::variant
 
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 
