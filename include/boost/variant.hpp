@@ -508,8 +508,8 @@ private:
 
     bool using_storage1() const
     {
-        // If some types are not moveable...
-        if (is_same<storage2_t, detail::variant::null_storage>::value)
+        // If a true second storage is in use (i.e. NOT null_storage)...
+        if (!is_same<storage2_t, detail::variant::null_storage>::value)
             // ...then we must check the which_ value:
             return which_ >= 0;
 
