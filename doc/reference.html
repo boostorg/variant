@@ -345,32 +345,80 @@ which is required from each <a href="#VisitorOf">visitor</a> class.
 <hr>
 
 <h2><a name="ValueExtraction">Value Extraction: <code>boost::extract</code></a></h2>
-<pre>template&lt;typename ToType, typename VariantType&gt;
-const ValueType* extract(const VariantType* operand);
+<pre>
+<pre>
 
-template&lt;typename ToType, typename VariantType&gt;
-ValueType* extract(VariantType* operand);
-
-template&lt;typename ToType, typename VariantType&gt;
-const ValueType& extract(const VariantType& operand);
-
-template&lt;typename ToType, typename VariantType&gt;
-ValueType& extract(VariantType& operand);
-
-class bad_extract : public std::exception
-{
-public:
+  class bad_extract : public std::exception
+  {
+  public:
+  
     virtual const char* what() const throw();
-};
+  };
+
+  template &lt;class ToType&gt;
+  struct extract
+  {
+    typedef ToType&amp; result_type;
+
+    template&lt;VariantType&gt;
+    extract(const VariantType&amp; from);
+
+    template&lt;VariantType&gt;
+    extract(VariantType&amp; from);
+
+    bool check() const;
+    
+    result_type operator()() const;
+    operator result_type() const;
+
+  };
+</pre>
 
 </pre>
-<code>boost::extract()</code> is used for extracting a held value from a
-<code>variant</code> object:<br><br>
-If passed a pointer, it returns a pointer
-to the held value if its type is <code>ToType</code>. Otherwise - returns null;<br>
-If a value or a reference is passed, <code>extract()</code> returns a
-copy of the held value if its type is <code>ToType</code>. Otherwise - a
-<code>boost::bad_extract</code> exception is emitted.<br>
+<code>boost::extract</code> is a facility for extracting a reference 
+to a value held by a <code>variant</code> object. The 'extraction' 
+succeeds only if the type of the held value is identical to the 
+<CODE>ToType</CODE> template parameter. Usage:<BR> <OL>
+<LI><CODE>extract&lt;RR&gt;(var_inst);</code> Initializes a temporary 
+object which has an
+implicit convertion to <CODE>RR&</CODE>. If the given <CODE>variant</CODE> 
+object, <CODE>var_inst</CODE> does not hold a value of type 
+<CODE>RR</CODE>, a <CODE>bad_extract</CODE> exception is thrown.
+<LI><code>extract&lt;RR&gt; ex(var_inst);</code> Initalizes an extract 
+object, <code>ex</CODE>. Subsequently, client code can issue an 
+<CODE>ex.check()</CODE> call, to determine whether <CODE>var_inst</CODE> 
+is holding a value of type <CODE>RR</CODE>. </OL>
+
+
+<h3>Constructors</h3>
+<PRE>
+    template&lt;VariantType&gt;
+    extract(const VariantType&amp; from);
+
+    template&lt;VariantType&gt;
+    extract(VariantType&amp; from);
+</PRE>
+Sets up an <CODE>extract</CODE> object which is associated with the given 
+<code>variant</code> object (<code>from</code>).<BR>
+<H3>Queries</H3>
+<PRE>
+    bool check() const;
+   
+</PRE>     
+<CODE>check()</CODE> is a non throwing member function which return 
+<CODE>true</CODE>, if, and only if, the associated <code>variant</CODE> 
+object is holding a value of type <CODE>ToType</CODE>.
+<PRE>    result_type operator()() const;
+    operator result_type() const;
+</PRE>
+
+<CODE>If <CODE>check()</code> is <code>true</CODE> - 
+<code>operator()</code> returns a
+reference to the value held by the associated <CODE>variant</CODE> object. 
+Otherwise - a <CODE>bad_extract</CODE> exception is thrown.<BR>
+<code>operator result_type()</code> supplies an implicit conversion to 
+<code>ToType&amp;</CODE>. It is semantically identical to 
+<CODE>operator()</code>.<BR>
 <BR>
 <hr>
 <BR>
