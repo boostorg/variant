@@ -28,6 +28,7 @@
 #include "boost/preprocessor/cat.hpp"
 #include "boost/preprocessor/enum.hpp"
 #include "boost/preprocessor/enum_params.hpp"
+#include "boost/preprocessor/enum_params_with_a_default.hpp"
 #include "boost/preprocessor/enum_params_with_defaults.hpp"
 #include "boost/preprocessor/repeat.hpp"
 #include "boost/preprocessor/arithmetic/sub.hpp"
@@ -92,6 +93,7 @@ struct is_sequence
 //
 // Implementation-defined preprocessor symbol describing the actual
 // length of variant's pseudo-variadic template parameter list.
+//
 #define BOOST_VARIANT_LIMIT_TYPES \
     BOOST_MPL_LIMIT_LIST_SIZE
 
@@ -101,7 +103,9 @@ namespace detail {
 namespace variant {
 
 // function template swap_impl
-//   Swaps using Koenig lookup but falls back to std::swap on non-conforming compilers.
+//
+// Swaps using Koenig lookup but falls back to std::swap on non-conforming compilers.
+//
 template <typename T>
 inline void swap_impl(T& lhs, T& rhs)
 {
@@ -276,18 +280,47 @@ public:
 
 };
 
-// tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
-//   Used to forward variant's variadic argument list to mpl::vector.
+//////////////////////////////////////////////////////////////////////////
+// BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
 //
-//   NOTE: Needed to workaround compilers that don't support
-//   using-declarations in class templates.
+// Needed to work around compilers that don't support using-declarations
+// in class templates. (See the variant::initializer workarounds below.)
+//
+#if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
 
+// metafunction make_variant_list
+//
+// Provides a MPL-compatible sequence with the specified non-void types
+// as arguments.
+template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
+struct make_variant_list
+{
+	typedef typename mpl::list<
+		  BOOST_PP_ENUM_PARAMS(
+			  BOOST_VARIANT_LIMIT_TYPES
+			, T
+			)
+		>::type type;
+};
+
+#else// defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+
+// class template convert_void
+// 
+// Provides the mechanism by which voidNN types are converted to
+// mpl::void_ (and thus can be passed to mpl::list).
+//
 template <typename T> struct convert_void
 {
     typedef T type;
 };
 
-#define DEFINE_VOID_N(N,_)                                 \
+// tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
+//
+// Defines void types that are each unique and specializations of
+// convert_void that yields mpl::void_ for each voidNN type.
+//
+#define BOOST_VARIANT_DETAIL_DEFINE_VOID_N(N,_)            \
     struct BOOST_PP_CAT(void,N);                           \
                                                            \
     template <> struct convert_void<BOOST_PP_CAT(void,N)>  \
@@ -297,17 +330,45 @@ template <typename T> struct convert_void
 
 BOOST_PP_REPEAT(
       BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
-    , DEFINE_VOID_N
+    , BOOST_VARIANT_DETAIL_DEFINE_VOID_N
     , _
     )
-#undef DEFINE_VOID_N
+#undef BOOST_VARIANT_DETAIL_DEFINE_VOID_N
+
+// metafunction make_variant_list
+//
+// Provides a MPL-compatible sequence with the specified non-void types
+// as arguments.
+//
+template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
+struct make_variant_list
+{
+	// [Define a macro to convert any voidNN tags to mpl::void...]
+#   define BOOST_VARIANT_DETAIL_CONVERT_VOID(N,_)   \
+        typename detail::variant::convert_void<BOOST_PP_CAT(T,N)>::type
+
+	// [...so that the specified types can be passed to mpl::list...
+	typedef typename mpl::list< 
+		  BOOST_PP_ENUM(
+			  BOOST_VARIANT_LIMIT_TYPES
+			, BOOST_VARIANT_DETAIL_CONVERT_VOID
+			, _
+			)
+		>::type type;
+
+	// [...and, finally, the conversion macro can be undefined:]
+#   undef BOOST_VARIANT_DETAIL_CONVERT_VOID
+};
+
+#endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
 
 } // namespace variant
 } // namespace detail
 
 //////////////////////////////////////////////////////////////////////////
 // class template variant (concept inspired by Andrei Alexandrescu)
-//   Efficient, type-safe bounded discriminated union.
+//
+// Efficient, type-safe bounded discriminated union.
 //
 // Preconditions:
 //  - Two or more types must be specified.
@@ -317,20 +378,36 @@ BOOST_PP_REPEAT(
 //   variant<A,B,...>  (where A,B,... are not type-sequences)
 // or
 //   variant<types>  (where types is a type-sequence with size > 1)
-
+//
 template <
   typename A
 , typename B = mpl::void_
+
+#if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+
+, BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
+	  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+	, typename T
+	, mpl::void_
+	)
+
+#else// defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+
 , BOOST_PP_ENUM_PARAMS_WITH_DEFAULTS(
       BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
     , typename T
     , detail::variant::void//NN
     )
+
+#endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
+
 >
 class variant
+
 #if defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
     : public detail::variant_workaround_base
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION workaround
+
 {
 /*    typedef mpl::integral_c<unsigned, 2>
         min_list_size;
@@ -354,24 +431,18 @@ class variant
         ));
 */
 public:
-#   define BOOST_VARIANT_CONVERT_VOID(N,_)   \
-        typename detail::variant::convert_void<BOOST_PP_CAT(T,N)>::type
-
     typedef typename mpl::apply_if<
           mpl::is_sequence<A>
         , mpl::identity<A>
-        , mpl::list<
-              A
-            , B
-            , BOOST_PP_ENUM(
-                  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
-                , BOOST_VARIANT_CONVERT_VOID
-                , _
-                )
-            >
-        >::type types;
-
-#   undef BOOST_VARIANT_CONVERT_VOID
+		, detail::variant::make_variant_list<
+			  A
+			, B
+			, BOOST_PP_ENUM_PARAMS(
+				  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+				, T
+				)
+			>
+		>::type types;
 
 private:
     BOOST_STATIC_CONSTANT(
@@ -941,7 +1012,7 @@ void swap(
 //////////////////////////////////////////////////////////////////////////
 // class template apply_visitor_traits<variant> specialization
 //
-// Enables apply_visitor(visitor, variant) functionality.
+// Enables the apply_visitor facility for variants.
 //
 
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
@@ -1004,7 +1075,7 @@ variant_apply_visitor(
 //////////////////////////////////////////////////////////////////////////
 // class template extract_traits<variant> specialization
 //
-// Attempts "extraction" of specified type value from given variant.
+// Enables the extract<T> facility for variants.
 //
 
 namespace detail {
