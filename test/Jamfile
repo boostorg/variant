@@ -37,12 +37,14 @@ exe test6 : test6.cpp
    : debug release <runtime-link>static/dynamic	
    ;
 
-exe test7: test7.cpp
+
+exe test7 : test7.cpp
    : <include>$(BOOST_ROOT)
    : debug release <runtime-link>static/dynamic	
    ;
 
-exe test8: test8.cpp
+
+exe test8 : test8.cpp
    : <include>$(BOOST_ROOT)
    : debug release <runtime-link>static/dynamic	
    ;
