@@ -45,12 +45,12 @@
 
 #include "boost/mpl/apply_if.hpp"
 #include "boost/mpl/begin_end.hpp"
-#include "boost/mpl/bool_c.hpp"
+#include "boost/mpl/bool.hpp"
 #include "boost/mpl/contains.hpp"
 #include "boost/mpl/count_if.hpp"
 #include "boost/mpl/distance.hpp"
 #include "boost/mpl/empty.hpp"
-#include "boost/mpl/comparison/equal_to.hpp"
+#include "boost/mpl/equal_to.hpp"
 #include "boost/mpl/identity.hpp"
 #include "boost/mpl/integral_c.hpp"
 #include "boost/mpl/iter_fold.hpp"
@@ -102,7 +102,7 @@ namespace mpl {
 template <typename T>
 struct is_sequence
 {
-    typedef false_c type;
+    typedef false_ type;
     BOOST_STATIC_CONSTANT(bool, value = type::value);
 };
 
@@ -593,11 +593,11 @@ private: // static precondition assertions
     // Compile error here indicates that variant's variadic
     // template parameter list was used inappropriately.
     BOOST_STATIC_ASSERT((
-          mpl::logical_or< // B != void_ || (is_sequence<A> && size<A> >= 2)
-              mpl::logical_not<
+          mpl::or_< // B != void_ || (is_sequence<A> && size<A> >= 2)
+              mpl::not_<
                   is_same<B, detail::variant::void_>
                 >
-            , mpl::logical_and<
+            , mpl::and_<
                   mpl::is_sequence<A>
                 , mpl::equal_to<
                       mpl::guarded_size<A, min_list_size>
@@ -612,8 +612,8 @@ private: // static precondition assertions
     // Until mpl_list_initializer (below) works, sequences are not supported
     // for compilers that do not support using declarations in templates.
     BOOST_STATIC_ASSERT((
-          mpl::logical_not< // !(B == void_ || is_sequence<A>)
-              mpl::logical_or<
+          mpl::not_< // !(B == void_ || is_sequence<A>)
+              mpl::or_<
                   is_same<B, detail::variant::void_>
                 , mpl::is_sequence<A>
                 >
@@ -862,7 +862,7 @@ private: // helpers, for structors (below)
         static int initialize_impl(
               void* dest
             , const T& operand
-            , mpl::false_c// converting_initialization_flag
+            , mpl::false_// converting_initialization_flag
             , mpl::identity<Iterator>
             )
         {
@@ -880,7 +880,7 @@ private: // helpers, for structors (below)
         static int initialize_impl(
               void* dest
             , const T& operand
-            , mpl::true_c// converting_initialization_flag
+            , mpl::true_// converting_initialization_flag
             , I
             )
         {
@@ -943,7 +943,7 @@ private: // helpers, for structors (below)
                 found_it;
 
             // [...because converting-initialization is needed if it could not be found:]
-            typedef mpl::bool_c<
+            typedef mpl::bool_<
                   is_same<found_it, typename mpl::end<types>::type>::value
                 > converting_initialization_flag;
 
@@ -1054,7 +1054,7 @@ private: // helpers for structors, cont. (below)
     template <typename T>
     void copy_construct(
           const T& operand
-        , mpl::false_c = mpl::false_c() // from_foreign_variant
+        , mpl::false_ = mpl::false_() // from_foreign_variant
         )
     {
         // NOTE TO USER :
@@ -1073,7 +1073,7 @@ private: // helpers for structors, cont. (below)
     template <typename Variant>
     void copy_construct(
           const Variant& operand
-        , mpl::true_c// from_foreign_variant
+        , mpl::true_// from_foreign_variant
         )
     {
         convert_copy_into visitor(storage_.first().address());
@@ -1092,7 +1092,7 @@ private: // workaround, for structors, cont. (below)
         , long)
     {
         // [Determine if operand is a bounded type, or if it needs to be converted (foreign):]
-        typedef mpl::bool_c<
+        typedef mpl::bool_<
               !mpl::contains<
                   types
                 , boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES,U)>
@@ -1150,7 +1150,7 @@ private: // helpers, for modifiers (below)
         template <typename T>
         void assign_impl(
               const T& operand
-            , mpl::true_c// has_nothrow_move_constructor
+            , mpl::true_// has_nothrow_move_constructor
             )
         {
             // Attempt to make a temporary copy...
@@ -1170,7 +1170,7 @@ private: // helpers, for modifiers (below)
         template <typename T>
         void assign_impl(
               const T& operand
-            , mpl::false_c// has_nothrow_move_constructor
+            , mpl::false_// has_nothrow_move_constructor
             )
         {
             // Attempt a copy into target's inactive storage...
@@ -1195,7 +1195,7 @@ private: // helpers, for modifiers (below)
         {
             assign_impl(
                   operand
-                , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
+                , mpl::bool_< has_nothrow_move_constructor<T>::value >()
                 );
         }
 
@@ -1257,7 +1257,7 @@ private: // helpers, for modifiers, cont. (below)
         template <typename T>
         void move_assign_impl(
               T& operand
-            , mpl::true_c// has_nothrow_move_constructor
+            , mpl::true_// has_nothrow_move_constructor
             )
         {
             // Destroy the target's active storage...
@@ -1274,7 +1274,7 @@ private: // helpers, for modifiers, cont. (below)
         template <typename T>
         void move_assign_impl(
               T& operand
-            , mpl::false_c// has_nothrow_move_constructor
+            , mpl::false_// has_nothrow_move_constructor
             )
         {
             // Attempt a move into target's inactive storage...
@@ -1299,7 +1299,7 @@ private: // helpers, for modifiers, cont. (below)
         {
             move_assign_impl(
                   operand
-                , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
+                , mpl::bool_< has_nothrow_move_constructor<T>::value >()
                 );
         }
 
@@ -1349,7 +1349,7 @@ private: // helpers, for modifiers, cont. (below)
         template <typename T>
         void swap_impl(
               T& rhs_content
-            , mpl::true_c// has_nothrow_move_constructor
+            , mpl::true_// has_nothrow_move_constructor
             )
         {
             // Cache rhs's which-index (because it will be overwritten)...
@@ -1387,7 +1387,7 @@ private: // helpers, for modifiers, cont. (below)
         template <typename T>
         void swap_impl(
               T& rhs_content
-            , mpl::false_c// has_nothrow_move_constructor
+            , mpl::false_// has_nothrow_move_constructor
             )
         {
             // Cache rhs's which-index (because it will be overwritten)...
@@ -1430,7 +1430,7 @@ private: // helpers, for modifiers, cont. (below)
         {
             swap_impl(
                   rhs_content
-                , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
+                , mpl::bool_< has_nothrow_move_constructor<T>::value >()
                 );
         }
 
@@ -1481,12 +1481,12 @@ private: // helpers, for visitation support (below)
           const unsigned int var_which // [const-ness may aid in optimization by compiler]
         , Variant& var
         , Visitor& visitor
-        , mpl::false_c// is_last
+        , mpl::false_// is_last
         )
     {
         typedef typename mpl::next<Which>::type next_which;
         typedef typename mpl::next<Iterator>::type next_iter;
-        typedef mpl::bool_c<is_same<next_iter, LastIterator>::value> next_is_last;
+        typedef mpl::bool_<is_same<next_iter, LastIterator>::value> next_is_last;
         typedef typename mpl::apply_if<
               is_const<Variant>
             , add_const<typename Iterator::type>
@@ -1515,7 +1515,7 @@ private: // helpers, for visitation support (below)
           const unsigned int
         , Variant&
         , Visitor&
-        , mpl::true_c// is_last
+        , mpl::true_// is_last
         )
     {
         // | This is never called at runtime: a visitor must handle at |
@@ -1539,7 +1539,7 @@ public: // helpers, for visitation support (below)
               mpl::integral_c<unsigned long, 0>
             , typename mpl::begin<types>::type
             , typename mpl::end<types>::type
-            >(which(), *this, visitor, mpl::false_c());
+            >(which(), *this, visitor, mpl::false_());
     }
 
     template <typename Visitor>
@@ -1550,7 +1550,7 @@ public: // helpers, for visitation support (below)
               mpl::integral_c<unsigned long, 0>
             , typename mpl::begin<types>::type
             , typename mpl::end<types>::type
-            >(which(), *this, visitor, mpl::false_c());
+            >(which(), *this, visitor, mpl::false_());
     }
 
 public: // visitation support
