@@ -20,6 +20,7 @@
 #include "boost/incomplete.hpp"
 #include "boost/type_switch.hpp"
 #include "boost/apply_visitor.hpp"
+#include "boost/static_visitor.hpp"
 #include "boost/visitor_ptr.hpp"
 
 // Support headers:
@@ -39,16 +40,20 @@ typedef boost::variant<
     , std::string
     > my_variant;
 
-struct display_visitor
-    : boost::static_visitor<>
+class display_visitor
+    : public boost::static_visitor<>
 {
-private:
+private: // representation
+
     std::ostream* o_;
 
-public:
+public: //structors
+
     explicit display_visitor(std::ostream& o)
         : o_(&o)
     { }
+
+public: // visitor interfaces
 
     template <typename T>
     void operator()(const T& operand)
@@ -60,6 +65,7 @@ public:
     {
         *o_ << val;
     }
+
 };
 
 template <typename T, typename Variant>
@@ -153,13 +159,18 @@ struct subtract
 class calculator
     : public boost::static_visitor<int>
 {
+private: // representation
+
     int value_;
 
-public:
+public: // structors
+
     explicit calculator(int value)
         : value_(value)
     {
     }
+
+public: // visitor interfaces
 
     int operator()(variable) const
     {
@@ -180,14 +191,16 @@ public:
     {
         return boost::apply_visitor(*this, x.lhs) - boost::apply_visitor(*this, x.rhs);
     }
+
 };
 
 //////////////////////////////////////////////////////////////////////////
 // class are_strict_equals
 //
-struct are_strict_equals
-    : boost::static_visitor<bool>
+class are_strict_equals
+    : public boost::static_visitor<bool>
 {
+public: // visitor interfaces
 
 #if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
@@ -234,15 +247,20 @@ public:
 //
 template <typename T>
 class strict_equal_to
-    : boost::static_visitor<bool>
+    : public boost::static_visitor<bool>
 {
+private: // representation
+
     T value_;
 
-public:
+public: // structors
+
     explicit strict_equal_to(const T& value)
         : value_(value)
     {
     }
+
+public: // visitor interfaces
 
     bool operator()(const T& operand) const
     {
@@ -254,6 +272,7 @@ public:
     {
         return false;
     }
+
 };
 
 //////////////////////////////////////////////////////////////////////////

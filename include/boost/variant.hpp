@@ -23,7 +23,6 @@
 #include <cstddef> // for std::size_t
 #include <new> // for placement new
 #include <typeinfo> // for std::bad_cast, std::type_info
-#include <utility> // for std::swap
 
 #include "boost/config.hpp"
 #include "boost/compressed_pair.hpp"
@@ -40,7 +39,7 @@
 #include "boost/type_traits/alignment_of.hpp"
 //#include "boost/type_traits/is_better_conversion.hpp"
 #include "boost/type_traits/is_const.hpp"
-#include "boost/type_traits/is_convertible.hpp"
+//#include "boost/type_traits/is_convertible.hpp"
 #include "boost/type_traits/is_same.hpp"
 #include "boost/type_traits/type_with_alignment.hpp"
 
@@ -55,7 +54,6 @@
 #include "boost/mpl/distance.hpp"
 #include "boost/mpl/empty.hpp"
 #include "boost/mpl/erase.hpp"
-#include "boost/mpl/remove_if.hpp"
 //#include "boost/mpl/find.hpp"
 #include "boost/mpl/comparison/equal_to.hpp"
 #include "boost/mpl/identity.hpp"
@@ -340,7 +338,8 @@ public: // visitor interfaces
 //  * for all other visits, the given value itself.
 //
 template <typename Visitor>
-struct invoke_visitor
+class invoke_visitor
+    : public static_visitor< typename Visitor::result_type >
 {
 private: // representation
 
