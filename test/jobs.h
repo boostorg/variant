@@ -8,8 +8,8 @@
 #include <sstream>
 #include <algorithm>
 #include <typeinfo>
-#include <boost/extract.hpp>
-#include <boost/apply_visitor.hpp>
+#include "boost/extract.hpp"
+#include "boost/apply_visitor.hpp"
 
 #include "varout.h"
 
@@ -210,13 +210,6 @@ struct spec
    typedef T result;
 };
 
-
-template<typename VariantType, typename S>
-const void* ptr_of(const VariantType* p, spec<S>)
-{
-   return boost::extract<const S>(p);
-}
-
 template<typename VariantType, typename S>
 void verify(const VariantType& vari, spec<S>, std::string str = "")
 {
@@ -228,17 +221,8 @@ void verify(const VariantType& vari, spec<S>, std::string str = "")
    //
    // Check extract<>()
    //
-   BOOST_TEST(ptr_of(&vari, spec<S>()) != 0);
-
-   bool passes_extraction = true;
-   try
-   {
-      extract<const S>(vari);  
-   }
-   catch(bad_extract& )
-   {
-      passes_extraction = false;
-   }
+   bool passes_extraction = extract<const S>(vari).check();
+   
    BOOST_CHECK(passes_extraction);
 
    //
@@ -259,17 +243,8 @@ void verify_not(const VariantType& vari, spec<S>)
    using namespace boost;
 
    BOOST_CHECK(vari.type() != typeid(S));
-   BOOST_TEST(ptr_of(&vari, spec<S>()) == 0);
-
-   bool passes_extraction = true;
-   try
-   {
-      extract<const S>(vari);      
-   }
-   catch(bad_extract& )
-   {
-      passes_extraction = false;
-   }
+   
+   bool passes_extraction = extract<const S>(vari).check();
    BOOST_CHECK(!passes_extraction);
    
    //TODO: Check variant_cast : reference + point
