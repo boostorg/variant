@@ -1,0 +1,105 @@
+ <html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+        <meta name="keywords" content="Variant, design pattern, generic programming, C++">
+        <link rel="stylesheet" type="text/css" href="doc/styles.css">
+
+        <title>Boost::variant</title>
+    </head>
+
+    <body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+        <table summary="header" border="0" cellpadding="2" cellspacing="0" width="100%">
+                <td valign="top" width="300">
+                    <h3>
+                    <A HREF="../../index.htm">
+                    <img src="../../c++boost.gif" alt="C++ Boost"
+width="277" height="86" BORDER=0> </A>
+                    </h3>
+                </td>
+                <td valign="top">
+                    <h1 align="center">boost::variant</h1>
+                </td>
+            </tr>
+        </table>
+        <hr>
+
+<h2><a name="Introduction">Introduction</a></h2>
+        <p>The <code>boost::variant</code> template class offers a simple, type-safe solution 
+        for manipulating an object from an inhomogeneous set of&nbsp; types in a 
+        uniform manner. Once a <code>variant</code> object is instantiated, it 
+        is very simple for the rest of the code to handle an apparently 
+        unrelated set of types in a polymorphic way. This reduces code 
+        duplications and enhances maintainability.</p>
+        <p>Features of <CODE>boost::variant</CODE>: </p>
+<UL>
+<LI>Full value semantics, including adherence to standard overload resolution 
+rules</LI>
+<LI>Strong exception-safety guarantee</LI>
+<LI>Compile-time type-safe value visitation</LI>
+<LI>Run-time checked explicit value extraction</LI>
+<LI>Support for incomplete types and recursive variant types</LI>
+<LI>Efficient stack-based storage solution</LI>
+</UL>
+<hr>
+<H2>Contents</H2>
+<UL>
+<li><a href="#Introduction">Introduction</a></li>
+<LI><a href="doc/tutorial.html">Tutorial</a>
+<UL>
+<LI><a href="doc/tutorial.html#Motivation">Motivation</a></LI>
+<LI><a href="doc/tutorial.html#FirstVariantProgram">First variant program</a></LI>
+<LI><a href="doc/tutorial.html#Instantiation">Instantiation</a></LI>
+<LI><a href="doc/tutorial.html#ValueSemantics">Value semantics</a></LI>
+<LI><a href="doc/tutorial.html#FunctorBasedVisitation">Functor-based
+visitation</a></LI>
+</UL>
+</LI>
+
+<LI><a href="doc/reference.html">Reference</a>
+<UL>
+<LI><a HREF="doc/reference.html#Definitions">Definitions</a></LI>
+<UL>
+<LI><A HREF="doc/reference.html#SetOfTypes">Set of types</A></LI>
+<LI><A HREF="doc/reference.html#VisitorOf">Visitor of</A></LI>
+<LI><A HREF="doc/reference.html#BoostVariantLimitTypes">BOOST_VARIANT_LIMIT_TYPES</A></LI>
+</UL>
+<LI><a href="doc/reference.html#Synopsis">Synopsis</a></LI>
+<LI><a href="doc/reference.html#ExceptionSafety">Exception safety</a></LI>
+<LI><a href="doc/reference.html#Members">Members of boost::variant</a></LI>
+<LI><a href="doc/reference.html#ApplyingVisitors">boost::apply_visitor</a></LI>
+<LI><a href="doc/reference.html#StaticVisitor">boost::static_visitor</a></LI>
+<LI><a href="doc/reference.html#Extract">boost::extract</a></LI>
+<LI><a href="doc/reference.html#Incomplete">boost::incomplete</a></LI>
+</UL>
+</LI>
+<LI><a href="doc/sample.html">Sample programs</a>
+<UL>
+<LI><a href="doc/sample.html#quick">A quick example</a></LI>
+<LI><a href="doc/sample.html#tree">A binary tree implementation</a></LI>
+<LI><a href="doc/sample.html#poly">Polymorphism: Inheritance Vs.
+Variants</a></LI>
+</UL>
+</LI>
+<LI><a href="doc/misc.html">Miscellaneous</A>
+<ul>
+<LI><a href="doc/misc.html#HeaderFiles">Header files</a></LI>
+<LI><a href="doc/misc.html#Compatibility">Compatibility</a></LI>
+<LI><a href="doc/misc.html#Troubleshooting">Trouble shooting</a></LI>
+<LI><a href="doc/misc.html#Credits">Credits</a></LI>
+</ul>
+</LI>
+</UL>
+<BR>
+<hr>
+
+<p>Revised 10 February 2003</p>
+
+<p><i>&copy; Copyright Eric Friedman and Itay Maman</a> 2002-2003. All rights 
+reserved.</i></p>
+        <p>Permission to use, copy, modify, distribute and sell this software 
+        and its documentation for any purpose is hereby granted without fee, 
+        provided that the above copyright notice appear in all copies and that 
+        both that copyright notice and this permission notice appear in 
+        supporting documentation. Eric Friedman and Itay Maman make no 
+        representations about the suitability of this software for any purpose. 
+        It is provided &quot;as is&quot; without express or implied warranty.</p>
