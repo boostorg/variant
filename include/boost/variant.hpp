@@ -61,6 +61,7 @@
 #include "boost/mpl/identity.hpp"
 #include "boost/mpl/if.hpp"
 #include "boost/mpl/integral_c.hpp"
+#include "boost/mpl/iter_fold.hpp"
 #include "boost/mpl/comparison/less.hpp"
 #include "boost/mpl/list.hpp"
 #include "boost/mpl/limits/list.hpp"
@@ -113,24 +114,29 @@ namespace boost {
 
 namespace detail { namespace variant {
 
-// metafunction max_value
+//////////////////////////////////////////////////////////////////////////
+// (detail) metafunction max_value
 //
 // Applies ValueOp to the maximal element (as determined by ValueOp) of Sequence.
 //
 template <typename Sequence, typename ValueOp>
 struct max_value
 {
-private:
+private: // helpers, for metafunction result (below)
+
     typedef typename mpl::max_element<
           typename mpl::transform<Sequence, ValueOp>::type
         >::type max_it;
 
-public:
+public: // metafunction result
+
     typedef typename max_it::type
         type;
+
 };
 
-// metafunction make_storage
+//////////////////////////////////////////////////////////////////////////
+// (detail) metafunction make_storage
 //
 // Provides an aligned storage type capable of holding any of the types
 // specified in the given type-sequence.
@@ -138,7 +144,8 @@ public:
 template <typename Types>
 struct make_storage
 {
-private:
+private: // helpers, for metafunction result (below)
+
     BOOST_STATIC_CONSTANT(
           std::size_t
         , max_size = (max_value< Types, mpl::sizeof_<mpl::_1> >::type::value)
@@ -148,17 +155,22 @@ private:
         , max_alignment = (max_value< Types, alignment_of<mpl::_1> >::type::value)
         );
 
-public:
+public: // metafunction result
+
     typedef aligned_storage<max_size, max_alignment>
         type;
+
 };
 
-// class null_storage
+//////////////////////////////////////////////////////////////////////////
+// (detail) class null_storage
 //
 // Simulates aligned_storage's interface, but with nothing underneath.
 //
 struct null_storage
 {
+public: // queries
+
     void* address()
     {
         return 0;
@@ -168,112 +180,144 @@ struct null_storage
     {
         return 0;
     }
+
 };
 
-// class destroyer
+//////////////////////////////////////////////////////////////////////////
+// (detail) class destroyer
 //
-// Generic Visitor that destroys the value it visits.
+// Generic static visitor that destroys the value it visits.
 //
 struct destroyer
     : public static_visitor<>
 {
+public: // visitor interfaces
+
     template <typename T>
     void operator()(const T& operand) const
     {
         operand.~T();
     }
+
 };
 
-// class copy_into
+//////////////////////////////////////////////////////////////////////////
+// (detail) class copy_into
 //
-// Generic Visitor that copies the value it visits into the given buffer.
+// Generic static visitor that copies the value it visits into the given buffer.
 //
 class copy_into
     : public static_visitor<>
 {
+private: // representation
+
     void* storage_;
 
-public:
+public: // structors
+
     explicit copy_into(void* storage)
         : storage_(storage)
     {
     }
+
+public: // visitor interfaces
 
     template <typename T>
     void operator()(const T& operand) const
     {
         new(storage_) T(operand);
     }
+
 };
 
-// class move_into
+//////////////////////////////////////////////////////////////////////////
+// (detail) class move_into
 //
-// Generic Visitor that moves the value it visits into the given buffer.
+// Generic static visitor that moves the value it visits into the given buffer.
 //
 class move_into
     : public static_visitor<>
 {
+private: // representation
+
     void* storage_;
 
-public:
+public: // structors
+
     explicit move_into(void* storage)
         : storage_(storage)
     {
     }
+
+public: // visitor interfaces
 
     template <typename T>
     void operator()(T& operand) const
     {
         new(storage_) T( move(operand) );
     }
+
 };
 
-// class swap_with
+//////////////////////////////////////////////////////////////////////////
+// (detail) class swap_with
 //
-// Generic Visitor that swaps the value it visits with the given value.
+// Generic static visitor that swaps the value it visits with the given value.
 //
 struct swap_with
     : public static_visitor<>
 {
-private:
+private: // representation
+
     void* toswap_;
 
-public:
+public: // structors
+
     explicit swap_with(void* toswap)
         : toswap_(toswap)
     {
     }
+
+public: // visitor interfaces
 
     template <typename T>
     void operator()(T& operand) const
     {
         boost::move_swap(operand, *static_cast<T*>(toswap_));
     }
+
 };
 
-// class reflect
+//////////////////////////////////////////////////////////////////////////
+// (detail) class reflect
 //
-// Generic Visitor that performs a typeid on the value it visits.
+// Generic static visitor that performs a typeid on the value it visits.
 //
 struct reflect
     : public static_visitor<const std::type_info&>
 {
+public: // visitor interfaces
+
     template <typename T>
     const std::type_info& operator()(const T&)
     {
         return typeid(T);
     }
+
 };
 
-// class cast_to
+//////////////////////////////////////////////////////////////////////////
+// (detail) class cast_to
 //
-// Generic Visitor that: if the value matches the specified type,
+// Generic static visitor that: if the value is of the specified type,
 // returns a pointer to the value it visits; else a null pointer.
 //
 template <typename T>
 struct cast_to
     : public static_visitor<T*>
 {
+public: // visitor interfaces
+
     template <typename U>
     T* operator()(U&) const
     {
@@ -284,11 +328,13 @@ struct cast_to
     {
         return boost::addressof(operand);
     }
+
 };
 
-// class template invoke_visitor
+//////////////////////////////////////////////////////////////////////////
+// (detail) class template invoke_visitor
 //
-// Invokes the given visitor using:
+// Generic static visitor that invokes the given visitor using:
 //  * for raw visits where the given value is a
 //    boost::incomplete, the given value's held value.
 //  * for all other visits, the given value itself.
@@ -296,14 +342,17 @@ struct cast_to
 template <typename Visitor>
 struct invoke_visitor
 {
-public:
+private: // representation
+
+    Visitor& visitor_;
+
+public: // typedefs
+
     typedef typename Visitor::result_type
         result_type;
 
-private:
-    Visitor& visitor_;
+public: // structors
 
-public:
     explicit invoke_visitor(Visitor& visitor)
         : visitor_(visitor)
     {
@@ -311,7 +360,8 @@ public:
 
 #if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
-public:
+public: // visitor interfaces
+
     template <typename T>
     result_type operator()(incomplete<T>& operand)
     {
@@ -332,7 +382,8 @@ public:
 
 #else// defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
-private:
+private: // helpers, for visitor interfaces (below)
+
     template <typename T>
     result_type execute_impl(incomplete<T>& operand, long)
     {
@@ -351,7 +402,8 @@ private:
         return visitor_(operand);
     }
 
-public:
+public: // visitor interfaces
+
     template <typename T>
     result_type operator()(T& operand)
     {
@@ -368,56 +420,66 @@ public:
 // Needed to work around compilers that don't support using-declarations
 // in class templates. (See the variant::initializer workarounds below.)
 //
+
 #if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
 
-// metafunction make_variant_list
+// (detail) metafunction make_variant_list
 //
 // Provides a MPL-compatible sequence with the specified non-void types
 // as arguments.
+//
 template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
 struct make_variant_list
 {
+public: // metafunction result
+
     typedef typename mpl::list<
           BOOST_PP_ENUM_PARAMS(
               BOOST_VARIANT_LIMIT_TYPES
             , T
             )
         >::type type;
+
 };
 
 #else// defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
 
-// class template convert_void
+// (detail) class template convert_void
 // 
 // Provides the mechanism by which voidNN types are converted to
 // mpl::void_ (and thus can be passed to mpl::list).
 //
-template <typename T> struct convert_void
+template <typename T>
+struct convert_void
 {
     typedef T type;
 };
 
-// tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
+// (detail) tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
 //
 // Defines void types that are each unique and specializations of
 // convert_void that yields mpl::void_ for each voidNN type.
 //
+
 #define BOOST_VARIANT_DETAIL_DEFINE_VOID_N(z,N,_)          \
     struct BOOST_PP_CAT(void,N);                           \
                                                            \
-    template <> struct convert_void<BOOST_PP_CAT(void,N)>  \
+    template <>                                            \
+    struct convert_void< BOOST_PP_CAT(void,N) >            \
     {                                                      \
         typedef mpl::void_ type;                           \
-    };
+    };                                                     \
+    /**/
 
 BOOST_PP_REPEAT(
       BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
     , BOOST_VARIANT_DETAIL_DEFINE_VOID_N
     , _
     )
+
 #undef BOOST_VARIANT_DETAIL_DEFINE_VOID_N
 
-// metafunction make_variant_list
+// (detail) metafunction make_variant_list
 //
 // Provides a MPL-compatible sequence with the specified non-void types
 // as arguments.
@@ -425,11 +487,13 @@ BOOST_PP_REPEAT(
 template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
 struct make_variant_list
 {
+public: // metafunction result
+
     // [Define a macro to convert any voidNN tags to mpl::void...]
 #   define BOOST_VARIANT_DETAIL_CONVERT_VOID(z, N,_)   \
         typename detail::variant::convert_void<BOOST_PP_CAT(T,N)>::type
 
-    // [...so that the specified types can be passed to mpl::list...
+    // [...so that the specified types can be passed to mpl::list...]
     typedef typename mpl::list< 
           BOOST_PP_ENUM(
               BOOST_VARIANT_LIMIT_TYPES
@@ -440,6 +504,7 @@ struct make_variant_list
 
     // [...and, finally, the conversion macro can be undefined:]
 #   undef BOOST_VARIANT_DETAIL_CONVERT_VOID
+
 };
 
 #endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
@@ -455,34 +520,34 @@ struct make_variant_list
 //  - Two or more types must be specified.
 //  - Each type must be unique.
 //
-// Proper syntax:
-//   variant<A,B,...>  (where A,B,... are not type-sequences)
+// Proper declaration form:
+//   variant<A,B,...>  (where A,B,... are NOT type-sequences)
 // or
-//   variant<types>  (where types is a type-sequence with size > 1)
+//   variant<types>    (where types is a type-sequence with size > 1)
 //
 template <
-  typename A
-, typename B = mpl::void_
+    typename A
+  , typename B = mpl::void_
 
 #if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
 
-, BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
-      BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
-    , typename T
-    , mpl::void_
-    )
+  , BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
+        BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+      , typename T
+      , mpl::void_
+      )
 
 #else// defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
 
-, BOOST_PP_ENUM_PARAMS_WITH_DEFAULTS(
-      BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
-    , typename T
-    , detail::variant::void//NN
-    )
+  , BOOST_PP_ENUM_PARAMS_WITH_DEFAULTS(
+        BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+      , typename T
+      , detail::variant::void//NN
+      )
 
 #endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
 
->
+  >
 class variant
     : public static_visitable<
           boost::variant<
@@ -505,7 +570,10 @@ class variant
             >
         >
 {
-/*    typedef mpl::integral_c<unsigned, 2>
+private: // static precondition assertions
+
+/*
+    typedef mpl::integral_c<unsigned, 2>
         min_list_size;
 
     // NOTE TO USER :
@@ -526,7 +594,9 @@ class variant
             >::type::value
         ));
 */
-public:
+
+public: // typedefs
+
     typedef typename mpl::apply_if<
           mpl::is_sequence<A>
         , mpl::identity<A>
@@ -540,7 +610,8 @@ public:
             >
         >::type types;
 
-private:
+private: // representation
+
     typedef typename detail::variant::make_storage<types>::type
         storage1_t;
 
@@ -548,6 +619,8 @@ private:
           types
         , has_nothrow_move_constructor<mpl::_1>
         >::type throwing_types;
+
+    // [storage2_t = empty(throwing_types) ? null_storage : make_storage<throwing_types>]
     typedef typename mpl::apply_if<
           mpl::empty<throwing_types>
         , mpl::identity<detail::variant::null_storage>
@@ -605,7 +678,8 @@ private:
         return storage_.second().address();
     }
 
-public:
+public: // queries
+
     int which() const
     {
         // If NOT using storage1...
@@ -617,7 +691,7 @@ public:
         return which_;
     }
 
-private:
+private: // helpers, for structors (below)
 
 // [On compilers where using declarations in class templates can correctly avoid name hiding...]
 #if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
@@ -626,11 +700,17 @@ private:
 
     struct initializer_root
     {
-    private:
+    private: // helpers, for static functions (below)
+
         enum NotCallable { not_callable };
 
-    public:
+    public: // static functions
+
+        // Root type must expose name "initialize," so
+        // the following dummy function is provided:
+
         static void initialize(NotCallable) { }
+
     };
 
     struct make_initializer_node
@@ -638,14 +718,19 @@ private:
         template <typename Base, typename Iterator>
         struct apply
         {
-        private:
+        private: // helpers, for metafunction result (below)
+
             struct initializer_node
                 : Base
             {
-                using Base::initialize;
-                
+            private: // helpers, for static functions (below)
+
                 typedef typename Iterator::type
                     T;
+
+            public: // static functions
+
+                using Base::initialize;
 
                 static int initialize(void* dest, const T& operand)
                 {
@@ -653,22 +738,31 @@ private:
 
                     BOOST_STATIC_CONSTANT(
                           std::size_t
-                        , idx = (mpl::distance<typename mpl::begin<types>::type, Iterator>::value)
+                        , idx = (
+                              mpl::distance<
+                                  typename mpl::begin<types>::type
+                                , Iterator
+                                >::type::value
+                            )
                         );
+
                     return idx;
                 }
+
             };
 
-        public:
+        public: // metafunction result
+
             typedef initializer_node
                 type;
+
         };
     };
 
     typedef typename mpl::iter_fold<
           types
         , initializer_root
-        , make_initializer_node
+        , mpl::protect< make_initializer_node >
         >::type initializer;
 
 #else // defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
@@ -677,11 +771,13 @@ private:
 
     struct preprocessor_list_initializer
     {
+    public: // static functions
+
         static int initialize(void* dest, const A& operand)
         {
             typedef A T;
             BOOST_STATIC_CONSTANT(int, which = 0);
-            
+
             new(dest) T(operand);
             return which;
         }
@@ -714,11 +810,14 @@ private:
             , _
             )
         #undef BOOST_VARIANT_INITIALIZE_FUNCTION
+
     };
+
 /*
     struct mpl_list_initializer
     {
-    private:
+    private: // helpers, for static functions (below)
+
         template <typename T, typename Iterator>
         static int initialize_impl(
               void* dest
@@ -794,7 +893,8 @@ private:
             return mpl::distance<typename mpl::begin<types>::type, best_conversion_it>::value;
         }
 
-    public:
+    public: // static functions
+
         template <typename T>
         static int initialize(void* dest, const T& operand)
         {
@@ -815,6 +915,7 @@ private:
                 , mpl::identity<found_it>()
                 );
         }
+
     };
 
     typedef typename mpl::if_<
@@ -823,23 +924,34 @@ private:
         , preprocessor_list_initializer
         >::type initializer;
 */
+
     typedef preprocessor_list_initializer
         initializer;
 
 #endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
 
-public:
+    void destroy_content()
+    {
+        detail::variant::destroyer visitor;
+        raw_apply_visitor(visitor);
+    }
+
+public: // structors
+
+    ~variant()
+    {
+        destroy_content();
+    }
+
     variant()
     {
         // NOTE TO USER :
         // Compile error from here indicates that the first bound
         // type is default-constructible, and so variant cannot
         // support its own default-construction
-        new(storage_.first().address()) A;
 
-        activate_storage1(
-              0    // zero is the index of the first bounded type
-            );
+        new(storage_.first().address()) A;
+        activate_storage1(0); // zero is the index of the first bounded type
     }
 
     variant(const variant& operand)
@@ -864,17 +976,23 @@ public:
         activate_storage1(operand.which());         
     }
 
-private:
+private: // helpers, for structors, cont. (below)
+
     class convert_copy_into
         : public static_visitor<int>
     {
+    private: // representation
+
         void* storage_;
 
-    public:
+    public: // structors
+
         explicit convert_copy_into(void* storage)
             : storage_(storage)
         {
         }
+
+    public: // visitor interfaces
 
         template <typename T>
         int operator()(const T& operand) const
@@ -883,13 +1001,16 @@ private:
             // Compile error here indicates one of the source variant's types 
             // cannot be unambiguously converted to the destination variant's
             // types (or that no conversion exists).
+            //
             return initializer::initialize(storage_, operand);
         }
+
     };
 
 #if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
-public:
+public: // structors, cont.
+
     template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename U)>
     variant(const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand)
     {
@@ -907,6 +1028,7 @@ public:
         // Compile error here indicates that the given type is not 
         // unambiguously convertible to one of the variant's types
         // (or that no conversion exists).
+        //
         activate_storage1(
               initializer::initialize(
                   storage_.first().address()
@@ -917,7 +1039,8 @@ public:
 
 #else// defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
-private:
+private: // workaround, for structors, cont. (below)
+
     template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename U)>
     void constructor_simulated_partial_ordering(
           const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand
@@ -937,6 +1060,7 @@ private:
         // Compile error here indicates that the given type is not 
         // unambiguously convertible to one of the variant's types
         // (or that no conversion exists).
+        //
         activate_storage1(
               initializer::initialize(
                   storage_.first().address()
@@ -945,7 +1069,8 @@ private:
             );
     }
 
-public:
+public: // structors, cont.
+
     template <typename T>
     variant(const T& operand)
     {
@@ -954,41 +1079,34 @@ public:
 
 #endif // BOOST_NO_FUNCTION_TEMPLATE_ORDERING workaround
 
-private:
-    void destroy_content()
-    {
-        detail::variant::destroyer visitor;
-        raw_apply_visitor(visitor);
-    }
+private: // helpers, for modifiers (below)
 
-public:
-    ~variant()
-    {
-        destroy_content();
-    }
-
-private:
     // class assign_into
     //
     // Generic visitor that assigns the value it visits to the variant it is
     // given, maintaining the strong guarantee of exception safety.
     //
+
     friend class assign_into;
 
     class assign_into
         : public static_visitor<>
     {
+    private: // representation
+
         variant& target_;
         int source_which_;
 
-    public:
+    public: // structors
+
         assign_into(variant& target, int source_which)
             : target_(target)
             , source_which_(source_which)
         {
         }
 
-    private:
+    private: // helpers, for visitor interfaces (below)
+
         template <typename T>
         void assign_impl(
               const T& operand
@@ -1030,7 +1148,8 @@ private:
                 target_.activate_storage1(source_which_); // nothrow
         }
 
-    public:
+    public: // visitor interfaces
+
         template <typename T>
         void operator()(const T& operand)
         {
@@ -1039,6 +1158,7 @@ private:
                 , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
                 );
         }
+
     };
 
     void assign(const variant& operand)
@@ -1048,6 +1168,7 @@ private:
     }
 
 public: // modifiers
+
     variant& operator=(const variant& rhs)
     {
         assign(rhs);
@@ -1057,35 +1178,42 @@ public: // modifiers
     template <typename T>
     variant& operator=(const T& rhs)
     {
-        // While potentially inefficient, the following temporary
+        // While potentially inefficient, the following (implicit)
         // construction of a variant allows T as any type convertible
         // to a bounded type (i.e., opposed to an exact match).
+
         assign(rhs);
         return *this;
     }
 
-private:
+private: // helpers, for modifiers, cont. (below)
+
     // class move_assign_into
     //
     // Generic visitor that moves the value it visits to the variant it is
     // given, maintaining the strong guarantee of exception safety.
     //
+
     friend class move_assign_into;
 
     class move_assign_into
         : public static_visitor<>
     {
+    private: // representation
+
         variant& target_;
         int source_which_;
 
-    public:
+    public: // structors
+
         move_assign_into(variant& target, int source_which)
             : target_(target)
             , source_which_(source_which)
         {
         }
 
-    private:
+    private: // helpers, for visitor interfaces (below)
+
         template <typename T>
         void move_assign_impl(
               T& operand
@@ -1124,7 +1252,8 @@ private:
                 target_.activate_storage1(source_which_); // nothrow
         }
 
-    public:
+    public: // visitor interfaces
+
         template <typename T>
         void operator()(T& operand)
         {
@@ -1133,9 +1262,11 @@ private:
                 , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
                 );
         }
+
     };
 
-public:
+public: // modifiers, cont.
+
     variant& operator=(move_source<variant> source)
     {
         move_assign_into visitor(*this, operand.which());
@@ -1144,29 +1275,35 @@ public:
         return *this;
     }
 
-private:
+private: // helpers, for modifiers, cont. (below)
+
     // class swap_variants
     //
-    // Generic visitor that swaps given lhs and rhs variants.
+    // Generic static visitor that swaps given lhs and rhs variants.
     //
     // NOTE: Must be applied to the rhs variant.
     //
+
     friend class swap_variants;
 
     class swap_variants
         : public static_visitor<>
     {
+    private: // representation
+
         variant& lhs_;
         variant& rhs_;
 
-    public:
+    public: // structors
+
         swap_variants(variant& lhs, variant& rhs)
             : lhs_(lhs)
             , rhs_(rhs)
         {
         }
 
-    private:
+    private: // helpers, for visitor interfaces (below)
+
         template <typename T>
         void swap_impl(
               T& rhs_content
@@ -1244,7 +1381,8 @@ private:
             }
         }
 
-    public:
+    public: // visitor interfaces
+
         template <typename T>
         void operator()(T& rhs_content)
         {
@@ -1253,9 +1391,11 @@ private:
                 , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
                 );
         }
+
     };
 
-public:
+public: // modifiers, cont.
+
     void swap(variant& rhs)
     {
         // If the types are the same...
@@ -1274,6 +1414,11 @@ public:
     }
 
 public: // queries
+
+    //
+    // NOTE: member which() defined above.
+    //
+
     bool empty() const
     {
         return false;
@@ -1285,7 +1430,8 @@ public: // queries
         return this->apply_visitor(visitor);
     }
 
-private:
+private: // helpers, for visitation support (below)
+
     template <typename Which, typename Iterator, typename LastIterator, typename Variant, typename Visitor>
     static
         typename Visitor::result_type
@@ -1336,7 +1482,8 @@ private:
         throw;
     }
 
-public:
+public: // helpers, for visitation support (below)
+
     //////////////////////////////////////////////////////////////////////
     // WARNING TO USER :
     // The following functions are not part of the public interface,
@@ -1364,6 +1511,8 @@ public:
             >(which(), *this, visitor, mpl::false_c());
     }
 
+public: // visitation support
+
     template <typename Visitor>
         typename Visitor::result_type
     apply_visitor(Visitor& visitor)
@@ -1380,6 +1529,8 @@ public:
         return raw_apply_visitor(invoker);
     }
 
+public: // value extraction support
+
     template <typename T>
     T* extract()
     {
@@ -1393,48 +1544,18 @@ public:
         detail::variant::cast_to<T> visitor;
         return apply_visitor(visitor);
     }
+
 };
 
 //////////////////////////////////////////////////////////////////////////
-// class template is_variant
-//
-// Metafunction to determine if specified type is a variant.
-//
-
-#if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-
-template <typename T>
-struct is_variant
-{
-    typedef mpl::bool_c<false> type;
-    BOOST_STATIC_CONSTANT(bool, value = type::value);
-};
-
-template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
-struct is_variant<
-  boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>
->
-{
-    typedef mpl::bool_c<true> type;
-    BOOST_STATIC_CONSTANT(bool, value = type::value);
-};
-
-#else// defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-
-// [is_variant is defined in the variant workaround header.]
-
-#endif // !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-
-//////////////////////////////////////////////////////////////////////////
-// function overload swap
+// function template swap
 //
 // Swaps two variants of the same type (i.e., identical bounded type set).
 //
-
-template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
+template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
 void swap(
-      boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>& lhs
-    , boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>& rhs
+      boost::variant< BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T) >& lhs
+    , boost::variant< BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T) >& rhs
     )
 {
     lhs.swap(rhs);
