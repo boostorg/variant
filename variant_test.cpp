@@ -261,13 +261,21 @@ public:
 //
 int test_main( int, char *[] )
 {
-    // initialize, assign, and copy tests
+    // initialize, assign, copy, and assign tests
     {
-        my_variant var(2.71);
+        my_variant def;
+		my_variant var(2.71);
         my_variant varcopy(var);
+		def = var;
 
         BOOST_TEST((
               boost::apply_visitor(are_strict_equals(), var, varcopy)
+            ));
+		BOOST_TEST((
+              boost::apply_visitor(are_strict_equals(), var, def)
+            ));
+		BOOST_TEST((
+              boost::apply_visitor(are_strict_equals(), def, varcopy)
             ));
     }
 
