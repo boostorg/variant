@@ -385,15 +385,61 @@ private:
     typedef aligned_storage<max_size, max_alignment>
         aligned_storage_t;
 
+    // which_ on:
+    // * [0,  size<types>) indicates storage1
+    // * [-size<types>, 0) indicates storage2
+    // if which_ >= 0:
+    // * then which() -> which_
+    // * else which() -> -(which_ + 1)
     int which_;
-    aligned_storage_t storage_;
+    aligned_storage_t storage1_;
+    aligned_storage_t storage2_;
+
+    void copy_into_storage1(const variant& operand)
+    {
+        operand.raw_apply_visitor(detail::variant::copy_into(storage1_.raw_pointer()));
+        which_ = operand.which();
+    }
+
+    void copy_into_storage2(const variant& operand)
+    {
+        operand.raw_apply_visitor(detail::variant::copy_into(storage2_.raw_pointer()));
+        which_ = -(operand.which() + 1);
+    }
+
+    bool using_storage1() const
+    {
+        return which_ >= 0;
+    }
+
+    aligned_storage_t& active_storage()
+    {
+        return using_storage1() ? storage1_ : storage2_;
+    }
+
+    const aligned_storage_t& active_storage() const
+    {
+        return const_cast<variant* const>(this)->active_storage();
+    }
+
+public:
+    int which() const
+    {
+        // If using storage1...
+        if (using_storage1())
+            // ...return which_ directly:
+            return which_;
+
+        // Otherwise, return adjusted which_:
+        return -(which_ + 1);
+    }
 
 private:
 
 // [On compilers where using declarations in class templates can correctly avoid name hiding...]
 #if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
 
-    // [...we use an optimal converting initializer based on the variant typelist:]
+    // [...use an optimal converting initializer based on the variant typelist:]
 
     struct initializer_root
     {
@@ -444,7 +490,7 @@ private:
 
 #else // defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
 
-    // [...otherwise, we have to use a hackish workaround based on variant's template parameters:]
+    // [...otherwise, use a hackish workaround based on variant's template parameters:]
 
     struct preprocessor_list_initializer
     {
@@ -600,22 +646,13 @@ public:
         // Compile error from here indicates that the first bound
         // type is default-constructible, and so variant cannot
         // support its own default-construction
-        storage_.template construct_as<A>();
+        storage1_.template construct_as<A>();
         which_ = 0;
     }
 
     variant(const variant& operand)
-        : which_(-1)
     {
-        // If operand is not empty...
-        if (!operand.empty())
-        {
-            // ...then copy its held value into our storage...
-            operand.raw_apply_visitor(detail::variant::copy_into(storage_.raw_pointer()));
-
-            // ...and copy its which-index:
-            which_ = operand.which_;
-        }
+        copy_into_storage1(operand);
     }
 
 private:
@@ -646,16 +683,11 @@ private:
 public:
     template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename U)>
     variant(const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand)
-        : which_(-1)
     {
-        // If operand is not empty...
-        if (!operand.empty())
-        {
-            // ...then attempt a converting copy into our storage:
-            which_ = operand.raw_apply_visitor(
-                  convert_copy_into(storage_.raw_pointer())
-                );
-        }
+        // Attempt a converting copy into *this's storage:
+        which_ = operand.raw_apply_visitor(
+              convert_copy_into(storage1_.raw_pointer())
+            );
     }
 
     template <typename T>
@@ -666,7 +698,7 @@ public:
         // unambiguously convertible to one of the variant's types
         // (or that no conversion exists).
         which_ = initializer::initialize(
-              storage_.raw_pointer()
+              storage1_.raw_pointer()
             , operand
             );
     }
@@ -679,19 +711,10 @@ private:
           const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand
         , long)
     {
-        // If operand is not empty...
-        if (!operand.empty())
-        {
-            // ...then attempt a converting copy into our storage:
-            which_ = operand.raw_apply_visitor(
-                  convert_copy_into(storage_.raw_pointer())
-                );
-        }
-        else
-        {
-            // ...otherwise, make *this empty:
-            which_ = -1;
-        }
+        // Attempt a converting copy into *this's storage:
+        which_ = operand.raw_apply_visitor(
+              convert_copy_into(storage1_.raw_pointer())
+            );
     }
 
     template <typename T>
@@ -702,7 +725,7 @@ private:
         // unambiguously convertible to one of the variant's types
         // (or that no conversion exists).
         which_ = initializer::initialize(
-              storage_.raw_pointer()
+              storage1_.raw_pointer()
             , operand
             );
     }
@@ -719,41 +742,30 @@ public:
 public:
     ~variant()
     {
-        clear();
+        // Visit *this's contents with a 'destroyer' visitor:
+        raw_apply_visitor(detail::variant::destroyer());
     }
 
 private:
-    enum MakeEmpty { make_empty };
-    explicit variant(MakeEmpty)
-        : which_(-1) // prevents visitation
+    void assign(const variant& operand)
     {
+        if (using_storage1())
+            copy_into_storage2(operand);
+        else
+            copy_into_storage1(operand);
     }
 
 public: // modifiers
     template <typename T>
     variant& operator=(const T& rhs)
     {
-        variant temp(rhs);
-		*this = temp;
-
+        assign(rhs);
         return *this;
     }
 
     variant& operator=(const variant& rhs)
     {
-        // Clear *this...
-        clear();
-
-        // ...and if rhs is not itself empty...
-        if (!rhs.empty())
-        {
-            // ...then attempt to copy rhs's stored value into *this's storage...
-            rhs.raw_apply_visitor(detail::variant::copy_into(storage_.raw_pointer()));
-
-            // ...and set *this's which-index to match rhs's:
-            which_ = rhs.which_;
-        }
-
+        assign(rhs);
         return *this;
     }
 
@@ -763,45 +775,27 @@ public: // modifiers
         if (which_ == operand.which_)
         {
             // ...then swap the values directly:
-            raw_apply_visitor(detail::variant::swapper(operand.storage_.raw_pointer()));
+            raw_apply_visitor(detail::variant::swapper(operand.active_storage().raw_pointer()));
             return *this;
         }
 
         // Otherwise, perform normal swap:
-        variant temp(*this);
-        *this = operand;
-        operand = temp;
+        variant temp(operand);
+        operand.assign(*this);
+        assign(temp);
 
         return *this;
-    }
-
-private:
-    void clear()
-    {
-        if (!empty())
-        {
-            raw_apply_visitor(detail::variant::destroyer());
-            which_ = -1;
-        }
     }
 
 public: // queries
     bool empty() const
     {
-        return (which_ == -1);
-    }
-
-    int which() const
-    {
-        return which_;
+        return false;
     }
 
     const std::type_info& type() const
     {
-        if (empty())
-            return typeid(void);
-        
-        return apply_visitor(detail::variant::reflect());
+        return this->apply_visitor(detail::variant::reflect());
     }
 
 private:
@@ -826,7 +820,7 @@ private:
 
         if (var_which == Which::value)
         {
-            return visitor(var.storage_.template get_as<T>());
+            return visitor(var.active_storage().template get_as<T>());
         }
 
         return apply_visitor_impl<next_which, next_iter, LastIterator>(
@@ -850,7 +844,7 @@ private:
         // / This is never called at runtime: a visitor must handle at \
         // | least one of the variant's types. Throw to circumvent the |
         // \ compile-time requirement that a value is returned:        /
-        throw "Visiting an empty variant is undefined!";
+        throw;
     }
 
 public:
@@ -867,7 +861,7 @@ public:
               mpl::integral_c<unsigned long, 0>
             , typename mpl::begin<types>::type
             , typename mpl::end<types>::type
-            >(which_, *this, visitor, mpl::false_c());
+            >(which(), *this, visitor, mpl::false_c());
     }
 
     template <typename Visitor>
@@ -878,7 +872,7 @@ public:
               mpl::integral_c<unsigned long, 0>
             , typename mpl::begin<types>::type
             , typename mpl::end<types>::type
-            >(which_, *this, visitor, mpl::false_c());
+            >(which(), *this, visitor, mpl::false_c());
     }
 
     template <typename Visitor>
