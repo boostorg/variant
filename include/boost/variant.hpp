@@ -940,25 +940,8 @@ private:
             , mpl::false_c// is_moveable
             )
         {
-            // If the target is currently using storage1...
-            void * target_inactive_storage;
-            int result_which;
-            if (target_.using_storage1())
-            {
-                // ...and cache the final which_ value that will indicate storage2:
-                result_which = -(source_which_ + 1);
-            }
-            else
-            {
-                // ...otherwise, get a pointer to storage1...
-                target_inactive_storage = target_.storage_.first().address();
-
-                // ...and cache the final which_ value that will indicate storage1:
-                result_which = source_which_;
-            }
-
-            // Now attempt a copy into the inactive storage...
-            new(target_inactive_storage) T(operand);
+            // Now attempt a copy into target's inactive storage...
+            new(target_.inactive_storage()) T(operand);
 
             // ...and upon success destroy the target's active storage...
             target_.destroy_content(); // nothrow
