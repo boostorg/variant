@@ -74,7 +74,6 @@
 // The following are new/in-progress headers:
 #include "boost/config/no_class_template_using_declarations.hpp"
 #include "boost/aligned_storage.hpp"
-#include "boost/extractable.hpp"
 #include "boost/incomplete_fwd.hpp"
 #include "boost/move/move.hpp"
 #include "boost/move/moveable.hpp"
@@ -92,7 +91,7 @@
 #
 #   include "boost/mpl/is_sequence.hpp"
 
-#else
+#else // BOOST_VERSION <= 102900 || defined(BOOST_MSVC)
 
 #define BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
 
@@ -527,7 +526,6 @@ BOOST_PP_REPEAT(
 template <typename Variant>
 class variant_base
     : public ::boost::static_visitable<Variant>
-    , public ::boost::extractable<Variant>
     , public ::boost::moveable<Variant>
 {
 };
@@ -1553,22 +1551,6 @@ public: // visitation support
     {
         detail::variant::invoke_visitor<Visitor> invoker(visitor);
         return raw_apply_visitor(invoker);
-    }
-
-public: // value extraction support
-
-    template <typename T>
-    T* extract()
-    {
-        detail::variant::cast_to<T> visitor;
-        return this->apply_visitor(visitor);
-    }
-
-    template <typename T>
-    T* extract() const
-    {
-        detail::variant::cast_to<T> visitor;
-        return this->apply_visitor(visitor);
     }
 
 };
