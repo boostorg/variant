@@ -1,8 +1,10 @@
-INC=-I..\..\..\..\boost-sandbox -Id:\var\lib\boost_1_29_0 
+# INC=-I..\..\..\..\boost-sandbox -Id:\var\lib\boost_1_29_0 
+INC=-I..\..\..\..\boost_1_29_0
 
 
 
-# all: bin/test7.exe 
+
+# all: bin/test2.exe 
 all: bin/test1.exe bin/test2.exe bin/test3.exe bin/test4.exe bin/test5.exe bin/test6.exe bin/test7.exe bin/test8.exe
 
 run: all
