@@ -17,11 +17,12 @@
 #ifndef BOOST_INCOMPLETE_HPP
 #define BOOST_INCOMPLETE_HPP
 
-#include "boost/utility.hpp" // for checked_delete
+#include "boost/incomplete_fwd.hpp"
+
+#include "boost/checked_delete.hpp"
 #include "boost/mpl/if.hpp"
 
-// The following are new/in-progress headers or fixes to existing headers:
-#include "boost/incomplete_fwd.hpp"
+#include "boost/move_fwd.hpp"
 
 namespace boost {
 
@@ -69,6 +70,24 @@ public:
 
     T* get_pointer() { return p_; }
     const T* get_pointer() const { return p_; }
+
+private:
+    enum DoMove { do_move };
+    incomplete(DoMove, incomplete& source)
+        : p_(source.p_)
+    {
+        // The following is allowed because move semantics do not
+        // require the source to be useable after moving:
+        source.p_ = 0;
+    }
+
+public:
+    incomplete& move_to(void* dest)
+    {
+        return *(
+              new(dest) incomplete(do_move, *this) // nothrow
+            );
+    }
 };
 
 template <typename T>
@@ -95,14 +114,32 @@ incomplete<T>::~incomplete()
     boost::checked_delete(p_);
 }
 
-// swap
+// function template swap
 //
 // Swaps two incomplete<T> objects of the same type T.
+//
 template <typename T>
-void swap(incomplete<T>& lhs, incomplete<T>& rhs)
+inline void swap(incomplete<T>& lhs, incomplete<T>& rhs)
 {
     lhs.swap(rhs);
 }
+
+#if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
+
+// class template move_traits specialization
+//
+// Enables use of move semantics with incomplete.
+//
+template <typename T>
+struct move_traits< incomplete<T> >
+{
+    void move(void* dest, incomplete<T>& src)
+    {
+        src.move_to(dest);
+    }
+};
+
+#endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION unsupported
 
 } // namespace boost
 
