@@ -87,14 +87,16 @@
 // MPL as shipped in 1.29 does not provide is_sequence predicate, so define following:
 #if BOOST_VERSION > 102900
 
+#   if defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#      define BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
+#   endif
+#
 #   include "boost/mpl/is_sequence.hpp"
 
 #else
 
-// metafunction mpl::is_sequence -- dummy, always returns false
-//
-// Temporary dummy implementation until a real one is implemented.
-//
+#define BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
+
 namespace boost {
 namespace mpl {
 
@@ -583,7 +585,7 @@ class variant
 {
 private: // static precondition assertions
 
-#if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#if !defined(BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
 
     typedef mpl::integral_c<unsigned, 2>
         min_list_size;
@@ -606,13 +608,13 @@ private: // static precondition assertions
             >::type::value
         ));
 
-#else // defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#else // defined(BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
 
     // Until mpl_list_initializer (below) works, sequences are not supported
     // for compilers that do not support using declarations in templates.
     BOOST_STATIC_ASSERT((!mpl::is_sequence<A>::type::value));
 
-#endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS
+#endif // BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
 
 public: // typedefs
 
