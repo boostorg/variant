@@ -17,29 +17,12 @@
 #ifndef BOOST_INCOMPLETE_FWD_HPP
 #define BOOST_INCOMPLETE_FWD_HPP
 
-#include <cstddef> // for std::size_t
-
 namespace boost {
 
 // class template incomplete
 //
 // Treats an incomplete type as a value type.
-//  * incomplete<T> stores value on the heap;
-//  * incomplete<T,Size> stores value in stack storage of capacity Size.
-template <typename T, std::size_t Size = -1> class incomplete;
-
-// class template heap_incomplete
-//
-// Treats an incomplete type as a value type by dynamic allocation.
-//
-template <typename T> class heap_incomplete;
-
-// stack_incomplete
-//
-// Treats an incomplete type as a value type by allocating it
-// opaquely on the stack.
-//
-template <typename T, std::size_t Size> class stack_incomplete;
+template <typename T> class incomplete;
 
 } // namespace boost
 

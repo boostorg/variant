@@ -72,8 +72,6 @@
 #include "boost/extract_fwd.hpp"
 #include "boost/generic_visitor.hpp"
 #include "boost/incomplete.hpp"
-#include "boost/utility/safe_assign.hpp"
-#include "boost/utility/safe_swap.hpp"
 #include "boost/mpl/guarded_size.hpp"
 
 namespace boost {
@@ -143,17 +141,17 @@ struct destroyer
     }
 };
 
-// class copier
+// class copy_into
 //
 // Generic Visitor that copies the value it visits into the given buffer.
 //
-class copier
+class copy_into
     : generic_visitor<>
 {
     void* storage_;
 
 public:
-    explicit copier(void* storage)
+    explicit copy_into(void* storage)
         : storage_(storage)
     {
     }
@@ -165,18 +163,18 @@ public:
     }
 };
 
-// class swapper
+// class swap_with
 //
 // Generic Visitor that swaps the value it visits with the given value.
 //
-struct swapper
+struct swap_with
     : generic_visitor<>
 {
 private:
     void* toswap_;
 
 public:
-    explicit swapper(void* toswap)
+    explicit swap_with(void* toswap)
         : toswap_(toswap)
     {
     }
@@ -188,11 +186,11 @@ public:
     }
 };
 
-// class reflector
+// class reflect
 //
 // Generic Visitor that performs a typeid on the value it visits.
 //
-struct reflector
+struct reflect
     : generic_visitor<const std::type_info&>
 {
     template <typename T>
@@ -200,6 +198,82 @@ struct reflector
     {
         return typeid(T);
     }
+};
+
+// class template invoke_visitor
+//
+// Invokes the given visitor using:
+//  * for raw visits where the given value is a
+//    boost::incomplete, the given value's held value.
+//  * for all other visits, the given value itself.
+//
+template <typename Visitor>
+struct invoke_visitor
+{
+public:
+	typedef typename Visitor::result_type
+		result_type;
+
+private:
+	Visitor& visitor_;
+
+public:
+	explicit invoke_visitor(Visitor& visitor)
+		: visitor_(visitor)
+	{
+	}
+
+#if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
+
+public:
+	template <typename T>
+	result_type operator()(incomplete<T>& operand)
+	{
+		return visitor_(operand.get());
+	}
+
+	template <typename T>
+	result_type operator()(const incomplete<T>& operand)
+	{
+		return visitor_(operand.get());
+	}
+
+	template <typename T>
+	result_type operator()(T& operand)
+	{
+		return visitor_(operand);
+	}
+
+#else// defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
+
+private:
+	template <typename T>
+	result_type execute_impl(incomplete<T>& operand, long)
+	{
+		return visitor_(operand.get());
+	}
+
+	template <typename T>
+	result_type execute_impl(const incomplete<T>& operand, long)
+	{
+		return visitor_(operand.get());
+	}
+
+	template <typename T>
+	result_type execute_impl(T& operand, int)
+	{
+		return visitor_(operand);
+	}
+
+public:
+	template <typename T>
+	result_type operator()(T& operand)
+	{
+		return execute_impl(operand, 1L);
+	}
+
+#endif // BOOST_NO_FUNCTION_TEMPLATE_ORDERING workaround
+
 };
 
 // tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
@@ -522,24 +596,36 @@ private:
 public:
     variant()
     {
+		// NOTE TO USER :
+        // Compile error from here indicates that the first bound
+		// type is default-constructible, and so variant cannot
+		// support its own default-construction
         storage_.template construct_as<A>();
         which_ = 0;
     }
 
     variant(const variant& operand)
+		: which_(-1)
     {
-        operand.raw_apply_visitor(detail::variant::copier(storage_.raw_pointer()));
-        which_ = operand.which_;
+		// If operand is not empty...
+		if (!operand.empty())
+		{
+			// ...then copy its held value into our storage...
+			operand.raw_apply_visitor(detail::variant::copy_into(storage_.raw_pointer()));
+
+			// ...and copy its which-index:
+			which_ = operand.which_;
+		}
     }
 
 private:
-    class static_variant_converter
+    class convert_copy_into
         : generic_visitor<int>
     {
         void* storage_;
 
     public:
-        explicit static_variant_converter(void* storage)
+        explicit convert_copy_into(void* storage)
             : storage_(storage)
         {
         }
@@ -560,10 +646,16 @@ private:
 public:
     template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename U)>
     variant(const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand)
+		: which_(-1)
     {
-        which_ = operand.raw_apply_visitor(
-              static_variant_converter(storage_.raw_pointer())
-            );
+		// If operand is not empty...
+		if (!operand.empty())
+		{
+			// ...then attempt a converting copy into our storage:
+			which_ = operand.raw_apply_visitor(
+				  convert_copy_into(storage_.raw_pointer())
+				);
+		}
     }
 
     template <typename T>
@@ -587,9 +679,19 @@ private:
           const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand
         , long)
     {
-        which_ = operand.raw_apply_visitor(
-              static_variant_converter(storage_.raw_pointer())
-            );
+        // If operand is not empty...
+		if (!operand.empty())
+		{
+			// ...then attempt a converting copy into our storage:
+			which_ = operand.raw_apply_visitor(
+				  convert_copy_into(storage_.raw_pointer())
+				);
+		}
+		else
+		{
+			// ...otherwise, make *this empty:
+			which_ = -1;
+		}
     }
 
     template <typename T>
@@ -617,33 +719,63 @@ public:
 public:
     ~variant()
     {
-        raw_apply_visitor(detail::variant::destroyer());
+        clear();
     }
 
-    int which() const
-	{
-		return which_;
-	}
+private:
+    enum MakeEmpty { make_empty };
+    explicit variant(MakeEmpty)
+        : which_(-1) // prevents visitation
+    {
+    }
 
+public:
     template <typename T>
     variant& operator=(const T& rhs)
     {
-        // Could use canonical assignment, i.e.:
-//        variant temp(rhs);
-//        return swap(temp);
+        // [Assert that we can find the given type in variant's bounds...]
+        typedef typename mpl::find<types, T>::type found_it;
+        BOOST_MPL_ASSERT_NOT_SAME(found_it, typename mpl::end<types>::type);
 
-        // But safe_assign is more efficient:
-        return safe_assign(*this, rhs);
+        // [...so we can get the which-index of the given type:]
+        BOOST_STATIC_CONSTANT(
+              int
+            , which = (
+                mpl::distance<
+                      typename mpl::begin<types>::type
+                    , found_it
+                    >::type::value
+                    )
+            );
+
+        // Clear *this...
+        clear();
+
+        // ...so we can attempt to copy rhs into *this's storage...
+        new(storage_.raw_pointer()) T(rhs);
+
+        // ...and set *this's which-index to the given type's index:
+        which_ = which;
+
+        return *this;
     }
 
     variant& operator=(const variant& rhs)
     {
-        // Could use canonical assignment, i.e.:
-//        variant temp(rhs);
-//        return swap(temp);
+        // Clear *this...
+        clear();
 
-        // But safe_assign is more efficient:
-        return safe_assign(*this, rhs);
+        // ...and if rhs is not itself empty...
+        if (!rhs.empty())
+        {
+            // ...then attempt to copy rhs's stored value into *this's storage...
+            rhs.raw_apply_visitor(detail::variant::copy_into(storage_.raw_pointer()));
+
+            // ...and set *this's which-index to match rhs's:
+            which_ = rhs.which_;
+        }
+
+        return *this;
     }
 
     variant& swap(variant& operand)
@@ -651,70 +783,52 @@ public:
         // If the types are the same...
         if (which_ == operand.which_)
         {
-            // ...then swap directly and efficiently:
-            raw_apply_visitor(detail::variant::swapper(&operand.storage_.raw_pointer()));
+            // ...then swap the values directly:
+            raw_apply_visitor(detail::variant::swapper(operand.storage_.raw_pointer()));
             return *this;
         }
 
-        // Otherwise, fallback to inefficient swap:
-        safe_swap(*this, operand);
+        // Otherwise, perform normal swap:
+        variant temp(operand);
+        operand = *this;
+        *this = temp;
+
         return *this;
     }
 
-public: // for |boost::any| generic compatibility
-	bool empty() const
+public:
+    void clear()
     {
-		return false;
-	}
+        if (!empty())
+        {
+            raw_apply_visitor(detail::variant::destroyer());
+            which_ = -1;
+        }
+    }
+
+    bool empty() const
+    {
+        return (which_ == -1);
+    }
+
+    int which() const
+    {
+        return which_;
+    }
 
     const std::type_info& type() const
     {
-        return apply_visitor(detail::variant::reflector());
+        return apply_visitor(detail::variant::reflect());
     }
 
 private:
-    template <typename Visitor, typename T, typename RawVisit>
-    static
-        typename Visitor::result_type
-    invoke_visitor(Visitor& visitor, T& operand, RawVisit, int)
-    {
-        return visitor(operand);
-    }
-
-    template <typename Visitor, typename T, std::size_t Size>
-    static
-        typename Visitor::result_type
-    invoke_visitor(
-          Visitor& visitor
-        , incomplete<T, Size>& operand
-        , mpl::false_c// raw_visit
-        , long// partial-ordering workaround dummy
-        )
-    {
-        return visitor(operand.get());
-    }
-
-    template <typename Visitor, typename T, std::size_t Size>
-    static
-        typename Visitor::result_type
-    invoke_visitor(
-          Visitor& visitor
-        , const incomplete<T, Size>& operand
-        , mpl::false_c// raw_visit
-        , long// partial-ordering workaround dummy
-        )
-    {
-        return visitor(operand.get());
-    }
-
-    template <typename Which, typename Iterator, typename LastIterator, typename Variant, typename Visitor, typename RawVisit>
+    template <typename Which, typename Iterator, typename LastIterator, typename Variant, typename Visitor>
     static
         typename Visitor::result_type
     apply_visitor_impl(
           const int var_which // [const-ness may aid in optimization by compiler]
         , Variant& var
         , Visitor& visitor
-        , RawVisit raw_visit
         , mpl::false_c// is_last
         )
     {
@@ -729,63 +843,40 @@ private:
 
         if (var_which == Which::value)
         {
-            return invoke_visitor(
-                  visitor
-                , var.storage_.template get_as<T>()
-                , raw_visit
-                , 1L
-                );
+			return visitor(var.storage_.template get_as<T>());
         }
 
         return apply_visitor_impl<next_which, next_iter, LastIterator>(
               var_which
             , var
             , visitor
-            , raw_visit
             , next_is_last()
             );
     }
 
-    template <typename W, typename I, typename LI, typename Variant, typename Visitor, typename RV>
+    template <typename W, typename I, typename LI, typename Variant, typename Visitor>
     static
         typename Visitor::result_type
-    apply_visitor_impl(const int, Variant&, Visitor&, RV, mpl::true_c)
+    apply_visitor_impl(
+          const int
+        , Variant&
+        , Visitor&
+        , mpl::true_c// is_last
+        )
     {
         // / This is never called at runtime: a visitor must handle at \
         // | least one of the variant's types. Throw to circumvent the |
         // \ compile-time requirement that a value is returned:        /
-        throw;
+        throw "Visiting an empty variant is undefined!";
     }
 
 public:
 	//////////////////////////////////////////////////////////////////////
-	// WARNING TO USER :
-	// The following functions are not part of the public interface,
-	// despite their public access (which may change in the future).
-	//
-    template <typename Visitor>
-        typename Visitor::result_type
-    apply_visitor(Visitor visitor)
-    {
-        return apply_visitor_impl<
-              mpl::integral_c<unsigned long, 0>
-            , typename mpl::begin<types>::type
-            , typename mpl::end<types>::type
-            >(which_, *this, visitor, mpl::false_c(), mpl::false_c());
-    }
-
-    template <typename Visitor>
-        typename Visitor::result_type
-    apply_visitor(Visitor visitor) const
-    {
-        return apply_visitor_impl<
-              mpl::integral_c<unsigned long, 0>
-            , typename mpl::begin<types>::type
-            , typename mpl::end<types>::type
-            >(which_, *this, visitor, mpl::false_c(), mpl::false_c());
-    }
-
-    template <typename Visitor>
+    // WARNING TO USER :
+    // The following functions are not part of the public interface,
+    // despite their public access (which may change in the future).
+    //
+	template <typename Visitor>
         typename Visitor::result_type
     raw_apply_visitor(Visitor visitor)
     {
@@ -793,7 +884,7 @@ public:
               mpl::integral_c<unsigned long, 0>
             , typename mpl::begin<types>::type
             , typename mpl::end<types>::type
-            >(which_, *this, visitor, mpl::true_c(), mpl::false_c());
+            >(which_, *this, visitor, mpl::false_c());
     }
 
     template <typename Visitor>
@@ -804,7 +895,23 @@ public:
               mpl::integral_c<unsigned long, 0>
             , typename mpl::begin<types>::type
             , typename mpl::end<types>::type
-            >(which_, *this, visitor, mpl::true_c(), mpl::false_c());
+            >(which_, *this, visitor, mpl::false_c());
+    }
+
+    template <typename Visitor>
+        typename Visitor::result_type
+    apply_visitor(Visitor visitor)
+    {
+		detail::variant::invoke_visitor<Visitor> invoker(visitor);
+		return raw_apply_visitor(invoker);
+    }
+
+    template <typename Visitor>
+        typename Visitor::result_type
+    apply_visitor(Visitor visitor) const
+    {
+        detail::variant::invoke_visitor<Visitor> invoker(visitor);
+		return raw_apply_visitor(invoker);
     }
 };
 

@@ -27,10 +27,9 @@
 #include <algorithm>
 #include <vector>
 
-#include "boost/cstdlib.hpp"
-
 #define BOOST_INCLUDE_MAIN
 #include <boost/test/test_tools.hpp>
+#include "boost/cstdlib.hpp"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -192,13 +191,13 @@ struct are_strict_equals
 
 #if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
-	template <typename T>
+    template <typename T>
     bool operator()(const T& x, const T& y) const
     {
         return x == y;
     }
 
-	template <typename T, typename U>
+    template <typename T, typename U>
     bool operator()(const T&, const U&) const
     {
         return false;
@@ -207,20 +206,20 @@ struct are_strict_equals
 #else// defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
 private:
-	template <typename T>
+    template <typename T>
     bool execute_impl(const T& x, const T& y, long) const
     {
         return x == y;
     }
 
-	template <typename T, typename U>
+    template <typename T, typename U>
     bool execute_impl(const T&, const U&, int) const
     {
         return false;
     }
 
 public:
-	template <typename T, typename U>
+    template <typename T, typename U>
     bool operator()(const T& x, const U& y) const
     {
         return execute_impl(x, y, 1L);
@@ -237,54 +236,26 @@ template <typename T>
 class strict_equal_to
     : boost::generic_visitor<bool>
 {
-	T value_;
+    T value_;
 
 public:
-	explicit strict_equal_to(const T& value)
-		: value_(value)
-	{
-	}
+    explicit strict_equal_to(const T& value)
+        : value_(value)
+    {
+    }
 
-	bool operator()(const T& operand) const
-	{
-		return operand == value_;
-	}
+    bool operator()(const T& operand) const
+    {
+        return operand == value_;
+    }
 
-	template <typename U>
+    template <typename U>
     bool operator()(const U&) const
     {
         return false;
     }
 };
-/*
-//////////////////////////////////////////////////////////////////////////
-// function template strict_equal_to_visitable
-//
-template <typename Visitable>
-class strict_equal_to_visitable_t
-    : boost::generic_visitor<bool>
-{
-    Visitable& visitable_;
 
-public:
-    explicit strict_equal_to_visitable_t(Visitable& visitable)
-        : visitable_(visitable)
-    {
-    }
-
-    template <typename T>
-    bool operator()(const T& operand) const
-    {
-        return boost::apply_visitor(strict_equal_to(operand), visitable_);
-    }
-};
-
-template <typename Visitable>
-strict_equal_to_visitable_t<Visitable> strict_equal_to_visitable(Visitable& visitable)
-{
-    return strict_equal_to_visitable_t<Visitable>(visitable);
-}
-*/
 //////////////////////////////////////////////////////////////////////////
 // function test_main
 //
@@ -406,5 +377,5 @@ int test_main( int, char *[] )
     }
 
     std::cout << "\n\n";
-	return boost::exit_success;
+    return boost::exit_success;
 }
