@@ -184,38 +184,79 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-// function template strict_equal_to
+// class are_strict_equals
 //
-template <typename T>
-class strict_equal_to_t
+struct are_strict_equals
     : boost::generic_visitor<bool>
 {
-    T value_;
+
+#if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
+
+	template <typename T>
+    bool operator()(const T& x, const T& y) const
+    {
+        return x == y;
+    }
+
+	template <typename T, typename U>
+    bool operator()(const T&, const U&) const
+    {
+        return false;
+    }
+
+#else// defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
+
+private:
+	template <typename T>
+    bool execute_impl(const T& x, const T& y, long) const
+    {
+        return x == y;
+    }
+
+	template <typename T, typename U>
+    bool execute_impl(const T&, const U&, int) const
+    {
+        return false;
+    }
 
 public:
-    explicit strict_equal_to_t(const T& value)
-        : value_(value)
+	template <typename T, typename U>
+    bool operator()(const T& x, const U& y) const
     {
+        return execute_impl(x, y, 1L);
     }
 
-    bool operator()(const T& operand) const
-    {
-        return value_ == operand;
-    }
+#endif // BOOST_NO_FUNCTION_TEMPLATE_ORDERING workaround
 
-    template <typename U>
-    bool operator()(const U& operand) const
+};
+
+//////////////////////////////////////////////////////////////////////////
+// class template strict_equal_to
+//
+template <typename T>
+class strict_equal_to
+    : boost::generic_visitor<bool>
+{
+	T value_;
+
+public:
+	explicit strict_equal_to(const T& value)
+		: value_(value)
+	{
+	}
+
+	bool operator()(const T& operand) const
+	{
+		return operand == value_;
+	}
+
+	template <typename U>
+    bool operator()(const U&) const
     {
         return false;
     }
 };
-
-template <typename T>
-strict_equal_to_t<T> strict_equal_to(const T& value)
-{
-    return strict_equal_to_t<T>(value);
-}
-
+/*
 //////////////////////////////////////////////////////////////////////////
 // function template strict_equal_to_visitable
 //
@@ -243,7 +284,7 @@ strict_equal_to_visitable_t<Visitable> strict_equal_to_visitable(Visitable& visi
 {
     return strict_equal_to_visitable_t<Visitable>(visitable);
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////
 // function test_main
 //
@@ -255,7 +296,7 @@ int test_main( int, char *[] )
         my_variant varcopy(var);
 
         BOOST_TEST((
-              boost::apply_visitor(strict_equal_to_visitable(var), varcopy)
+              boost::apply_visitor(are_strict_equals(), var, varcopy)
             ));
     }
 
