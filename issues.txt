@@ -197,3 +197,21 @@ Applying ~T on a const object
 == IT17 == 
 
 Requirement of BoundedTypes should state that references are not allowed
+
+== IT18 ==
+
+
+Fix VC7 warning  - unreferenced variable -  as follows (Courtesy of Ed Brey + Jason Shirk):
+
+struct destroyer
+: public static_visitor<>
+{
+ public: // visitor interfaces
+  template <typename T>
+  void operator()(const T& operand) const
+  {
+    operand; // C4100 workaround
+    operand.~T();
+  }
+};
+
