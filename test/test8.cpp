@@ -1,6 +1,5 @@
-//
-// Boost.Test
-//
+// File: test8.cpp
+
 #include "boost/test/minimal.hpp"
 
 #include "boost/variant.hpp"

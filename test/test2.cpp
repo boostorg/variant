@@ -1,23 +1,8 @@
+// File: test2.cpp
 
-// test2.cpp : Defines the entry point for the console application.
-//
+#include "boost/test/minimal.hpp"
 
-
-
-
-//
-// Boost.Test
-//
-#include <boost/test/minimal.hpp>
-
-
-//
-// Test program code starts here...
-//
-
-#include <boost/config.hpp>
-#include <boost/variant.hpp>
-
+#include "boost/variant.hpp"
 #include "jobs.h"
 #include "varout.h"
 

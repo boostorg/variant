@@ -1,4 +1,4 @@
-//class_a.cpp
+//File: class_a.cpp
 
 
 #include <sstream>
@@ -12,21 +12,17 @@ using namespace std;
 
 class_a::~class_a()
 {
-//   cout << "class_a going down " << this << endl;
    assert(self_p_ == this);
 }
 
 class_a::class_a(int n)
 {
-//   cout << "class_a is up " << this << endl;
    n_ = n;
    self_p_ = this;
 }
 
 class_a::class_a(const class_a& other)
 {
-//   cout << "class_a was copied " << this
-//      << "( source = " << &other << ')' << endl;
    n_ = other.n_;
    self_p_ = this;
 }

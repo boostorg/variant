@@ -1,13 +1,12 @@
-//Class_a.h
+//File: class_a.h
 
 #ifndef _CLASSA_H_INC_
 #define _CLASSA_H_INC_
 
 
-//#include "accepting_visitor.hpp"
 #include <iosfwd>
 
-struct class_a //: Accepting_super_visitor<Class_a>
+struct class_a 
 {
    ~class_a();
    class_a(int n = 5511);

@@ -1,23 +1,9 @@
+// File: test5.cpp
 
-
-//File: test5.cpp
-//Written by: Itay Mamamn
-
-
-//
-// Boost.Test
-//
 #include "boost/test/minimal.hpp"
-
-
-//
-// Test program code starts here...
-//
-
 
 #include "boost/variant.hpp"
 #include "boost/apply_visitor.hpp"
-
 #include "jobs.h"
 #include "varout.h"
 

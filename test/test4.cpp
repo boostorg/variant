@@ -1,21 +1,9 @@
+// File: test4.cpp
 
-//File: test4.cpp
-//Written by: Itay Mamamn
+#include "boost/test/minimal.hpp"
 
-//
-// Boost.Test
-//
-#include <boost/test/minimal.hpp>
-
-
-//
-// Test program code starts here...
-//
-
-
-#include <boost/variant.hpp>
-#include <boost/incomplete.hpp>
-
+#include "boost/variant.hpp"
+#include "boost/incomplete.hpp"
 #include "varout.h"
 #include "jobs.h"
 

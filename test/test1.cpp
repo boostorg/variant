@@ -1,15 +1,7 @@
-// test1.cpp : Defines the entry point for the console application.
-//
+//File: test1.cpp
 
 
-//
-// Boost.Test
-//
 #include "boost/test/minimal.hpp"
-
-//
-// Test program code starts here...
-//
 #include "boost/variant.hpp"
 #include "boost/apply_visitor.hpp"
 

@@ -1,19 +1,11 @@
-//File: test6.cpp
-//Written by: Itay Mamamn
+// File: test6.cpp
+
+#include "boost/test/minimal.hpp"
 
 
-//
-// Boost.Test
-//
-#include <boost/test/minimal.hpp>
-
-
-//
-// Test program code starts here...
-//
 #include <iostream>
-#include <boost/variant.hpp>
 
+#include "boost/variant.hpp"
 #include "jobs.h"
 #include "varout.h"
 

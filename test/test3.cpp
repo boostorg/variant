@@ -1,40 +1,12 @@
+// File: test3.cpp
 
-/***************************************************************************
-                          test3.cpp  -  description
-                             -------------------
-    begin                : Fri Jun 28 08:46:58 IDT 2002
-    copyright            : (C) 2002 by Itay Maman
-    email                : itay_maman@yahoo.com
- ***************************************************************************/
+#include "boost/test/minimal.hpp"
 
-//
-// Permission to use, copy, modify, and distribute this software for any
-// purpose is hereby granted without fee, provided that this copyright and
-// permissions notice appear in all copies and derivatives.
-//
-// This software is provided "as is" without express or implied warranty.
-//
-
-
-
-/////////////////////////////////////////////////////////////////////
-
-//
-// Boost.Test
-//
-#include <boost/test/minimal.hpp>
-
-
-
-//
-// Test program code starts here...
-//
-#include <boost/variant.hpp>
-#include <boost/incomplete.hpp>
-#include <boost/apply_visitor.hpp>
+#include "boost/variant.hpp"
+#include "boost/incomplete.hpp"
+#include "boost/apply_visitor.hpp"
 
 #include <iostream>
-
 #include <sstream>
 #include <string>
 
