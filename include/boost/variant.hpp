@@ -25,7 +25,7 @@
 
 #include <cstddef> // for std::size_t
 #include <new> // for placement new
-#include <typeinfo> // for std::bad_cast, std::type_info
+#include <typeinfo> // for std::type_info
 
 #include "boost/config.hpp"
 #include "boost/compressed_pair.hpp"
@@ -40,32 +40,18 @@
 #include "boost/preprocessor/arithmetic/sub.hpp"
 #include "boost/type_traits/add_const.hpp"
 #include "boost/type_traits/alignment_of.hpp"
-//#include "boost/type_traits/is_better_conversion.hpp"
 #include "boost/type_traits/is_const.hpp"
-//#include "boost/type_traits/is_convertible.hpp"
 #include "boost/type_traits/is_same.hpp"
-#include "boost/type_traits/type_with_alignment.hpp"
 
-#include "boost/apply_visitor.hpp"
-
-#include "boost/mpl/advance.hpp"
-#include "boost/mpl/apply.hpp"
 #include "boost/mpl/apply_if.hpp"
-#include "boost/mpl/assert_is_same.hpp"
 #include "boost/mpl/begin_end.hpp"
-#include "boost/mpl/bind.hpp"
 #include "boost/mpl/bool_c.hpp"
-#include "boost/mpl/contains.hpp"
 #include "boost/mpl/distance.hpp"
 #include "boost/mpl/empty.hpp"
-#include "boost/mpl/erase.hpp"
-//#include "boost/mpl/find.hpp"
 #include "boost/mpl/comparison/equal_to.hpp"
 #include "boost/mpl/identity.hpp"
-#include "boost/mpl/if.hpp"
 #include "boost/mpl/integral_c.hpp"
 #include "boost/mpl/iter_fold.hpp"
-#include "boost/mpl/comparison/less.hpp"
 #include "boost/mpl/list.hpp"
 #include "boost/mpl/limits/list.hpp"
 #include "boost/mpl/logical.hpp"
@@ -75,11 +61,20 @@
 #include "boost/mpl/transform.hpp"
 #include "boost/mpl/void.hpp"
 
+// The following used in experimental mpl_list_initializer (below):
+//#include "boost/type_traits/is_better_conversion.hpp"
+//#include "boost/type_traits/is_convertible.hpp"
+//#include "boost/mpl/assert_is_same.hpp"
+//#include "boost/mpl/bind.hpp"
+//#include "boost/mpl/erase.hpp"
+//#include "boost/mpl/find.hpp"
+//#include "boost/mpl/if.hpp"
+
 // The following are new/in-progress headers or fixes to existing headers:
 #include "boost/config/no_class_template_using_declarations.hpp"
 #include "boost/aligned_storage.hpp"
 #include "boost/extractable.hpp"
-#include "boost/incomplete.hpp"
+#include "boost/incomplete_fwd.hpp"
 #include "boost/move/move.hpp"
 #include "boost/static_visitable.hpp"
 #include "boost/static_visitor.hpp"
@@ -1560,14 +1555,14 @@ public: // value extraction support
     T* extract()
     {
         detail::variant::cast_to<T> visitor;
-        return apply_visitor(visitor);
+        return this->apply_visitor(visitor);
     }
 
     template <typename T>
     T* extract() const
     {
         detail::variant::cast_to<T> visitor;
-        return apply_visitor(visitor);
+        return this->apply_visitor(visitor);
     }
 
 };
