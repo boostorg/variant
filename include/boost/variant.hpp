@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2002
+// Copyright (c) 2002-2003
 // Eric Friedman
 //
 // Permission to use, copy, modify, distribute and sell this software
