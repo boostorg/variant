@@ -17,6 +17,9 @@
 #ifndef BOOST_VARIANT_HPP
 #define BOOST_VARIANT_HPP
 
+// MPL as shipped in 1.29 has bug with preprocessed headers, so define following:
+#define BOOST_MPL_AUX_CONFIG_USE_PREPROCESSED_HPP_INCLUDED
+
 #include <cstddef> // for std::size_t
 #include <new> // for placement new
 #include <typeinfo> // for std::bad_cast, std::type_info

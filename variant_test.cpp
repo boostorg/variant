@@ -14,8 +14,6 @@
 // suitability of this software for any purpose. It is provided "as is" 
 // without express or implied warranty.
 
-#define BOOST_MPL_AUX_CONFIG_USE_PREPROCESSED_HPP_INCLUDED
-
 // Headers whose facilities are to be tested:
 #include "boost/variant.hpp"
 #include "boost/extract.hpp"
