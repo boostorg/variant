@@ -35,16 +35,16 @@ width="277" height="86" BORDER=0> </A>
 <UL>
 <LI><A HREF="#SetOfTypes">Set of types</A></LI>
 <LI><A HREF="#VisitorOf">Visitor of</A></LI>
-<LI><A HREF="#BoostVariantLimitTypes">BOOST_VARIANT_LIMIT_TYPES</A></LI>
+<LI><A HREF="#BoostVariantLimitTypes"><code>BOOST_VARIANT_LIMIT_TYPES</code></A></LI>
 </UL>
 </LI>
 <LI><a href="#Synopsis">Synopsis</a></LI>
 <LI><a href="#ExceptionSafety">Exception safety</a></LI>
-<LI><a href="#Members">Members of boost::variant</a></LI>
+<LI><a href="#Members">Members of <code>boost::variant</code></a></LI>
 <LI>Visitation: <a href="#Visitation"><code>boost::apply_visitor</code></a></LI>
 <LI>Visitation: <a href="#StaticVisitor"><code>boost::static_visitor</code></a></LI>
 <LI>Value Extraction: <a href="#ValueExtraction"><code>boost::extract</code></a></LI>
-<LI><a href="#Incomplete">boost::incomplete</a></LI>
+<LI><a href="#Incomplete"><code>boost::incomplete</code></a></LI>
 </UL>
 <HR>
 <h2><a name="Definitions">Definitions</a></h2>
@@ -79,7 +79,7 @@ used.
 <LI>At least two types must be specified.
 <LI>The maximum number of types depends on the compiler, and is specified 
 by the preprocessor symbol <CODE>BOOST_VARIANT_LIMIT_TYPES</CODE>.
-<LI>Multiple occurrences of a type within a set of types are not allowed.
+<LI>Multiple occurrences of a type within a set of types are not allowed, and result in an undefined behavior.
 </UL>
 </LI>
 </UL>
@@ -114,7 +114,7 @@ then <B>functor_type is a visitor of variant_type</B>, if for each expression <c
 </UL>
 <BR>
 <BR>
-<h3><a name="BoostVariantLimitTypes">- BOOST_VARIANT_LIMIT_TYPES</A></h3>
+<h3><a name="BoostVariantLimitTypes">- <code>BOOST_VARIANT_LIMIT_TYPES</code></A></h3>
 <pre>#define BOOST_VARIANT_LIMIT_TYPES <i>implementation-defined</i></pre>
 Implementation-defined value equal to the length of <code>boost::variant</code>'s
 template parameter list.<br>
@@ -176,7 +176,7 @@ the strong guarantee of exception-safety.</li>
 <hr>
 <br>
 
-<h2><a name="Members">Members of boost::variant</a></h2>
+<h2><a name="Members">Members of <code>boost::variant</code></a></h2>
 <BR>
 <h3>Constructors</h3>
 <pre>variant()  { }
@@ -346,7 +346,6 @@ which is required from each <a href="#VisitorOf">visitor</a> class.
 
 <h2><a name="ValueExtraction">Value Extraction: <code>boost::extract</code></a></h2>
 <pre>
-<pre>
 
   class bad_extract : public std::exception
   {
@@ -373,21 +372,26 @@ which is required from each <a href="#VisitorOf">visitor</a> class.
 
   };
 </pre>
-
-</pre>
 <code>boost::extract</code> is a facility for extracting a reference 
 to a value held by a <code>variant</code> object. The 'extraction' 
 succeeds only if the type of the held value is identical to the 
-<CODE>ToType</CODE> template parameter. Usage:<BR> <OL>
-<LI><CODE>extract&lt;RR&gt;(var_inst);</code> Initializes a temporary 
+<CODE>ToType</CODE> template parameter. Usage:<BR> 
+<OL>
+<LI>
+<CODE>extract&lt;RR&gt;(var_inst);</code> Initializes a temporary 
 object which has an
 implicit convertion to <CODE>RR&</CODE>. If the given <CODE>variant</CODE> 
 object, <CODE>var_inst</CODE> does not hold a value of type 
 <CODE>RR</CODE>, a <CODE>bad_extract</CODE> exception is thrown.
-<LI><code>extract&lt;RR&gt; ex(var_inst);</code> Initalizes an extract 
+</LI>
+
+<LI>
+<code>extract&lt;RR&gt; ex(var_inst);</code> Initalizes an extract 
 object, <code>ex</CODE>. Subsequently, client code can issue an 
 <CODE>ex.check()</CODE> call, to determine whether <CODE>var_inst</CODE> 
-is holding a value of type <CODE>RR</CODE>. </OL>
+is holding a value of type <CODE>RR</CODE>. 
+</LI>
+</OL>
 
 
 <h3>Constructors</h3>
@@ -412,7 +416,7 @@ object is holding a value of type <CODE>ToType</CODE>.
     operator result_type() const;
 </PRE>
 
-<CODE>If <CODE>check()</code> is <code>true</CODE> - 
+If <CODE>check()</code> is <code>true</CODE> - 
 <code>operator()</code> returns a
 reference to the value held by the associated <CODE>variant</CODE> object. 
 Otherwise - a <CODE>bad_extract</CODE> exception is thrown.<BR>
@@ -422,7 +426,7 @@ Otherwise - a <CODE>bad_extract</CODE> exception is thrown.<BR>
 <BR>
 <hr>
 <BR>
-<h2><a name="Incomplete">boost::incomplete</a></h2>
+<h2><a name="Incomplete"><code>boost::incomplete</code></a></H2>
 
 <CODE>incomplete&lt;T&gt;</CODE> is a template class, which allows a
 <CODE>variant</CODE> type to be instantiated with incomplete types.<br>

@@ -175,8 +175,8 @@ be enclosed inside an <code>incomplete&lt;&gt;</code> wrapper, as shown below:<b
 Once a <code>variant</code> object has been created its value may be changed by
 <code>variant</code>'s assingment operator. The right-hand side value of the assignment
 is converted to the closet possible type of the assigned variant's <a
-href="reference.html#SetOfTypes">set of types</A>, by using overload
-resolution rules. Naturally, If there is an exact match, no convesion is
+href="reference.html#SetOfTypes">set of types</A>, using C++'s overload
+resolution rules. Naturally, If there is an exact match, no convresion is
 applied, and the right-hand side value is copied as-is.
 On the other hand, if no conversion exists, or, if the conversion is ambiguous, a
 compiler error is triggered.<br>
@@ -198,9 +198,9 @@ interchangeably.
    v1 = string("abc");    // Error! no implicit conversion from
                           //   string to int/char/double
 
-   v1 = static_cast&lt;long double&gt;(4.0); // Error! (ambiguity):
-                          //      long double -> double conversion
-                          //      clashes with long double -> int conversion
+   v1 = static_cast&lt;long double&gt;(4.0); // Error! (ambiguity) 
+                          //      long double -> double clashes with ...
+                          //      ...long double -> int conversion
 
 
    variant&lt;std::string, double, int&gt; v2; // Default construction.
@@ -254,11 +254,11 @@ the assigned variant:
 </PRE>
 
 Variant-to-variant assignment: Consider this case:
-<pre>   typedef variant&lt;RR, SS, TT, .. &gt; rhs_type;
-   rhs_type src;
+<pre>   typedef variant&lt;S1, S2, S3, .. &gt; src_type;
+   src_type src;
 
-   typedef variant&lt;XX, YY, ZZ, .. &gt; lhs_type;
-   lhs_type trg;
+   typedef variant&lt;T1, T2, T3, .. &gt; dst_type;
+   dst_type dst;
 
    trg = src; // Variant to variant assignment:
               // trg and src are two variants of different types
@@ -267,14 +267,12 @@ Variant-to-variant assignment: Consider this case:
 What will <code>trg</code>'s value be, following such an assignment?<br>
 <ul>
 <li>
-Case 1: If <code>rhs_type</code> is not part of <code>lhs_type</code>'s
-<a href="reference.html#SetOfTypes">set of types</a>, then <code>src</code>'s
-value is assigned to <code>trg</code>, using the rules discussed throughout this section.
-</li>
-<li>
-Case 2: If <code>rhs_type</code> <b>does</b> appear on <code>lhs_type</code>'s set of types,
+Case 1: If one of <code>T1, T2, T3, ...</code> <b>is</b> <code>src_type</code>
 then <code>src</code> itself will be assigned into <code>trg</code>, turning <code>trg</code> into a
 <b>variant holding a variant</b>
+</li>
+<li>
+Case 2: Otherwise - <code>src</code>'s value is assigned to <code>trg</code>, using the rules discussed throughout this section.
 </li>
 </ul>
 <pre>    typedef variant&lt;int, std::string&gt; variant_type;
@@ -285,10 +283,10 @@ then <code>src</code> itself will be assigned into <code>trg</code>, turning <co
 
     a = "hello";  // char* converted to std::string
 
-    b = a;        // b <- value of a, so b holds an std::string (Case 1)
+    b = a;        // Copy value of a into b, so b holds an std::string (Case 2)
 
-    c = a;        // c <- a, so c holds a variant_type object holding
-                  // an std::string (Case 2)
+    c = a;        // Copy a into c, so c holds a variant_type object holding
+                  // an std::string (Case 1)
 </pre>
 
 Note that a variant-to-variant assignment will fail - at compile time - if one
@@ -335,7 +333,7 @@ From <code>visitor</code>'s standpoint, its function-call operator is called
 with whatever value <code>a_variant</code> is holding. This gives <code>visitor</code> a
 chacne to inspect/modify <code>a_variant</code>'s value.<br>
 <BR>
-The following snip demonstrates the visitation facility using a concrete visitor class, <code>print_int_char_visitor</code>. The code will print "Char value: 'x'" and "Int value: 77" to <CODE>std::cout</CODE>:
+The following snip demonstrates the visitation facility using a concrete visitor class, <code>print_int_char_visitor</code>. The code will print "Float value: 53.22" and "Int value: 77" to <CODE>std::cout</CODE>:
 <PRE>   struct print_int_float_visitor
    {
       //result_type specifies the return type of operator()
@@ -397,9 +395,9 @@ is generated.
 <PRE>   struct print_int_char : boost::static_visitor&lt;void&gt;
    {
       // Handler *A*
-      void operator()(int f) const
+      void operator()(int n) const
       {
-         std::cout &lt;&lt; "Int value: " &lt;&lt; f &lt;&lt; std::endl;
+         std::cout &lt;&lt; "Int value: " &lt;&lt; n &lt;&lt; std::endl;
       }
 
       // Handler *B*
@@ -411,12 +409,12 @@ is generated.
    };
    .
    .
-   variant&lt;short, char&gt; a = static_cast&lt;short&gt;(88);
-   apply_visitor(print_int_char(), a);   // Output: "Int value: 88.0"
-                                         //   (int value intercepted by handler *A*)
-
-   a = 'x';                              // a = 'x'
+   variant&lt;short, char&gt; a = 'x';
    apply_visitor(print_int_char(), a);   // Output: "Char value: 'x'"
+
+   a = static_cast&lt;short&gt;(88);           // a = short(88)
+   apply_visitor(print_int_char(), a);   // Output: "Int value: 88.0"
+                                         //   (short value intercepted by handler *A*)
 
    variant&lt;int, char, void*&gt; b = 88;     // b = int(88)
    apply_visitor(print_int_char(), b);   // Error! -
@@ -489,7 +487,7 @@ This allows a visitor to mutate the variant-held value:
 </pre>
 <BR>
 
-The last sample shows persistency of visitors. Every visitor is actually a function-object, so its data members can be used to keep persistent data. The <code>int_accumulator</code> visitor uses <code>total_</code> to keep track of the total sum of its operands:
+The last sample (below) shows persistency of visitors. Every visitor is actually a function-object, so its data members can be used to keep persistent data. The <code>int_accumulator</code> visitor uses <code>total_</code> to keep track of the total sum of its operands:
 <pre>   struct int_accumulator : boost::static_visitor&lt;void&gt;
    {
        int_accumulator() : total_(0) { }
