@@ -2,8 +2,8 @@ INC=-I..\..\..\..\boost-sandbox -I..\..\..\..\..\lib\boost_1_29_0
 
 
 
-# all: bin/s.exe bin/test8.exe
-all: bin/test1.exe bin/test2.exe bin/test3.exe bin/test4.exe bin/test5.exe bin/test6.exe
+# all: bin/s.exe 
+all: bin/test1.exe bin/test2.exe bin/test3.exe bin/test4.exe bin/test5.exe bin/test6.exe bin/test8.exe
 
 run: all
 	bin\test1.exe
