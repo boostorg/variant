@@ -20,6 +20,20 @@ struct verifier
 typedef verifier<true> verify;
 typedef verifier<false> verify_not;
 
+template <bool B>
+struct verifier_default
+{
+    template <typename T>
+    void operator()() const
+    {
+        verify_pass_ = B;
+    }
+};
+
+typedef verifier_default<true> verify_default;
+typedef verifier_default<false> verify_not_default;
+
+
 #define VERIFY_LAST \
     do { BOOST_CHECK( verify_pass_ ); verify_pass_ = false; } while(false)
 
@@ -41,11 +55,12 @@ int test_main(int , char* [])
 
     switch_(var1)
       |= case_<float>( verify_not() )
-      |= default_( verify() )
+      |= default_( verify_default() )
       ;
     VERIFY_LAST;
 
     switch_(var1)
+      |= case_<float>( verify_not() )
       |= case_< _ >( verify() )
       ;
     VERIFY_LAST;
