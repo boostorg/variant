@@ -50,7 +50,10 @@ boost::static_visitor</a></code>.
 <hr>
 <h2><a name="Compatibility">Compatibility</a></h2>
         <p>To date the code and test harness have been compiled and tested successfully
-using Microsoft Visual C++ 7.0 and GNU g++ 2.95/3.1.</p>
+using Microsoft Visual C++ 7.0 and GNU C++ 2.95/3.1.</p>
+The GNU C++ implementation of <a href="reference.html#ValueExtraction">extract</a> offers an 
+implicit type conversion operator, which is not supported by the MSVC7 implementation.<br>
+<br>
 <hr>
 <h2><a name="Troubleshooting">Troubleshooting</a></h2>
 <ul>
@@ -69,7 +72,7 @@ variant.hpp: (use -ftemplate-depth-NN to increase the maximum)
 <u>Solution</u>: Passing <code>-ftemplate-depth-50</code> to the compiler.
 This will increase the maximum depth to 50.<br>
 <br><br>
-<li><u>Compiler</u>: MSVC 7. Error message:<br>
+<li><u>Compiler</u>: MSVC7. Error message:<br>
 <table>
 <tr>
 <td width = "50"></td>

@@ -370,8 +370,8 @@ public: // structors
 public: // queries
 
     bool check() const;
-    ToType &amp; operator()() const;
-    operator ToType &amp;() const;
+    ToType&amp; operator()() const;
+    operator ToType&amp;() const; //  Not supported on MSVC
 
 };
 </pre>
@@ -383,8 +383,8 @@ public: // queries
         </p>
         <ol>
             <li>
-                <code>extract&lt;RR&gt;(var_inst);</code> Initializes a temporary object which 
-                has an implicit convertion to <code>RR&amp;</code>. If the given <code>variant</code>
+                <code>extract&lt;RR&gt;(var_inst)();</code> Initializes a temporary <code>extract</code>object 
+                and converts it to <code>RR&amp;</code>. If the given <code>variant</code>
                 object, <code>var_inst</code> does not hold a value of type <code>RR</code>, a <code>
                     bad_extract</code> exception is thrown.
             </li>
@@ -410,14 +410,15 @@ public: // queries
         <p><code>check()</code> is a non throwing member function which return <code>true</code>, 
             if, and only if, the associated <code>variant</code> object is holding a value 
             of type <code>ToType</code>.</p>
-        <pre>    result_type operator()() const;
-    operator result_type() const;
+        <pre>    result_type operator()() const; 
+    operator result_type() const; //  Not supported on MSVC
 </pre>
         <p>If <code>check()</code> is <code>true</code> - <code>operator()</code> returns a 
             reference to the value held by the associated <code>variant</code> object. 
             Otherwise - a <code>bad_extract</code> exception is thrown.<br>
             <code>operator result_type()</code> supplies an implicit conversion to <code>ToType&amp;</code>. 
-            It is semantically identical to <code>operator()</code>.<br>
+            It is semantically identical to <code>operator()</code>. Note that the MSVC7 implementation does not support 
+            this operator.<br>
         </p>
         <hr>
         <h2><a name="incomplete"><code>incomplete</code></a></h2>
