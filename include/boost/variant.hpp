@@ -76,12 +76,12 @@
 #include "boost/detail/variant_workaround.hpp"
 #include "boost/detail/boost_swap.hpp"
 #include "boost/aligned_storage.hpp"
-#include "boost/apply_visitor_fwd.hpp"
 #include "boost/auto_mover.hpp"
 #include "boost/extract_fwd.hpp"
-#include "boost/generic_visitor.hpp"
 #include "boost/incomplete.hpp"
 #include "boost/move.hpp"
+#include "boost/static_visitable.hpp"
+#include "boost/static_visitor.hpp"
 #include "boost/mpl/guarded_size.hpp"
 
 //////////////////////////////////////////////////////////////////////////
@@ -178,7 +178,7 @@ struct null_storage
 // Generic Visitor that destroys the value it visits.
 //
 struct destroyer
-    : generic_visitor<>
+    : public static_visitor<>
 {
     template <typename T>
     void operator()(const T& operand) const
@@ -192,7 +192,7 @@ struct destroyer
 // Generic Visitor that copies the value it visits into the given buffer.
 //
 class copy_into
-    : generic_visitor<>
+    : public static_visitor<>
 {
     void* storage_;
 
@@ -214,7 +214,7 @@ public:
 // Generic Visitor that swaps the value it visits with the given value.
 //
 struct swap_with
-    : generic_visitor<>
+    : public static_visitor<>
 {
 private:
     void* toswap_;
@@ -237,7 +237,7 @@ public:
 // Generic Visitor that performs a typeid on the value it visits.
 //
 struct reflect
-    : generic_visitor<const std::type_info&>
+    : public static_visitor<const std::type_info&>
 {
     template <typename T>
     const std::type_info& operator()(const T&)
@@ -445,9 +445,10 @@ template <
 
 >
 class variant
+//    : public static_visitable< boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)> >
 
 #if defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-    : public detail::variant_workaround_base
+    , public detail::variant_workaround_base
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION workaround
 
 {
@@ -789,13 +790,17 @@ public:
 
     variant(const variant& operand)
     {
-        operand.raw_apply_visitor(detail::variant::copy_into(storage_.first().address()));
+        // Copy the value of operand into *this...
+        detail::variant::copy_into visitor(storage_.first().address());
+        operand.raw_apply_visitor(visitor);
+
+        // ...and activate the *this's primary storage on success:
         activate_storage1(operand.which());
     }
 
 private:
     class convert_copy_into
-        : generic_visitor<int>
+        : public static_visitor<int>
     {
         void* storage_;
 
@@ -823,10 +828,9 @@ public:
     variant(const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand)
     {
         // Attempt a converting copy into *this's storage:
+        convert_copy_into visitor(storage_.first().address());
         activate_storage1(
-              operand.raw_apply_visitor(
-                  convert_copy_into(storage_.first().address())
-                )
+              operand.raw_apply_visitor(visitor)
             );
     }
 
@@ -854,10 +858,9 @@ private:
         , long)
     {
         // Attempt a converting copy into *this's storage:
+        convert_copy_into visitor(storage_.first().address());
         activate_storage1(
-              operand.raw_apply_visitor(
-                  convert_copy_into(storage_.first().address())
-                )
+              operand.raw_apply_visitor(visitor)
             );
     }
 
@@ -888,7 +891,8 @@ public:
 private:
     void destroy_content()
     {
-        raw_apply_visitor(detail::variant::destroyer());
+        detail::variant::destroyer visitor;
+        raw_apply_visitor(visitor);
     }
 
 public:
@@ -906,7 +910,7 @@ private:
     friend class assign_into;
 
     class assign_into
-        : generic_visitor<>
+        : public static_visitor<>
     {
         variant& target_;
         int source_which_;
@@ -944,7 +948,7 @@ private:
             , mpl::false_c// is_moveable
             )
         {
-            // Now attempt a copy into target's inactive storage...
+            // Attempt a copy into target's inactive storage...
             new(target_.inactive_storage()) T(operand);
 
             // ...and upon success destroy the target's active storage...
@@ -972,9 +976,8 @@ private:
 
     void assign(const variant& operand)
     {
-        operand.raw_apply_visitor(
-              assign_into(*this, operand.which())
-            );
+        assign_into visitor(*this, operand.which());
+        operand.raw_apply_visitor(visitor);
     }
 
 public: // modifiers
@@ -1001,7 +1004,7 @@ private:
     friend class swap_variants;
 
     class swap_variants
-        : generic_visitor<>
+        : public static_visitor<>
     {
         variant& lhs_;
         variant& rhs_;
@@ -1113,16 +1116,15 @@ public:
         if (which() == rhs.which())
         {
             // ...then swap the values directly:
-            rhs.raw_apply_visitor(
-                  detail::variant::swap_with(active_storage())
-                );
+            detail::variant::swap_with visitor(active_storage());
+            rhs.raw_apply_visitor(visitor);
+
             return *this;
         }
 
         // Otherwise, perform general variant swap:
-        rhs.raw_apply_visitor(
-              swap_variants(*this, rhs)
-            );
+        swap_variants visitor(*this, rhs);
+        rhs.raw_apply_visitor(visitor);
 
         return *this;
     }
@@ -1197,7 +1199,7 @@ public:
     //
     template <typename Visitor>
         typename Visitor::result_type
-    raw_apply_visitor(Visitor visitor)
+    raw_apply_visitor(Visitor& visitor)
     {
         return apply_visitor_impl<
               mpl::integral_c<unsigned long, 0>
@@ -1208,7 +1210,7 @@ public:
 
     template <typename Visitor>
         typename Visitor::result_type
-    raw_apply_visitor(Visitor visitor) const
+    raw_apply_visitor(Visitor& visitor) const
     {
         return apply_visitor_impl<
               mpl::integral_c<unsigned long, 0>
@@ -1219,7 +1221,7 @@ public:
 
     template <typename Visitor>
         typename Visitor::result_type
-    apply_visitor(Visitor visitor)
+    apply_visitor(Visitor& visitor)
     {
         detail::variant::invoke_visitor<Visitor> invoker(visitor);
         return raw_apply_visitor(invoker);
@@ -1227,7 +1229,7 @@ public:
 
     template <typename Visitor>
         typename Visitor::result_type
-    apply_visitor(Visitor visitor) const
+    apply_visitor(Visitor& visitor) const
     {
         detail::variant::invoke_visitor<Visitor> invoker(visitor);
         return raw_apply_visitor(invoker);
@@ -1288,7 +1290,7 @@ void swap(
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 
 template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
-struct apply_visitor_traits<
+struct static_visitable_traits<
   boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>
 >
 {
@@ -1300,7 +1302,7 @@ public:
     template <typename Visitor>
     static
         typename Visitor::result_type
-    execute(Visitor& visitor, variant_t& operand)
+    apply_visitor(Visitor& visitor, variant_t& operand)
     {
         return operand.apply_visitor(visitor);
     }
@@ -1308,7 +1310,7 @@ public:
     template <typename Visitor>
     static
         typename Visitor::result_type
-    execute(Visitor& visitor, const variant_t& operand)
+    apply_visitor(Visitor& visitor, const variant_t& operand)
     {
         return operand.apply_visitor(visitor);
     }
@@ -1353,7 +1355,7 @@ namespace variant {
 
 template <typename T>
 struct caster
-    : generic_visitor<T*>
+    : public static_visitor<T*>
 {
     template <typename U>
     T* operator()(U&) const
@@ -1385,13 +1387,15 @@ public:
     template <typename T>
     static T* execute(variant_t& operand)
     {
-        return operand.apply_visitor(detail::variant::caster<T>());
+        detail::variant::caster<T> visitor;
+        return operand.apply_visitor(visitor);
     }
 
     template <typename T>
     static T* execute(const variant_t& operand)
     {
-        return operand.apply_visitor(detail::variant::caster<T>());
+        detail::variant::caster<T> visitor;
+        return operand.apply_visitor(visitor);
     }
 };
 
@@ -1404,7 +1408,8 @@ T* variant_extract_pointer(
       boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>& operand
     )
 {
-    return operand.apply_visitor(detail::variant::caster<T>());
+    detail::variant::caster<T> visitor;
+    return operand.apply_visitor(visitor);
 }
 
 template <typename T, BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
@@ -1412,7 +1417,8 @@ T* variant_extract_pointer(
       const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>& operand
     )
 {
-    return operand.apply_visitor(detail::variant::caster<T>());
+    detail::variant::caster<T> visitor;
+    return operand.apply_visitor(visitor);
 }
 
 } // namespace detail

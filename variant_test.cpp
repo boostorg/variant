@@ -20,6 +20,7 @@
 #include "boost/incomplete.hpp"
 #include "boost/type_switch.hpp"
 #include "boost/apply_visitor.hpp"
+#include "boost/visitor_ptr.hpp"
 
 // Support headers:
 #include <iostream>
@@ -39,7 +40,7 @@ typedef boost::variant<
     > my_variant;
 
 struct display_visitor
-    : boost::generic_visitor<>
+    : boost::static_visitor<>
 {
 private:
     std::ostream* o_;
@@ -150,7 +151,7 @@ struct subtract
 };
 
 class calculator
-    : boost::generic_visitor<int>
+    : public boost::static_visitor<int>
 {
     int value_;
 
@@ -185,7 +186,7 @@ public:
 // class are_strict_equals
 //
 struct are_strict_equals
-    : boost::generic_visitor<bool>
+    : boost::static_visitor<bool>
 {
 
 #if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
@@ -233,7 +234,7 @@ public:
 //
 template <typename T>
 class strict_equal_to
-    : boost::generic_visitor<bool>
+    : boost::static_visitor<bool>
 {
     T value_;
 
