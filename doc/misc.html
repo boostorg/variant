@@ -21,26 +21,64 @@ width="277" height="86" BORDER=0> </A>
                     <h1 align="center"><a
 href='../index.html'>[boost::variant]</A> Miscellaneous</h1>
 
-                </td>
-            </tr>
-        </table>
-		<hr>
+</td>
+</tr>
+</table>
+<hr>
 <p>
 <UL>
 <LI><a href="#HeaderFiles">Header files</a></LI>
 <LI><a href="#Compatibility">Compatibility</a></LI>
+<LI><a href="#Troubleshooting">Trouble shooting</a></lI>
 <LI><a href="#Credits">Credits</a></LI>
 </UL>
 <hr>
 <BR>
 <BR>
 <h2><a name="HeaderFiles">Header files</a></h2>
-[TBD]
+<ul>
+<li><a href="../../../boost/variant.hpp">boost/variant.hpp</a> - Defines
+<code><a href="reference.html#Synopsis">boost::variant</a></code>
+<li><a href="../../../boost/incomplete.hpp">boost/incomplete.hpp</a>
+- Defines template class <code><a href="reference.html#Incomplete">boost::incomplete</code>.
+<li><a href="../../../boost/apply_visitor.hpp">boost/apply_visitor.hpp</a> -
+Defines the overloaded template function <code>
+<a href="reference.html#ApplyingVisitors">boost::apply_visitor()</a></code>
+<li><a href="../../../boost/static_visitor.hpp">boost/static_visitor.hpp</a>
+- Defines template class <code><a href="reference.html#StaticVisitor">
+boost::static_visitor</a></code>.
+<li><a href="../../../boost/extract.hpp">boost/extract.hpp</a>
+- Defines the template function <code>
+<a href="reference.html#Extract">boost::extract()</a></code>.
+</ul>
 <br>
 <hr>
 <h2><a name="Compatibility">Compatibility</a></h2>
 To date the code and test harness have been compiled and tested successfully
-using Microsoft Visual C++ 7.0 and GNU g++ 2.95.<br>
+using Microsoft Visual C++ 7.0 and GNU g++ 2.95/3.1.<br>
+<hr>
+<br>
+<br>
+<h2><a name="Troubleshooting">Trouble Shooting</a></h2>
+<ul>
+<li><u>Compiler</u>: GNU C++. Error message:<br>
+<code><blockquote>
+variant.hpp: template instantiation depth exceeds maximum of 17<br>
+variant.hpp: (use -ftemplate-depth-NN to increase the maximum)
+</blockquote></code>
+<u>Solution</u>: Passing <code>-ftemplate-depth-50</code> to the compiler.
+This will increase the maximum depth to 50.<br>
+<br><br>
+<li><u>Compiler</u>: MSVC 7. Error message:<br>
+<code><blockquote>
+boost\mpl\clear.hpp(36) : fatal error C1076: compiler limit : internal heap
+limit reached;<br>
+use /Zm to specify a higher limit
+</blockquote></code>
+<u>Solution</u>: Passing <code>/Zm200</code> to the compiler. This will increase
+the heap by a factor of 200%.<br>
+<br><br>
+</ul>
 <BR>
 <hr>
 <H2><a name="Credits">Credits</a></h2>
