@@ -41,7 +41,7 @@ T& check_pass(Variant& v, T value)
     {
 //        T& r = extract<T>(v);
         extract<T> x(v);
-        T& r = x;
+        T& r = x();
         BOOST_CHECK(r == value);
         return r;
     }
@@ -60,8 +60,8 @@ void check_fail(Variant& v)
     {
 //        T& r = extract<T>(v);
         extract<T> x(v);
-        T& r = x;
-        BOOST_CHECK(false && r); // should never reach
+        T& r = x();
+        BOOST_CHECK(false); // should never reach
     }
     catch(boost::bad_extract&)
     {
