@@ -159,6 +159,10 @@ stored within the variant itself
 [http://lists.boost.org/MailArchives/boost/msg44085.php]
 [http://lists.boost.org/MailArchives/boost/msg44089.php]
 [http://lists.boost.org/MailArchives/boost/msg44098.php]
+[http://lists.boost.org/MailArchives/boost/msg44129.php]
+[http://lists.boost.org/MailArchives/boost/msg44125.php]
+[http://lists.boost.org/MailArchives/boost/msg44132.php]
+[http://lists.boost.org/MailArchives/boost/msg44135.php]
 
 - Public interface of the extract facility
 - Renaming extract to access
