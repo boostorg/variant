@@ -1,0 +1,184 @@
+#
+# Rationale:
+#
+# - List all issues raised during the formal review in a concise manner.
+#
+# - The appearance of an item on this list does not necessarily mean it is accepted as a TODO item. 
+#   This decision will be made later 
+#
+#
+# File format:
+#
+# - Each item has a unique id of the form: ITnnn.
+#
+# - Each item references to relevant posts(s).
+#
+# - Several issues may be grouped into a single item, if they are likely to be accepted/rejected as a group.
+
+
+
+== IT1 ==
+[http://lists.boost.org/MailArchives/boost/msg44092.php]
+[http://lists.boost.org/MailArchives/boost/msg44027.php]
+
+Document the differences (boost::any vs. boost::variant).
+
+
+== IT2 ==
+
+[http://lists.boost.org/MailArchives/boost/msg43990.php]
+
+tutorial.html:
+- a_printer and inst are not defined.
+- chacne -> chance
+- The next code snip, demonstrate -> The next code snip demonstrates
+
+sample.html:
+- What is the weight of a star or space ship?  Totaling mass would make more sense to me. :-)
+- In the "bad" space example, total_weight's functions should return int.
+- Switching between using and not using the static_visitor base class was confusing to me.  (I didn't notice it at first and was confused as to why result_type was defined sometimes but not others.)
+
+reference.html:
+- "All members of variant satisfy the strong guarantee of exception-safety, unless otherwise specified."  This is inharmonious with the unqualified claim in the into "Strong exception-safety guarantee for all operations."
+- If check() is true - operator() -> If check() is true, operator() [otherwise, it looks like subtraction].
+- It would be helpful to document the space usage of the current implementation.  Something like "pointer + 2 * sizeof(largest type) + padding" would be fine (assuming I have deduced correctly).
+
+== IT3 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44036.php]
+
+The documentation needs to describe when this reference is invalidated.
+
+
+== IT4 ==
+
+[http://lists.boost.org/MailArchives/boost/msg43999.php]
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
+[http://lists.boost.org/MailArchives/boost/msg44061.php]
+
+I'd like to be able to compile it with my compiler (BCC551)
+
+
+== IT5 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
+
+a) In the introduction appears the term 'inhomogeneous'; isn't the term
+'heterogeneous' a much more familiar synonym?
+
+b) The first variant program in the tutorial is actually full of errors :-)
+
+e) Th visitation examples mismatches 'print_int_float_visitor'
+with 'print_int_char_visitor'
+
+
+== IT6 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
+
+The docs says that at least two parameters should be supplied.
+This isn't true.
+In fact, the implementation itself uses variants of a single parameter.
+
+== IT7 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
+
+The docs don't mention at all the possibility of using an mpl
+seuqence as the type set. Even if this is a restricted feature
+-for those good compilers-, it should be mentioned because it's
+most useful.
+
+
+== IT8 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
+
+f) In the Visitor concept docs, it says:
+   ...a function object which unambiguously accepts any value of
+   each of the variant's bounded types...
+
+First, I think this description is too informal, it itsn't clear if the
+visitor must have overloads for all of the types _separately_,
+or if the arguments must be passed by (const) reference, etc...
+Perhaps something like:
+
+   ...a function object whith an overloaded set of function call operators
+   such that any value of each and all of the variant's bounded types
+   can be passed to one of the operators unambiguosly, probably
+   requireing an implicit conversion.
+
+
+== IT9 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
+[http://lists.boost.org/MailArchives/boost/msg43990.php]
+
+Support for 'void' as one of the types with the corresponding change in 'empty()' semantics.
+
+
+== IT10 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
+
+a) static_visitable seems to be needed/useful for visitable-types, yet
+it is undocumented.
+
+
+== IT11 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
+
+'which' and realated is inconsistently typed
+
+
+== IT12 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44015.php]
+
+which() is documented to return "int", when the implementation returns
+  "unsigned int".
+
+
+== IT13 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44015.php]
+
+Nowhere is it documented that using incomplete<T> as a type will result in
+values of type T being stored on the heap, whereas values of other types are
+stored within the variant itself
+
+
+== IT14 ==
+
+[http://lists.boost.org/MailArchives/boost/msg43990.php]
+[http://lists.boost.org/MailArchives/boost/msg44011.php]
+[http://lists.boost.org/MailArchives/boost/msg44036.php]
+[http://lists.boost.org/MailArchives/boost/msg44090.php]
+[http://lists.boost.org/MailArchives/boost/msg44078.php]
+[http://lists.boost.org/MailArchives/boost/msg44085.php]
+[http://lists.boost.org/MailArchives/boost/msg44089.php]
+[http://lists.boost.org/MailArchives/boost/msg44098.php]
+
+- Public interface of the extract facility
+- Renaming extract to access
+- Extract and optional
+
+
+
+== IT15 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44027.php]
+[http://lists.boost.org/MailArchives/boost/msg44076.php]
+
+Support for lambda expressions
+
+
+== IT16 ==
+
+[http://lists.boost.org/MailArchives/boost/msg44080.php]
+[http://lists.boost.org/MailArchives/boost/msg44081.php]
+[http://lists.boost.org/MailArchives/boost/msg44077.php]
+
+Applying ~T on a const object
+
