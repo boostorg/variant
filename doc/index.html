@@ -1,99 +1,94 @@
- <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
- <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-        <meta name="keywords" content="Variant, design pattern, generic programming, C++">
-        <link rel="stylesheet" type="text/css" href="styles.css">
+<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
 
-        <title>Boost::variant</title>
-    </head>
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="Variant, design pattern, generic programming, C++">
+<link rel="stylesheet" type="text/css" href="styles.css">
+<title>Boost::variant</title>
+</head>
 
-    <body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
-        <table summary="header" border="0" cellpadding="2" cellspacing="0" width="100%">
-                <tr>
-                <td valign="top" width="300">
-                    <h3>
-                    <A HREF="../../index.htm">
-                    <img src="../../c++boost.gif" alt="C++ Boost"
-width="277" height="86" BORDER=0> </A>
-                    </h3>
-                </td>
-                <td valign="top">
-                    <h1 align="center">boost::variant</h1>
-                    <h2 align="center">Index</h2>
-                </td>
-            </tr>
-        </table>
-        <hr>
+<body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
 
-<H2>Contents</H2>
-<UL>
-<li><a href="overview.html">Overview</a>
-<UL>
-<LI><a href="overview.html#Introduction">Introduction</a></LI>
-<LI><a href="overview.html#Motivation">Motivation</a></LI>
-</UL>
-</LI>
-<LI><a href="tutorial.html">Tutorial</a>
-<UL>
-<LI><a href="tutorial.html#FirstVariantProgram">First variant program</a></LI>
-<LI><a href="tutorial.html#Instantiation">Instantiation</a></LI>
-<LI><a href="tutorial.html#ValueSemantics">Value semantics</a></LI>
-<LI><a href="tutorial.html#FunctorBasedVisitation">Functor-based
-visitation</a></LI>
-</UL>
-</LI>
-
-<LI><a href="reference.html">Reference</a>
-<UL>
-<LI><a HREF="reference.html#Definitions">Definitions</a><UL>
-<LI><A HREF="reference.html#SetOfTypes">Set of types</A></LI>
-<LI><A HREF="reference.html#VisitorOf">Visitor of</A></LI>
-<LI><A HREF="reference.html#BoostVariantLimitTypes"><code>BOOST_VARIANT_LIMIT_TYPES</code></A></LI>
-</UL></LI>
-<LI><a href="reference.html#Synopsis">Synopsis</a></LI>
-<LI><a href="reference.html#ExceptionSafety">Exception safety</a></LI>
-<LI><a href="reference.html#Members">Members of <code>boost::variant</code></a></LI>
-<LI><a href="reference.html#Visitation">Visitation: <code>boost::apply_visitor</code></a></LI>
-<LI><a href="reference.html#StaticVisitor">Visitation: <code>boost::static_visitor</code></a></LI>
-<LI><a href="reference.html#ValueExtraction">Value Extraction: <code>boost::extract</code></a></LI>
-<LI><a href="reference.html#Incomplete"><code>boost::incomplete</code></a></LI>
-</UL>
-</LI>
-<LI><a href="sample.html">Sample programs</a>
-<UL>
-<LI><a href="sample.html#quick">A quick example</a></LI>
-<LI><a href="sample.html#tree">A binary tree implementation</a></LI>
-<LI><a href="sample.html#poly">Polymorphism: Inheritance Vs.
-Variants</a></LI>
-</UL>
-</LI>
-<LI><a href="misc.html">Miscellaneous</A>
-<ul>
-<LI><a href="misc.html#HeaderFiles">Header files</a></LI>
-<LI><a href="misc.html#Compatibility">Compatibility</a></LI>
-<LI><a href="misc.html#Troubleshooting">Troubleshooting</a></LI>
-</ul>
-
-<LI><a href="credits.html">Credits</A>
-<ul>
-<LI><a href="credits.html#Acknowledgments">Acknowledgments</a></LI>
-<LI><a href="credits.html#Bibliography">Bibliography</a></LI>
-</ul>
-
-
-</LI>
-</UL>
+<table summary="header" border="0" cellpadding="2" cellspacing="0" width="100%">
+  <tr>
+    <td valign="top" width="300">
+    <h3><a HREF="../../index.htm">
+    <img src="../../c++boost.gif" alt="C++ Boost" width="277" height="86" BORDER="0">
+    </a></h3>
+    </td>
+    <td valign="top">
+    <h1 align="center">boost::variant</h1>
+    <h2 align="center">Index</h2>
+    </td>
+  </tr>
+</table>
 <hr>
+<h2>Contents</h2>
+<ul>
+  <li><a href="overview.html">Overview</a></li>
+  <ul>
+    <li><a href="overview.html#Introduction">Introduction</a></li>
+    <li><a href="overview.html#Motivation">Motivation</a></li>
+  </ul>
+  </li>
+  <li><a href="tutorial.html">Tutorial</a>
+  <ul>
+    <li><a href="tutorial.html#FirstVariantProgram">First variant program</a></li>
+    <li><a href="tutorial.html#Instantiation">Instantiation</a></li>
+    <li><a href="tutorial.html#ValueSemantics">Value semantics</a></li>
+    <li><a href="tutorial.html#FunctorBasedVisitation">Functor-based visitation</a></li>
+  </ul>
+  </li>
+  <li><a href="reference.html">Reference</a><ul>
+    <li>Header &quot;boost/variant.hpp&quot;</li><ul>
+      <li><a href="#Synopsis">Synopsis</a></li>
+      <li>Concept: <a href="#BoundedType">BoundedType</a></li>
+      <li>Concept: <a href="#Visitor">Visitor</a></li>
+      <li><a HREF="#BoostVariantLimitTypes">BOOST_VARIANT_LIMIT_TYPES</a></li>
+      <li><code><a href="#variant">variant</a></code></li>
+    </ul>
+    </li>
+    <li>Header &quot;boost/apply_visitor.hpp&quot;: <a href="#Visitation"><code>
+    apply_visitor</code></a></li>
+    <li>Header &quot;boost/static_visitor.hpp&quot;: <a href="#StaticVisitor"><code>
+    static_visitor</code></a></li>
+    <li>Header &quot;boost/extract.hpp&quot;: <a href="#ValueExtraction"><code>extract</code></a></li>
+    <li>Header &quot;boost/incomplete.hpp&quot;: <a href="#incomplete"><code>incomplete</code></a></li>
+  </ul>
+  </li>
+  <li><a href="sample.html">Sample programs</a><ul>
+    <li><a href="sample.html#quick">A quick example</a></li>
+    <li><a href="sample.html#tree">A binary tree implementation</a></li>
+    <li><a href="sample.html#poly">Polymorphism: Inheritance Vs. Variants</a></li>
+  </ul>
+  </li>
+  <li><a href="misc.html">Miscellaneous</a>
+  <ul>
+    <li><a href="misc.html#HeaderFiles">Header files</a></li>
+    <li><a href="misc.html#Compatibility">Compatibility</a></li>
+    <li><a href="misc.html#Troubleshooting">Troubleshooting</a></li>
+  </ul>
+  </li>
+  <li><a href="credits.html">Credits</a><ul>
+    <li><a href="credits.html#Acknowledgments">Acknowledgments</a></li>
+    <li><a href="credits.html#Bibliography">Bibliography</a></li>
+  </ul>
+  </li>
+</ul>
+<hr>
+<p>Revised 14 February 2003</p>
+<p><i>© Copyright Eric Friedman and Itay Maman 2002-2003. All rights reserved.</i></p>
+<p>Permission to use, copy, modify, distribute and sell this software and its 
+ documentation for any purpose is hereby granted without fee, provided that the 
+ above copyright notice appear in all copies and that both that copyright notice 
+ and this permission notice appear in supporting documentation. Eric Friedman 
+ and Itay Maman make no representations about the suitability of this software 
+ for any purpose. It is provided &quot;as is&quot; without express or implied warranty.</p>
 
-<p>Revised 13 February 2003</p>
+</body>
 
-<p><i>&copy; Copyright Eric Friedman and Itay Maman 2002-2003. All rights
-reserved.</i></p>
-        <p>Permission to use, copy, modify, distribute and sell this software
-        and its documentation for any purpose is hereby granted without fee,
-        provided that the above copyright notice appear in all copies and that
-        both that copyright notice and this permission notice appear in
-        supporting documentation. Eric Friedman and Itay Maman make no
-        representations about the suitability of this software for any purpose.
-        It is provided &quot;as is&quot; without express or implied warranty.</p>
+</html>

@@ -1,66 +1,59 @@
- <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
- <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-        <meta name="keywords" content="Variant, design pattern, generic programming, C++">
-        <link rel="stylesheet" type="text/css" href="styles.css">
+<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
 
-        <title>Boost::variant</title>
-    </head>
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="Variant, design pattern, generic programming, C++">
+<link rel="stylesheet" type="text/css" href="styles.css">
+<title>Boost::variant</title>
+</head>
 
 <body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+
 <table summary="header" border="0" cellpadding="7" cellspacing="0" width="100%">
-<tr>
-<td valign="top" width="300">
-<h3>
-<A HREF="..\..\..\index.htm">
-<img src="../../../c++boost.gif" alt="C++ Boost" width="277" height="86" BORDER=0> </A>
-</h3>
-</td>
-
-<td valign="top">
-<h1 align="center"><a href="index.html">boost::variant</a></h1>
-<h2 align="center">Sample programs</h2>
-</td>
-
-</tr></table><HR>
-
-<p>
-<UL>
-<LI><a href="#quick">A quick example</a></LI>
-<LI><a href="#tree">A binary tree implementation</a></LI>
-<LI><a href="#poly">Polymorphism: Inheritance Vs. Variants</a></LI>
-</UL>
+  <tr>
+    <td valign="top" width="300">
+    <h3><a HREF="../../../index.htm">
+    <img src="../../../c++boost.gif" alt="C++ Boost" width="277" height="86" BORDER="0">
+    </a></h3>
+    </td>
+    <td valign="top">
+    <h1 align="center"><a href="index.html">boost::variant</a></h1>
+    <h2 align="center">Sample programs</h2>
+    </td>
+  </tr>
+</table>
 <hr>
-
-
+<p></p>
+<ul>
+  <li><a href="#quick">A quick example</a></li>
+  <li><a href="#tree">A binary tree implementation</a></li>
+  <li><a href="#poly">Polymorphism: Inheritance Vs. Variants</a></li>
+</ul>
+<hr>
 <h2><a name="quick">A quick example</a></h2>
+<p>This program computes the total sum of numerical values of various types.</p>
+<p>The code defines a <code>variant</code> object, <code>v1</code>, which can 
+ hold a value of this set of types: <code>short, int, float</code>, and <code>
+ double</code>.</p>
+<p><code>double_sum</code> is a visitor class: Its function-call operator, <code>
+ double_sum::operator()</code>, accepts a single value, and adds it to the <code>
+ total_</code> data member. The program uses the construct: &quot;<code>boost::apply_visitor(visitor, 
+ variant);</code>&quot; to invoke the visitor object, <code>(ds)</code> on the 
+ specified variant <code>(v1)</code>.</p>
+<p>Naturally, <code>ds.total_</code> holds the total of all previously &quot;visited&quot; 
+ values, and - therefore - at the bottom of <code>main()</code>, its value is: 5 
+ + 16 + 3.11 + 15.3 = 39.41.</p>
+<pre>#include &lt;iostream&gt;
 
-This program, computes the total sum of numerical values of various types.<BR>
-<BR>
-The code defines a <CODE>variant</CODE> object, <CODE>v1</CODE>, which
-can hold a value of this set of types: <CODE>short, int, float</CODE> and
-<code>double</CODE>. <br>
-
-<CODE>double_sum</CODE> is a visitor class: Its function-call
-operator, <code>double_sum::operator()</code>, accepts a single value, and
-adds it to the <CODE>total_</CODE> data member. The program uses the
-construct: "<CODE>boost::apply_visitor(visitor, variant);</CODE>" to
-invoke the visitor object, <CODE>(ds)</CODE> on the specified variant
-<CODE>(v1)</CODE>. <BR>
-Naturally, <CODE>ds.total_</Code> holds the
-total of all previously "visited" values, and - therefore - at the bottom
- of <CODE>main()</code>, its value is: 5 + 16 + 3.11 + 15.3 = 39.41.
-
-<PRE>
-#include &lt;iostream&gt;
-
-#include &lt;boost/variant.hpp&gt;
-#include &lt;boost/apply_visitor.hpp&gt;
-#include &lt;boost/static_visitor.hpp&gt;
+#include &quot;boost/variant.hpp&quot;
+#include &quot;boost/apply_visitor.hpp&quot;
+#include &quot;boost/static_visitor.hpp&quot;
 
 struct double_sum : boost::static_visitor&lt;double&gt;
-
 {
    double_sum() : total_(0.0) { }
 
@@ -91,29 +84,25 @@ int main(int, char* [] )
    v1 = 15.3;
    double total = boost::apply_visitor(ds, v1);  // 4th
 
-   // Expected output: "Total = 39.41"
-   std::cout &lt;&lt; "Total = " &lt;&lt; total &lt;&lt; std::endl;
+   // Expected output: &quot;Total = 39.41&quot;
+   std::cout &lt;&lt; &quot;Total = &quot; &lt;&lt; total &lt;&lt; std::endl;
 
    return 0;
 }
-
-
 </pre>
-<BR>
-<HR>
-<BR>
+<hr>
 <h2><a name="tree">A binary tree implementation</a></h2>
-This sample program shows how <CODE>incomplete&lt;T&gt;</code> can be
-used to define recursive <CODE>variants</CODE>.<br>
-The code creates a small binary tree and then performs an in-order
-walk thru its nodes, producing this output: 3 4 6 10 19 20 23<BR>
-<PRE>
-#include &lt;iostream&gt;
+<p>This sample program shows how <code>incomplete&lt;T&gt;</code> can be used to 
+ define recursive <code>variants</code>.<br>
+ The code creates a small binary tree and then performs an in-order walk thru 
+ its nodes, producing this output: 3 4 6 10 19 20 23<br>
+</p>
+<pre>#include &lt;iostream&gt;
 
-#include &lt;boost/variant.hpp&gt;
-#include &lt;boost/apply_visitor.hpp&gt;
-#include &lt;boost/static_visitor.hpp&gt;
-#include &lt;boost/incomplete.hpp&gt;
+#include &quot;boost/variant.hpp&quot;
+#include &quot;boost/apply_visitor.hpp&quot;
+#include &quot;boost/static_visitor.hpp&quot;
+#include &quot;boost/incomplete.hpp&quot;
 
 
 using boost::variant;
@@ -131,9 +120,9 @@ typedef variant&lt;int, incomplete&lt;non_leaf_node&gt; &gt; tree_node;
 
 struct non_leaf_node
 {
-   non_leaf_node(const tree_node& l, int num, const tree_node& r)
+   non_leaf_node(const tree_node&amp; l, int num, const tree_node&amp; r)
       :  left_(l), right_(r), num_(num) { }
-   non_leaf_node(const non_leaf_node& other)
+   non_leaf_node(const non_leaf_node&amp; other)
       :  left_(other.left_), right_(other.right_), num_(other.num_)  { }
 
    int num_;
@@ -149,7 +138,7 @@ struct tree_printer : boost::static_visitor&lt;void&gt;
       cout &lt;&lt; n &lt;&lt; ' ';
    }
 
-   void operator()(const non_leaf_node& node) const
+   void operator()(const non_leaf_node&amp; node) const
    {
       boost::apply_visitor(*this, node.left_);
       cout &lt;&lt; node.num_ &lt;&lt; ' ';
@@ -172,20 +161,15 @@ int main(int, char* [] )
 
    return 0;
 }
-
-</PRE>
-
-<BR>
-<HR>
-<BR>
+</pre>
+<hr>
 <h2><a name="poly">Polymorphism: Inheritance Vs. Variants</a></h2>
-Let's assume we need to write a program that manipulates instances of
-<CODE>star</CODE> and <CODE>space_ship</CODE>, where each of these
-two classes inherits from <code> space_object</CODE>. The program
-maintains a <CODE>vector</CODE> of pointers to these objects, which is
-used to calculate the total weight of all <code>star</code> objects:
-<pre>
-   //
+<p>Let's assume we need to write a program that manipulates instances of <code>
+ star</code> and <code>space_ship</code>, where each of these two classes 
+ inherits from <code>space_object</code>. The program maintains a <code>vector</code> 
+ of pointers to these objects, which is used to calculate the total weight of 
+ all <code>star</code> objects: </p>
+<pre>   //
    //  'classic' inheritance-based implementation
    //
    #include &lt;vector&gt;
@@ -222,7 +206,7 @@ used to calculate the total weight of all <code>star</code> objects:
       void operator()(space_object* so_p)
       {
          if(dynamic_cast&lt;star*&gt;(so_p))
-            total_ += so_p->weight();
+            total_ += so_p-&gt;weight();
       }
 
       int total_;
@@ -240,46 +224,45 @@ used to calculate the total weight of all <code>star</code> objects:
       int total = std::for_each(space_objects.begin(), space_objects.end(),
          tw_job).total_;
 
-      std::cout << "Total weight of all stars = " << total
-         << std::endl;
+      std::cout &lt;&lt; &quot;Total weight of all stars = &quot; &lt;&lt; total
+         &lt;&lt; std::endl;
 
       //Apply delete to all pointers stored in space_objects
       // ...
 
       return 0;
    }
-</PRE>
-The are several issues worth noticing about this sample:<BR>
-<UL>
-    <LI>The code is bound to define a vector of pointers, rather
-than objects. This incurs considerable time overhead and could cause
-memory leaks if destruction is not handled properly.
-    <LI>the dynamic_cast&lt;&gt; used by <code>total_weight::operator()</code>
-is a costly operation. Alternatively, one can define an <code>enum</code> type which
-will be used to correctly identify the concrete object, but this is an
-error prone technique: the author must manually set the correct value
-for each new concrete class.
-    <LI><CODE>total_weight</CODE> is unsafe when new classes are
-introduced. Suppose a new class, <CODE>black_hole</CODE> - inherits
-directly from <CODE>space_object</CODE> - is added to the code.
-<CODE>total_weight</CODE> will silently ignore this class, possibly
-creating a havoc of run-time problems. This is a major flaw from software
-engineering standpoint.
 
-</UL>
-This real-life design problem can be elegantly solved using variants.
-Here is the variant-based code:
-<pre>
-   //
+</pre>
+<p>The are several issues worth noticing about this sample:<br>
+</p>
+<ul>
+  <li>The code is bound to define a vector of pointers, rather than objects. 
+  This incurs considerable time overhead and could cause memory leaks if 
+  destruction is not handled properly. </li>
+  <li>the dynamic_cast&lt;&gt; used by <code>total_weight::operator()</code> is a 
+  costly operation. Alternatively, one can define an <code>enum</code> type 
+  which will be used to correctly identify the concrete object, but this is an 
+  error prone technique: the author must manually set the correct value for each 
+  new concrete class. </li>
+  <li><code>total_weight</code> is unsafe when new classes are introduced. 
+  Suppose a new class, <code>black_hole</code> - inherits directly from <code>
+  space_object</code> - is added to the code. <code>total_weight</code> will 
+  silently ignore this class, possibly creating a havoc of run-time problems. 
+  This is a major flaw from software engineering standpoint. </li>
+</ul>
+<p>This real-life design problem can be elegantly solved using variants. Here is 
+ the variant-based code: </p>
+<pre>   //
    //  Variant-based implementation
    //
    #include &lt;vector&gt;
    #include &lt;algorithm&gt;
    #include &lt;iostream&gt;
 
-   #include &lt;boost/variant.hpp&gt;
-   #include &lt;boost/apply_visitor.hpp&gt;
-   #include &lt;boost/static_visitor.hpp&gt;
+   #include &quot;boost/variant.hpp&quot;
+   #include &quot;boost/apply_visitor.hpp&quot;
+   #include &quot;boost/static_visitor.hpp&quot;
 
    struct space_ship
    {
@@ -302,13 +285,13 @@ Here is the variant-based code:
    {
       total_weight() : total_(0) { }
 
-      void operator()(const star& a_star)
+      void operator()(const star&amp; a_star)
       {
          total_ += a_star.weight();
       }
 
       //space_ship objects are ignored:
-      void operator()(const space_ship& ) { }
+      void operator()(const space_ship&amp; ) { }
 
       int total_;
    };
@@ -326,29 +309,29 @@ Here is the variant-based code:
       std::for_each(space_objects.begin(), space_objects.end(),
          boost::apply_visitor(tw_job));
 
-      std::cout << "Total weight of all stars = " << tw_job.total_
-         << std::endl;
+      std::cout &lt;&lt; &quot;Total weight of all stars = &quot; &lt;&lt; tw_job.total_
+         &lt;&lt; std::endl;
 
       return 0;
    }
 
 </pre>
-This implementation directly addresses the three issues raised by the non-variant
-implementation: (1) The <CODE>space_objects</code> vector now holds
-<B>objects</B> (rather than pointers), (2) <CODE>dynamic_cast&lt;&gt;</CODE>s
-are <B>not needed</b> at all, and - most importantly - (3) the compiler
-<b>will yell</b> if <code>total_weight</CODE> is not changed, when a new
-class is introduced.
-
-
-
+<p>This implementation directly addresses the three issues raised by the 
+ non-variant implementation: (1) The <code>space_objects</code> vector now holds
+ <b>objects</b> (rather than pointers), (2) <code>dynamic_cast&lt;&gt;</code>s are <b>
+ not needed</b> at all, and - most importantly - (3) the compiler <b>will 
+ produce an error</b> if <code>total_weight</code> is not changed, when a new 
+ class is introduced. </p>
 <hr>
+<p>Revised 14 February 2003</p>
+<p><i>© Copyright Eric Friedman and Itay Maman 2002-2003. All rights reserved.</i></p>
+<p>Permission to use, copy, modify, distribute and sell this software and its 
+ documentation for any purpose is hereby granted without fee, provided that the 
+ above copyright notice appear in all copies and that both that copyright notice 
+ and this permission notice appear in supporting documentation. Eric Friedman 
+ and Itay Maman make no representations about the suitability of this software 
+ for any purpose. It is provided &quot;as is&quot; without express or implied warranty.</p>
 
-<p>Last modified: 2002-12-04</p>
+</body>
 
-<p>&copy; Copyright Eric Friedman and Itay Maman 2002. Permission to
-copy, use, modify, sell and distribute this software and its documentation
-is granted provided this copyright notice appears in all copies. This
-software and its documentation is provided "as is" without express or
-implied warranty, and with no claim as to its suitability for any purpose.
-</p>
+</html>
