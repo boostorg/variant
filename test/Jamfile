@@ -3,45 +3,47 @@ subproject libs/variant/test ;
 
 exe test1 : test1.cpp class_a.cpp
    : <include>$(BOOST_ROOT)
-     <include>$(BOOST_ROOT)../my_boost
    : debug release <runtime-link>static/dynamic	
    ;
 
 
 exe test2 : test2.cpp
    : <include>$(BOOST_ROOT)
-     <include>$(BOOST_ROOT)../my_boost
    : debug release <runtime-link>static/dynamic	
    ;
-
 
 
 
 exe test3 : test3.cpp
    : <include>$(BOOST_ROOT)
-     <include>$(BOOST_ROOT)../my_boost
    : debug release <runtime-link>static/dynamic	
    ;
 
 
-#exe test4 : test4.cpp
-#   : <include>$(BOOST_ROOT)
-#     <include>$(BOOST_ROOT)../my_boost
-#   : debug release <runtime-link>static/dynamic	
-#   ;
+exe test4 : test4.cpp
+   : <include>$(BOOST_ROOT)
+   : debug release <runtime-link>static/dynamic	
+   ;
 
 
 exe test5 : test5.cpp
    : <include>$(BOOST_ROOT)
-     <include>$(BOOST_ROOT)../my_boost
    : debug release <runtime-link>static/dynamic	
    ;
 
 
 exe test6 : test6.cpp
    : <include>$(BOOST_ROOT)
-     <include>$(BOOST_ROOT)../my_boost
    : debug release <runtime-link>static/dynamic	
    ;
 
+exe test7: test7.cpp
+   : <include>$(BOOST_ROOT)
+   : debug release <runtime-link>static/dynamic	
+   ;
+
+exe test8: test8.cpp
+   : <include>$(BOOST_ROOT)
+   : debug release <runtime-link>static/dynamic	
+   ;
 
