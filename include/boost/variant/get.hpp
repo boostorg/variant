@@ -17,6 +17,8 @@
 #ifndef BOOST_VARIANT_GET_HPP
 #define BOOST_VARIANT_GET_HPP
 
+#include <exception>
+
 #include "boost/preprocessor/enum_params.hpp"
 #include "boost/utility/addressof.hpp"
 #include "boost/variant/variant_fwd.hpp"
