@@ -268,6 +268,7 @@ int test_main( int, char *[] )
         my_variant var(2.71);
         my_variant varcopy(var);
         def = var;
+        def = var; // check to ensure assign works
 
         BOOST_TEST((
               boost::apply_visitor(are_strict_equals(), var, varcopy)
@@ -390,6 +391,6 @@ int test_main( int, char *[] )
             );
     }
 
-    std::cout << "\n";
+    std::cout << '\n';
     return boost::exit_success;
 }
