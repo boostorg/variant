@@ -211,66 +211,66 @@ template <typename Visitor>
 struct invoke_visitor
 {
 public:
-	typedef typename Visitor::result_type
-		result_type;
+    typedef typename Visitor::result_type
+        result_type;
 
 private:
-	Visitor& visitor_;
+    Visitor& visitor_;
 
 public:
-	explicit invoke_visitor(Visitor& visitor)
-		: visitor_(visitor)
-	{
-	}
+    explicit invoke_visitor(Visitor& visitor)
+        : visitor_(visitor)
+    {
+    }
 
 #if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
 public:
-	template <typename T>
-	result_type operator()(incomplete<T>& operand)
-	{
-		return visitor_(operand.get());
-	}
+    template <typename T>
+    result_type operator()(incomplete<T>& operand)
+    {
+        return visitor_(operand.get());
+    }
 
-	template <typename T>
-	result_type operator()(const incomplete<T>& operand)
-	{
-		return visitor_(operand.get());
-	}
+    template <typename T>
+    result_type operator()(const incomplete<T>& operand)
+    {
+        return visitor_(operand.get());
+    }
 
-	template <typename T>
-	result_type operator()(T& operand)
-	{
-		return visitor_(operand);
-	}
+    template <typename T>
+    result_type operator()(T& operand)
+    {
+        return visitor_(operand);
+    }
 
 #else// defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
 
 private:
-	template <typename T>
-	result_type execute_impl(incomplete<T>& operand, long)
-	{
-		return visitor_(operand.get());
-	}
+    template <typename T>
+    result_type execute_impl(incomplete<T>& operand, long)
+    {
+        return visitor_(operand.get());
+    }
 
-	template <typename T>
-	result_type execute_impl(const incomplete<T>& operand, long)
-	{
-		return visitor_(operand.get());
-	}
+    template <typename T>
+    result_type execute_impl(const incomplete<T>& operand, long)
+    {
+        return visitor_(operand.get());
+    }
 
-	template <typename T>
-	result_type execute_impl(T& operand, int)
-	{
-		return visitor_(operand);
-	}
+    template <typename T>
+    result_type execute_impl(T& operand, int)
+    {
+        return visitor_(operand);
+    }
 
 public:
-	template <typename T>
-	result_type operator()(T& operand)
-	{
-		return execute_impl(operand, 1L);
-	}
+    template <typename T>
+    result_type operator()(T& operand)
+    {
+        return execute_impl(operand, 1L);
+    }
 
 #endif // BOOST_NO_FUNCTION_TEMPLATE_ORDERING workaround
 
@@ -596,26 +596,26 @@ private:
 public:
     variant()
     {
-		// NOTE TO USER :
+        // NOTE TO USER :
         // Compile error from here indicates that the first bound
-		// type is default-constructible, and so variant cannot
-		// support its own default-construction
+        // type is default-constructible, and so variant cannot
+        // support its own default-construction
         storage_.template construct_as<A>();
         which_ = 0;
     }
 
     variant(const variant& operand)
-		: which_(-1)
+        : which_(-1)
     {
-		// If operand is not empty...
-		if (!operand.empty())
-		{
-			// ...then copy its held value into our storage...
-			operand.raw_apply_visitor(detail::variant::copy_into(storage_.raw_pointer()));
+        // If operand is not empty...
+        if (!operand.empty())
+        {
+            // ...then copy its held value into our storage...
+            operand.raw_apply_visitor(detail::variant::copy_into(storage_.raw_pointer()));
 
-			// ...and copy its which-index:
-			which_ = operand.which_;
-		}
+            // ...and copy its which-index:
+            which_ = operand.which_;
+        }
     }
 
 private:
@@ -646,16 +646,16 @@ private:
 public:
     template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename U)>
     variant(const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, U)>& operand)
-		: which_(-1)
+        : which_(-1)
     {
-		// If operand is not empty...
-		if (!operand.empty())
-		{
-			// ...then attempt a converting copy into our storage:
-			which_ = operand.raw_apply_visitor(
-				  convert_copy_into(storage_.raw_pointer())
-				);
-		}
+        // If operand is not empty...
+        if (!operand.empty())
+        {
+            // ...then attempt a converting copy into our storage:
+            which_ = operand.raw_apply_visitor(
+                  convert_copy_into(storage_.raw_pointer())
+                );
+        }
     }
 
     template <typename T>
@@ -680,18 +680,18 @@ private:
         , long)
     {
         // If operand is not empty...
-		if (!operand.empty())
-		{
-			// ...then attempt a converting copy into our storage:
-			which_ = operand.raw_apply_visitor(
-				  convert_copy_into(storage_.raw_pointer())
-				);
-		}
-		else
-		{
-			// ...otherwise, make *this empty:
-			which_ = -1;
-		}
+        if (!operand.empty())
+        {
+            // ...then attempt a converting copy into our storage:
+            which_ = operand.raw_apply_visitor(
+                  convert_copy_into(storage_.raw_pointer())
+                );
+        }
+        else
+        {
+            // ...otherwise, make *this empty:
+            which_ = -1;
+        }
     }
 
     template <typename T>
@@ -818,6 +818,9 @@ public:
 
     const std::type_info& type() const
     {
+        if (empty())
+            return typeid(void);
+        
         return apply_visitor(detail::variant::reflect());
     }
 
@@ -843,7 +846,7 @@ private:
 
         if (var_which == Which::value)
         {
-			return visitor(var.storage_.template get_as<T>());
+            return visitor(var.storage_.template get_as<T>());
         }
 
         return apply_visitor_impl<next_which, next_iter, LastIterator>(
@@ -871,12 +874,12 @@ private:
     }
 
 public:
-	//////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
     // WARNING TO USER :
     // The following functions are not part of the public interface,
     // despite their public access (which may change in the future).
     //
-	template <typename Visitor>
+    template <typename Visitor>
         typename Visitor::result_type
     raw_apply_visitor(Visitor visitor)
     {
@@ -902,8 +905,8 @@ public:
         typename Visitor::result_type
     apply_visitor(Visitor visitor)
     {
-		detail::variant::invoke_visitor<Visitor> invoker(visitor);
-		return raw_apply_visitor(invoker);
+        detail::variant::invoke_visitor<Visitor> invoker(visitor);
+        return raw_apply_visitor(invoker);
     }
 
     template <typename Visitor>
@@ -911,7 +914,7 @@ public:
     apply_visitor(Visitor visitor) const
     {
         detail::variant::invoke_visitor<Visitor> invoker(visitor);
-		return raw_apply_visitor(invoker);
+        return raw_apply_visitor(invoker);
     }
 };
 
