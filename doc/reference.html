@@ -13,16 +13,15 @@
                 <tr>
                 <td valign="top" width="300">
                     <h3>
-                    <A HREF="..\..\..\index.htm">
+                    <A HREF="../../../index.htm">
                     <img src="../../../c++boost.gif" alt="C++ Boost"
 width="277" height="86" BORDER=0> </A>
                     </h3>
                 </td>
 
                 <td valign="top">
-                    <h1 align="center"><a
-href='../index.html'>[boost::variant]</A>  Reference</h1>
-
+                    <h1 align="center"><a href="index.html">boost::variant</A></h1>
+					<h2 align="center">Reference</h2>
                 </td>
             </tr>
         </table>
@@ -42,15 +41,13 @@ href='../index.html'>[boost::variant]</A>  Reference</h1>
 <LI><a href="#Synopsis">Synopsis</a></LI>
 <LI><a href="#ExceptionSafety">Exception safety</a></LI>
 <LI><a href="#Members">Members of boost::variant</a></LI>
-<LI><a href="#ApplyingVisitors">boost::apply_visitor</a></LI>
-<LI><a href="#StaticVisitor">boost::static_visitor</a></LI>
-<LI><a href="#Extract">boost::extract</a></LI>
+<LI>Visitation: <a href="#Visitation"><code>boost::apply_visitor</code></a></LI>
+<LI>Visitation: <a href="#StaticVisitor"><code>boost::static_visitor</code></a></LI>
+<LI>Value Extraction: <a href="#ValueExtraction"><code>boost::extract</code></a></LI>
 <LI><a href="#Incomplete">boost::incomplete</a></LI>
 </UL>
 <HR>
-<BR>
 <h2><a name="Definitions">Definitions</a></h2>
-<BR>
 <h3><a name="SetOfTypes">- Set of Types / Bounded Types:</A></h3>
 Assuming that:<br>
 <UL>
@@ -130,8 +127,7 @@ Conforming implementations must evaluate the expression
 <BR>
 <h2><a name="Synopsis">Synopsis</a></h2>
 
-<pre>
-template
+<pre>template
 &lt;
     typename T1
     typename T2,
@@ -183,8 +179,7 @@ the strong guarantee of exception-safety.</li>
 <h2><a name="Members">Members of boost::variant</a></h2>
 <BR>
 <h3>Constructors</h3>
-<pre>
-variant()  { }
+<pre>variant()  { }
 
 </pre>
 <p>Default constructor. Initializes <code>*this</code> with the default
@@ -193,8 +188,7 @@ arising from the default constructor of <code>T1</code>.<BR>
 <BR>
 <BR>
 <a name="CopyConstructor"></a>
-<PRE>
-variant(const variant& other);
+<PRE>variant(const variant& other);
 
 </PRE>
 <P>Standard copy constructor. Copies the content of <CODE>other</CODE>
@@ -203,8 +197,7 @@ constructor of <code>other</code>'s contained type.<br>
 <BR>
 <BR>
 <a name="TemplatedConstructor"></a>
-<PRE>
-template&lt;typename OperandType&gt;
+<PRE>template&lt;typename OperandType&gt;
 variant(const OperandType& operand);
 </pre>
 Templated constructor. Initializes <code>*this</code> according to the following logic:
@@ -230,8 +223,7 @@ of types, then <CODE>*this</CODE> is initialized with <code>operand</code>'s hel
 May fail with any exceptions arising from the copy constructor of <code>OperandType</code>.<br>
 <BR>
 <BR>
-<PRE>
-~variant();
+<PRE>~variant();
 
 </pre>
 Non-throwing destructor that releases all resources used in management of <code>*this</code>,
@@ -240,8 +232,7 @@ as well as, the currently held value.
 <BR>
 <br>
 <h3>Modifiers</h3>
-<pre>
-void swap(variant& other);
+<pre>void swap(variant& other);
 
 </pre>
 <p>Exchanges contents of <code>*this</code> and <code>other</code>.<BR>
@@ -250,8 +241,7 @@ or <code>other</code>, or from the swap primitive of the held values,
 if <code>this->type() == other.type()</code>.<br>
 <BR>
 <BR>
-<pre>
-variant& operator=(const variant& rhs);
+<pre>variant& operator=(const variant& rhs);
 
 </pre>
 Copy assignment. Assigns <code>rhs</code>'s value into <code>*this</code>. The old value held by
@@ -259,8 +249,7 @@ Copy assignment. Assigns <code>rhs</code>'s value into <code>*this</code>. The o
 This operator follows the same behaviour as <CODE>variant</code>'s <a href="#CopyConstructor">copy constructor</a>.<BR>
 <BR>
 <BR>
-<pre>
-template&lt;class OperandType&gt;
+<pre>template&lt;class OperandType&gt;
 variant& operator=(const OperandType& rhs);
 </pre>
 <P>Assigns <CODE>rhs</CODE> into <code>*this</code>. The old value held by
@@ -270,15 +259,13 @@ This operator follows the same behaviour as
 <BR>
 <BR>
 <h3>Queries</h3>
-<pre>
-const std::type_info& type() const;
+<pre>const std::type_info& type() const;
 
 </pre>
 Non-throwing query that returns the <code>typeid()</code> of the contained value<BR>
 <BR>
 <br>
-<pre>
-bool empty() const;
+<pre>bool empty() const;
 
 </pre>
 Always returns <CODE>false</CODE>. This non-throwing member function is provided
@@ -288,18 +275,14 @@ constructor initializes the object with the default value of the first
 type.<BR>
 <br>
 <br>
-<pre>
-int which() const;
+<pre>int which() const;
 
 </pre>
 A Non-throwing query that returns the index of the type of the contained value.<br>
 <BR>
 <HR>
-<BR>
-<h2><a name="ApplyingVisitors">boost::apply_visitor</a></h2>
-<br>
-<pre>
-// Binary form
+<h2><a name="Visitation">Visitation: <code>boost::apply_visitor</code></a></h2>
+<pre>// Binary form
 template&lt;typename VisitorType, typename VariantType&gt;
 typename VisitorType::result_type apply_visitor(VisitorType& visitor,
    VariantType& var_inst);
@@ -334,8 +317,7 @@ visitation</A> for an in-depth description of visitors.<BR>
 The unary form of <CODE>apply_visitor()</CODE> tranforms the given visitor
 into a unary function object which accepts a variant object, thus,
 the following two lines are equivalent:<BR>
-<PRE>
-      boost::apply_visitor(visitor, var_inst); // Binary form
+<PRE>      boost::apply_visitor(visitor, var_inst); // Binary form
       boost::apply_visitor(visitor)(var_inst); // Unary form
 </PRE>
 <BR>
@@ -345,12 +327,9 @@ needs to be applied on a sequence of <CODE>variant</code> objects, as illustrate
 the <a href="sample.html#poly">Polymorphism: Inheritance Vs. Variants</a> sample.<br>
 <BR>
 <hr>
-<BR>
 
-<h2><a name="StaticVisitor">boost::static_visitor</a></h2>
-<br>
-<pre>
-template&lt;typename R = void&gt;
+<h2><a name="StaticVisitor">Visitation: <code>boost::static_visitor</code></a></h2>
+<pre>template&lt;typename R = void&gt;
 struct static_visitor
 {
     typedef R result_type;
@@ -364,11 +343,9 @@ which is required from each <a href="#VisitorOf">visitor</a> class.
 <br>
 <BR>
 <hr>
-<BR>
 
-<h2><a name="Extract">boost::extract</a></h2>
-<pre>
-template&lt;typename ToType, typename VariantType&gt;
+<h2><a name="ValueExtraction">Value Extraction: <code>boost::extract</code></a></h2>
+<pre>template&lt;typename ToType, typename VariantType&gt;
 const ValueType* extract(const VariantType* operand);
 
 template&lt;typename ToType, typename VariantType&gt;
@@ -412,8 +389,7 @@ The snip below demonstrates the usage of <CODE>Incomplete&lt;&gt;</CODE>.
 A complete sample program is available <A
 HREF="sample.html#tree">here</A>.
 
-<PRE>
-   using boost::variant;
+<PRE>   using boost::variant;
    using boost::incomplete;
 
    struct non_leaf_node; // Forward declaration

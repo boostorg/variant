@@ -13,16 +13,15 @@
                 <tr>
                 <td valign="top" width="300">
                     <h3>
-                    <A HREF="..\..\..\index.htm">
+                    <A HREF="../../../index.htm">
                     <img src="../../../c++boost.gif" alt="C++ Boost"
 width="277" height="86" BORDER=0> </A>
                     </h3>
                 </td>
 
                 <td valign="top">
-                    <h1 align="center"><a
-href='../index.html'>[boost::variant]</A>  Tutorial</h1>
-
+                    <h1 align="center"><a href="index.html">boost::variant</a></h1>
+                    <h2 align="center">Tutorial</h2>
                 </td>
             </tr>
         </table>
@@ -32,109 +31,76 @@ href='../index.html'>[boost::variant]</A>  Tutorial</h1>
 
 <p>
 <UL>
-<LI><a href="#Motivation">Motivation</a></LI>
 <LI><a href="#FirstVariantProgram">First variant program</a></LI>
 <LI><a href="#Instantiation">Instantiation</a></LI>
 <LI><a href="#ValueSemantics">Value semantics</a></LI>
 <LI><a href="#FunctorBasedVisitation">Functor-based visitation</a></LI>
 </UL>
 <hr>
-<BR>
-<BR>
 
 
 
-<h2><a name="Motivation">Motivation</a></h2>
-C++ allows several distinct type to be polymorphically manipulated through a common base type
-(often a virtual base class). As the hierarchy of types evolves, the functionality offered
-by the base type, becomes a mere fracture of what each of the most derived classes has to offer.
-In other words: When the degree of commonality lessens, the base type - which is the common denominator of
-all the concrete types - gets increasingly degenerated.<br>
-<br>
-Very often, the following solution is conceived: The polymorphic object
-is downcasted to its concrete type, thus allowing the code to use the richer interface offered
-by the concrete type. However, solutions of this type are highly error-prone, due to these reasons:
-<ul>
-<li>There is no compile-time mecahnism which detects downcast errors. If the code contains
-an incorrect <code>dynamic_cast</code> call, the program will crash at run-time.</li>
-<li>If a new derived class is added to the bottom of the inheritance hierarchy,
-existing, <code>dynamic_cast</code>-based code will still work, despite the fact that it
-completely ignores this new type. The programmer will have to manually locate all the
-relevant locations and make the corresponding modifications.</li>
-</ul>
-(It should be noted, that although one can bypass the <code>dynamic_cast</code> approach by associating a
-unique 'id' with each concrete type, the overall code is still unsafe: id mismatch problems will
-not be visible until run-time, and - additionaly - the programmer has to manually take care of associating
-the correct, hard-coded, id value with each class.)<br>
-<Br>
-<code>boost::variant</code> is a type-safe generic container, which solves the above-mentioned problems.
-A <code>variant</code> instance contains exactly one instance of one of its bounded types, which are specified
-as arguments to <code>variant</code>'s template parameter list. In short, If we describe
-an <code>std::vector</code> as a <b>"Multi value, single type"</b> conatainer, then
-<code>boost::variant</code> is a <b>"Multi type, single value"</b> container.
-Its additional benefits are:
-<ul>
-<li>Efficient stack-based storage scheme (reduces free store penalty).</li>
-<li>Recursive types support.</li>
-<li>Unlike C++/C's <code>union</code>, it handls both POD and non-POD types.</li>
-</ul>
-The following sample program, illustrates a typical usage of <CODE>boost::variant</CODE> objects.<br>
-<Br>
-<hr>
-<br>
-<h2><a name="FirstVariantProgram">First variant program</a></h2>
-<br>
-(Additional variant-based sample programs, can be found <a href ="sample.html">here</a>).<br>
-<BR>
-Let's suppose you need to implement an object factory function, which is
-capable of creating objects of these types: <CODE>std::string</CODE>,
-<code>char*</CODE>, and <CODE>int</CODE>.<br>
-The type of the created object is controlled by a <code>double</code>
-value, <CODE>obj_selector</CODE>, which is passed in as the function's
-single parameter:<BR> <PRE>
-    2000.0 < obj_selector             ->  char*
-    1000.0 < obj_selector <= 2000.0   ->  std::string
-               otherwise              ->  int
+        <p>The following sample program illustrates a typical usage of <CODE>
+        variant</CODE>. Additional sample programs may be found <a href ="sample.html">here</a>.<br>
+        </p>
+<h2><a name="FirstVariantProgram">First <code>variant</code> program</a></h2>
+Let's suppose you need to implement an object factory function, <code>create</code>. 
+        Based on an integer argument to the function, <code>create</code> must 
+        construct and return an object of 
+        one of the following types: <CODE>std::string</CODE>,
+<code>char*</CODE>, and <CODE>int</CODE>. The relationship between the integer 
+        argument, <code>i</code>, and the returned type is specified as follows:<BR> <PRE>    2000 < i          ->  char*
+    1000 < i <= 2000  ->  std::string
+      <i>else  </i>          ->  int
 </pre>
 
-A typical implementation would probably use some sort of inheritance, to
-make it possible for a single function to return objects of three
-different types. This would lead to writing three adapter classes which
-will supply the semantics of the various types (<code>std::string</code>,
-<code>int</code>s and <code>char*</code>) while inheriting (publicly)
-from a common base class.<BR>
-On the other hand, by using <code>boost::variant</code> as the return type of
-the factory function, we end up with a clear, straight-forward, code:
-<pre>
-
-#include &lt;iostream&gt;
+        Typical implementations would probably designate of a virtual base class, 
+        returning objects of the derived types through a pointer to the base 
+        class. However, since none of the desired types may derive from the base 
+        class, the programmer would need to write &quot;adapter&quot; classes derived from 
+        the common base to supply the semantics of the various concrete types (i.e, <code>std::string</code>,
+<code>int</code>, and <code>char*</code>). Clients of the factory 
+        function would then check the result using <code>dynamic_cast</code> to determine 
+        which concrete type had in fact been created.<p>Other implementations might 
+        leverage the Boost <code><a href="../../any/index.html">any</a></code> class, 
+        thus avoiding the hassle of 
+        defining and implementing the virtual base class and the derived adapter 
+        classes. However, this solution still does not avoid the problem of 
+        needing to manually check the result using <code>any_cast</code>.</p>
+        <p>On the other hand, by returning an object of type <code>variant&lt; 
+        std::string, char*, int &gt;</code> from the factory function, the 
+        resultant code is clear and straight-forward: </p>
+<pre>#include &lt;iostream&gt;
 #include &lt;string&gt;
-#include &lt;boost/variant.hpp&gt;
-#include &lt;boost/apply_visitor.hpp&gt;
+#include &quot;boost/variant.hpp&quot;
+#include &quot;boost/apply_visitor.hpp&quot;
 
 using std::string;
 using boost::variant;
 
-typedef variant&lt;string, char*, int&gt; factory_objects;
+typedef variant&lt;string, char*, int&gt; create_result;
 
-
-// The object factory function
-factory_objects create(double obj_selector)
+//
+// <i>create</i>, our factory function
+//
+create_result create(int i)
 {
-   if(obj_selector &gt; 2000)
-      return "JKLM"; // Default char* value
+   // Return char* if (i &gt; 2000):
+   if (which &gt; 2000) return "JKLM";
 
-   if(obj_selector &gt; 1000)
-      return string("QRST"); // Default std::string value
+   // Return std::string if (1000 &lt; i &lt;= 2000):
+   if (which &gt; 1000) return string(&quot;QRST");
 
-   return 15; // Default int value
+   // Otherwise, return int:
+   return 15;
 }
 
-
-// Define a visitor
-struct cout_printer : boost::static_visitor&lt;&gt;
+//
+// <i>printer</i>, a visitor that prints to std::cout
+//
+struct printer : boost::static_visitor&lt;&gt;
 {
-   template&lt;typename T&gt;
+   template &lt;typename T&gt;
    void operator()(const T& t)
    {
       std::cout &lt;&lt; "operand: " &lt;&lt; t &lt;&lt; std::endl;
@@ -144,40 +110,34 @@ struct cout_printer : boost::static_visitor&lt;&gt;
 
 int main(int , char* [] )
 {
-   cout_printer a_printer;
-   factory_objects inst;
+   printer print;
+   create_result result;
 
-   inst = create(2500); // Create a char*
+   // First, create a char*...
+   result = create(2500);
 
-   // Print inst by applying a_printer to it.
-   // Expected output: "operand: JKLM"
-   boost::apply_visitor(a_printer, inst);
+   // ...and print result by applying print visitor to it:
+   boost::apply_visitor(a_printer, inst); // Output: &quot;operand: JKLM&quot;)
 
-   inst = create(1500); // Create a string
+   // Now, create a std::string and print it:
+   result = create(1500);
+   boost::apply_visitor(a_printer, inst); // Output: "operand: QRST"
 
-   // Print again. Expected output: "operand: QRST"
-   boost::apply_visitor(a_printer, inst);
-
-   inst = create(5);    // Create an int
-   boost::apply_visitor(a_printer, inst);  // Print it. Output: "15"
-
-   inst = create(11);   // Create an int (again)
-   boost::apply_visitor(a_printer, inst);  // Print it. Output: "15"
+   // Finally, create an int and print it:
+   result = create(5);
+   boost::apply_visitor(a_printer, inst);  // Output: "15"
 
    return 0;
 }
 </PRE>
-<BR>
 <HR>
-<BR>
 
 
 
 
 <h2><a name="Instantiation">Instantiation</a></h2>
 A concrete <code>variant</code> instantiation has this general form:
-<PRE>
-typedef boost::variant&lt;T1, T2, ... TN&gt; variant_type;
+<PRE>typedef boost::variant&lt;T1, T2, ... TN&gt; variant_type;
 
 </PRE>
 Where the types <CODE>T1, T2, ... TN</code> must meet the <A
@@ -185,8 +145,7 @@ HREF="Reference.html#SetOfTypes">Set-of-types</A> requirements. An Instance of <
 of these types.<BR>
 <BR>
 Examples:
-<PRE>
-   typedef boost::variant&lt;int, char, double&gt;
+<PRE>   typedef boost::variant&lt;int, char, double&gt;
       variant_type_1; // OK
 
    typedef variant&lt;int, char, double, char&gt;
@@ -205,8 +164,7 @@ Examples:
 <br>
 If one of these types is incomplete at the instantiation point, it must
 be enclosed inside an <code>incomplete&lt;&gt;</code> wrapper, as shown below:<br>
-<pre>
-   struct jas1; // Forward declaration of jas1 (Just Another Struct)
+<pre>   struct jas1; // Forward declaration of jas1 (Just Another Struct)
    variant&lt;jas1, double, std::string&gt; v6; // Error - 
                                           // jas1 is incomplete
    struct jas1 { ... };
@@ -234,8 +192,7 @@ The assignment rules (mentioned above) also apply when a variant object is inita
 Hence, the rest of this section will refer to assignment and initialization
 interchangeably.
 
-<PRE>
-   variant&lt;int, char, double&gt; v1;
+<PRE>   variant&lt;int, char, double&gt; v1;
    v1 = 5.9; // double -> double (no conversion is needed)
    v1 = 3;   // int -> int                - " -
    v1 = 'x'; // char -> char              - " -
@@ -289,8 +246,7 @@ Copy assignment: When a variant object is assigned to another variant object - w
 the same concrete type - the assignee becomes an exact duplicate of
 the assigned variant:
 
-<PRE>
-   variant&lt;int, char, double&gt; v1, v2;
+<PRE>   variant&lt;int, char, double&gt; v1, v2;
    v1 = 5.9; // v1 = double(5.9)
    v2 = v1;  // v2 = double(5.9)
 
@@ -305,8 +261,7 @@ the assigned variant:
 </PRE>
 
 Variant-to-variant assignment: Consider this case:
-<pre>
-   typedef variant&lt;RR, SS, TT, .. &gt; rhs_type;
+<pre>   typedef variant&lt;RR, SS, TT, .. &gt; rhs_type;
    rhs_type src;
 
    typedef variant&lt;XX, YY, ZZ, .. &gt; lhs_type;
@@ -329,8 +284,7 @@ then <code>src</code> itself will be assigned into <code>trg</code>, turning <co
 <b>variant holding a variant</b>
 </li>
 </ul>
-<pre>
-    typedef variant&lt;int, std::string&gt; variant_type;
+<pre>    typedef variant&lt;int, std::string&gt; variant_type;
     variant_type a;
 
     variant&lt;int, double, std::string&gt; b;
@@ -348,8 +302,7 @@ Note that a variant-to-variant assignment will fail - at compile time - if one
 of <code>src</code>'s bounded types cannot be assigned to <code>trg</code>
 (due to ambiguity/lack of conversion).<br>
 For instance:
-<pre>
-    variant&lt;int, std::string&gt; a;
+<pre>    variant&lt;int, std::string&gt; a;
     variant&lt;int, const char*&gt; b;
 
     a = b; // OK: int->int or const char* -> std::string
@@ -368,8 +321,7 @@ The visitation facility, implemented via
 mechanism thru which client code can gain access to a variant-held value.<br>
 <BR>
 Let us consider the following piece of code.
-<PRE>
-   boost::variant&lt;XX, YY, ZZ, ... &gt; a_variant;
+<PRE>   boost::variant&lt;XX, YY, ZZ, ... &gt; a_variant;
 
    struct visitor_type { ... };
    visitor_type visitor;
@@ -391,8 +343,7 @@ with whatever value <code>a_variant</code> is holding. This gives <code>visitor<
 chacne to inspect/modify <code>a_variant</code>'s value.<br>
 <BR>
 The following snip demonstrates the visitation facility using a concrete visitor class, <code>print_int_char_visitor</code>. The code will print "Char value: 'x'" and "Int value: 77" to <CODE>std::cout</CODE>:
-<PRE>
-   struct print_int_float_visitor
+<PRE>   struct print_int_float_visitor
    {
       //result_type specifies the return type of operator()
       typedef void result_type;
@@ -426,8 +377,7 @@ Note how <code>print_int_char_visitor</code> specifies the type of its return va
 nested type - <CODE>result_type</code>. This return value is also the value that is returned by <code>boost::apply_visitor()</code> to its caller.<br>
 The next code snip, demonstrate how <CODE>boost::static_visitor&lt;T&gt;</code> can be used as a base
 class to supply <CODE>result_type</CODE>'s definition. The visitor in this snip, <code>multiply_by_two</code> multiplies its operand by two and returns the result as an <code>int</code> value.
-<pre>
-   struct multiply_by_two
+<pre>   struct multiply_by_two
        :    boost::static_visitor&lt;int&gt; // Return type is int,
                                         // so derive from static_visitor&lt;int&gt;
    {
@@ -451,8 +401,7 @@ resolution rules are applied to choose the correct form. If a visitor cannot acc
 one of the types a variant may hold (due to ambiguity/lack of conversion), a comiler error
 is generated.
 <br>
-<PRE>
-   struct print_int_char : boost::static_visitor&lt;void&gt;
+<PRE>   struct print_int_char : boost::static_visitor&lt;void&gt;
    {
       // Handler *A*
       void operator()(int f) const
@@ -485,8 +434,7 @@ is generated.
 
 A "Catch-all" behavior can be achieved by supplying a templated form
 of <CODE>operator(): </CODE>
-<PRE>
-   struct ignore_non_ints_visitor : boost::static_visitor&lt;void&gt;
+<PRE>   struct ignore_non_ints_visitor : boost::static_visitor&lt;void&gt;
    {
       void operator()(int t) const
       {
@@ -515,8 +463,7 @@ of <CODE>operator(): </CODE>
 
 A visitor may accept its operand using a "pass-by-reference" parameter passing scheme.
 This allows a visitor to mutate the variant-held value:
-<pre>
-   struct first_capital : boost::static_visitor&lt;void&gt;
+<pre>   struct first_capital : boost::static_visitor&lt;void&gt;
    {
        void operator()(std::string& str) const
        {
@@ -550,8 +497,7 @@ This allows a visitor to mutate the variant-held value:
 <BR>
 
 The last sample shows persistency of visitors. Every visitor is actually a function-object, so its data members can be used to keep persistent data. The <code>int_accumulator</code> visitor uses <code>total_</code> to keep track of the total sum of its operands:
-<pre>
-   struct int_accumulator : boost::static_visitor&lt;void&gt;
+<pre>   struct int_accumulator : boost::static_visitor&lt;void&gt;
    {
        int_accumulator() : total_(0) { }
 
