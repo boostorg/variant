@@ -1,12 +1,12 @@
 //
 // Boost.Test
 //
-#include <boost/test/minimal.hpp>
+#include "boost/test/minimal.hpp"
 
-#include <boost/variant.hpp> 
-#include <boost/extract.hpp>
-#include <boost/static_visitor.hpp>
-#include <boost/apply_visitor.hpp>
+#include "boost/variant.hpp"
+#include "boost/extract.hpp"
+#include "boost/static_visitor.hpp"
+#include "boost/apply_visitor.hpp"
 
 #include <iostream>
 #include <vector>
@@ -33,112 +33,76 @@ struct int_sum : static_visitor<void>
    int result_;
 }; 
 
+template <typename T, typename Variant>
+T& check_pass(Variant& v, T value)
+{
+    BOOST_CHECK(extract<T>(v).check() == true);
+
+    try
+    {
+        T& r = extract<T>(v);
+        BOOST_CHECK(r == value);
+        return r;
+    }
+    catch(boost::bad_extract&)
+    {
+        throw; // must never reach
+    }
+}
+
+template <typename T, typename Variant>
+void check_fail(Variant& v)
+{
+    BOOST_CHECK(extract<T>(v).check() == false);
+
+    try
+    {
+        T& r = extract<T>(v);
+        BOOST_CHECK(false && r); // should never reach
+    }
+    catch(boost::bad_extract&)
+    {
+        // (do nothing here)
+    }
+}
+
 int test_main(int , char* [])
 {
    int_sum acc;
+   t_var1 v1 = 800;
 
-   t_var1 v1 = 19;
-
-   t_var1* pv = &v1;
-   const t_var1* read_only_p = &v1;
-
-   int* ptr = extract<int>(pv);
-
-   int* p1 = extract<int>(read_only_p);
-   BOOST_CHECK(p1 == 0);
-
-   const int* cpf = extract<const int>(read_only_p);
-   BOOST_CHECK(cpf == ptr);
-
-   p1 = extract<int>(pv);
-   const float* p2 = extract<float>(pv);
-   const short* p3 = extract<short>(pv);
-
-   BOOST_CHECK(p1 == ptr);
-   BOOST_CHECK(p2 == 0);
-   BOOST_CHECK(p3 == 0);
-
-
-   BOOST_CHECK(*p1 == 19);
-
-   apply_visitor(acc, v1);
-   BOOST_CHECK(acc.result_ == 19);
-
-   *p1 = 90;
-   apply_visitor(acc, v1);
-   BOOST_CHECK(acc.result_ == 109);
-
-//
-//
-//
-   v1 = 800;
-   int& r1 = extract<int>(v1);
-   BOOST_CHECK(r1 == 800);
-
-   int count = 0;
-   try
+   // check extract on non-const variant
    {
-      float& r2 = extract<float>(v1);
-   }
-   catch(boost::bad_extract& e)
-   {
-      ++count;
+      int& r1 = check_pass<int>(v1, 800);
+      
+      check_fail<const int>(v1);
+      check_fail<float>(v1);
+      check_fail<const float>(v1);
+      check_fail<short>(v1);
+      check_fail<const short>(v1);
+
+      apply_visitor(acc, v1);
+      BOOST_CHECK(acc.result_ == 800);
+
+      r1 = 920; // NOTE: modifies content of v1
+      apply_visitor(acc, v1);
+      BOOST_CHECK(acc.result_ == 800 + 920);
    }
 
-   try
+   // check const correctness:
    {
-      short& r3 = extract<short>(v1);
-   }
-   catch(boost::bad_extract& e)
-   {
-      ++count;
-   }
+      const t_var1& c = v1;
 
-   BOOST_CHECK(count == 2);
-   
-   apply_visitor(acc, v1);
-   BOOST_CHECK(acc.result_ == 909);
+      check_pass<const int>(c, 920);
 
-   r1 = 920;
-   apply_visitor(acc, v1);
-   BOOST_CHECK(acc.result_ == 1829);
-
-
-   const t_var1& c = v1;
-
-   try
-   {
-      const int& dcr1 = extract<const int>(c);
-      BOOST_CHECK(&dcr1 == ptr);
-      BOOST_CHECK(dcr1 == 920);
-   }
-   catch(boost::bad_extract& e)
-   {
-      BOOST_CHECK(false);
+      check_fail<int>(c);
+      check_fail<const float>(c);
+      check_fail<float>(c);
+      check_fail<const short>(c);
+      check_fail<short>(c);
    }
 
-   try
-   {
-      const float& dcr2 = extract<const float>(c);
-   }
-   catch(boost::bad_extract& e)
-   {
-      ++count;
-   }
-
-   try
-   {
-      const short& dcr3 = extract<const short>(c);
-   }
-   catch(boost::bad_extract& e)
-   {
-      ++count;
-   }
-
-   BOOST_CHECK(count == 4);
-
-       
-   return 0;
+   return boost::exit_success;
 }
 
 
