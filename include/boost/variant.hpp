@@ -415,47 +415,73 @@ public: // visitor interfaces
 };
 
 //////////////////////////////////////////////////////////////////////////
-// BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
-//
-// Needed to work around compilers that don't support using-declarations
-// in class templates. (See the variant::initializer workarounds below.)
-//
-
-#if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
-
-// (detail) metafunction make_variant_list
-//
-// Provides a MPL-compatible sequence with the specified non-void types
-// as arguments.
-//
-template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
-struct make_variant_list
-{
-public: // metafunction result
-
-    typedef typename mpl::list<
-          BOOST_PP_ENUM_PARAMS(
-              BOOST_VARIANT_LIMIT_TYPES
-            , T
-            )
-        >::type type;
-
-};
-
-#else// defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
-
-// (detail) class template convert_void
+// (detail) class void_ and class template convert_void
 // 
-// Provides the mechanism by which voidNN types are converted to
+// Provides the mechanism by which void(NN) types are converted to
 // mpl::void_ (and thus can be passed to mpl::list).
 //
+// Rationale: This is particularly needed for the using-declarations
+// workaround (below), but also to avoid associating mpl namespace with
+// variant in argument dependent lookups (which used to happen because of
+// defaulting of template parameters to mpl::void_).
+//
+
+struct void_;
+
 template <typename T>
 struct convert_void
 {
     typedef T type;
 };
 
-// (detail) tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
+template <>
+struct convert_void< void_ >
+{
+    typedef mpl::void_ type;
+};
+
+//////////////////////////////////////////////////////////////////////////
+// (detail) metafunction make_variant_list
+//
+// Provides a MPL-compatible sequence with the specified non-void types
+// as arguments.
+//
+// Rationale: see class template convert_void (above) and using-
+// declaration workaround (below).
+//
+template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
+struct make_variant_list
+{
+public: // metafunction result
+
+    // [Define a macro to convert any void(NN) tags to mpl::void...]
+#   define BOOST_VARIANT_DETAIL_CONVERT_VOID(z, N,_)   \
+        typename detail::variant::convert_void<BOOST_PP_CAT(T,N)>::type
+
+    // [...so that the specified types can be passed to mpl::list...]
+    typedef typename mpl::list< 
+          BOOST_PP_ENUM(
+              BOOST_VARIANT_LIMIT_TYPES
+            , BOOST_VARIANT_DETAIL_CONVERT_VOID
+            , _
+            )
+        >::type type;
+
+    // [...and, finally, the conversion macro can be undefined:]
+#   undef BOOST_VARIANT_DETAIL_CONVERT_VOID
+
+};
+
+//////////////////////////////////////////////////////////////////////////
+// BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
+//
+// Needed to work around compilers that don't support using-declarations
+// in class templates. (See the variant::initializer workarounds below.)
+//
+
+#if defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+
+// (detail) tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES - 2)
 //
 // Defines void types that are each unique and specializations of
 // convert_void that yields mpl::void_ for each voidNN type.
@@ -479,34 +505,6 @@ BOOST_PP_REPEAT(
 
 #undef BOOST_VARIANT_DETAIL_DEFINE_VOID_N
 
-// (detail) metafunction make_variant_list
-//
-// Provides a MPL-compatible sequence with the specified non-void types
-// as arguments.
-//
-template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
-struct make_variant_list
-{
-public: // metafunction result
-
-    // [Define a macro to convert any voidNN tags to mpl::void...]
-#   define BOOST_VARIANT_DETAIL_CONVERT_VOID(z, N,_)   \
-        typename detail::variant::convert_void<BOOST_PP_CAT(T,N)>::type
-
-    // [...so that the specified types can be passed to mpl::list...]
-    typedef typename mpl::list< 
-          BOOST_PP_ENUM(
-              BOOST_VARIANT_LIMIT_TYPES
-            , BOOST_VARIANT_DETAIL_CONVERT_VOID
-            , _
-            )
-        >::type type;
-
-    // [...and, finally, the conversion macro can be undefined:]
-#   undef BOOST_VARIANT_DETAIL_CONVERT_VOID
-
-};
-
 #endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
 
 }} // namespace detail::variant
@@ -527,14 +525,14 @@ public: // metafunction result
 //
 template <
     typename A
-  , typename B = mpl::void_
+  , typename B = detail::variant::void_
 
 #if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
 
   , BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
         BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
       , typename T
-      , mpl::void_
+      , detail::variant::void_
       )
 
 #else// defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
@@ -589,7 +587,7 @@ private: // static precondition assertions
                     >
                 >
             , mpl::logical_not<
-                  is_same<B, mpl::void_>
+                  is_same<B, detail::variant::void_>
                 >
             >::type::value
         ));
