@@ -8,6 +8,7 @@
 #include <sstream>
 #include <algorithm>
 #include <typeinfo>
+#include <boost/extract.hpp>
 
 #include "varout.h"
 
@@ -208,28 +209,68 @@ struct spec
    typedef T result;
 };
 
+
 template<typename VariantType, typename S>
-void verify(const VariantType& v, spec<S>, std::string str = "")
+const void* ptr_of(const VariantType* p, spec<S>)
+{
+   return boost::extract<const S>(p);
+}
+
+template<typename VariantType, typename S>
+void verify(const VariantType& vari, spec<S>, std::string str = "")
 {
    using namespace boost;
 
-   BOOST_CHECK(apply_visitor(total_sizeof(), v) == sizeof(S));
-   BOOST_CHECK(v.type() == typeid(S));
+   BOOST_CHECK(apply_visitor(total_sizeof(), vari) == sizeof(S));
+   BOOST_CHECK(vari.type() == typeid(S));
 
-   //TODO: Check variant_cast : reference + point
+   //
+   // Check extract<>()
+   //
+   BOOST_TEST(ptr_of(&vari, spec<S>()) != 0);
 
+   bool passes_extraction = true;
+   try
+   {
+      extract<const S>(vari);  
+   }
+   catch(bad_extract& )
+   {
+      passes_extraction = false;
+   }
+   BOOST_CHECK(passes_extraction);
+
+   //
+   // Check string content
+   //
    if(str.length() > 0)
    {
-      std::string temp = apply_visitor(to_text(), v);
+      std::string temp = apply_visitor(to_text(), vari);
+      std::cout << "temp = " << temp << ", str = " << str << std::endl;
       BOOST_CHECK(temp == str);         
    }
 }
 
 
 template<typename VariantType, typename S>
-void verify_not(const VariantType& v, spec<S>)
+void verify_not(const VariantType& vari, spec<S>)
 {
-   BOOST_CHECK(v.type() != typeid(S));
+   using namespace boost;
+
+   BOOST_CHECK(vari.type() != typeid(S));
+   BOOST_TEST(ptr_of(&vari, spec<S>()) == 0);
+
+   bool passes_extraction = true;
+   try
+   {
+      extract<const S>(vari);      
+   }
+   catch(bad_extract& )
+   {
+      passes_extraction = false;
+   }
+   BOOST_CHECK(!passes_extraction);
+   
    //TODO: Check variant_cast : reference + point
 }
 
