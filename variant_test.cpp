@@ -68,26 +68,6 @@ public: // visitor interfaces
 
 };
 
-template <typename T, typename Variant>
-bool can_extract_ptr(const Variant* pvar)
-{
-    return (boost::extract<const T>(pvar) != 0);
-}
-
-template <typename T, typename Variant>
-bool can_extract_ref(const Variant& var)
-{
-    try
-    {
-        const T& r = boost::extract<const T>(var);
-        return true;
-    }
-    catch (const boost::bad_extract&)
-    {
-        return false;
-    }
-}
-
 std::vector<my_variant> create_values()
 {
     std::vector<my_variant> ret;
@@ -308,20 +288,24 @@ int test_main( int, char *[] )
 
     // extract<T> tests
     {
-        my_variant var(12.345);
+        double d = 12.345;
+        my_variant var(d);
+
+        boost::extract<int> xi(var);
+        BOOST_TEST((
+              xi.check() == false
+            ));
+
+        boost::extract<double> xd(var);
+        BOOST_TEST((
+              xd.check() == true
+            ));
+        BOOST_TEST((
+              xd() == d
+            ));
 
         BOOST_TEST((
-              can_extract_ptr<int>(&var) == false
-            ));
-        BOOST_TEST((
-              can_extract_ref<int>(var) == false
-            ));
-
-        BOOST_TEST((
-              can_extract_ptr<double>(&var) == true
-            ));
-        BOOST_TEST((
-              can_extract_ref<double>(var) == true
+              boost::extract<double>(var) == d
             ));
     }
 
