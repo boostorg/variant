@@ -11,10 +11,10 @@
 #
 # - Each item has a unique id of the form: ITnnn.
 #
-# - Each item references to relevant posts(s).
+# - Each item references relevant posts(s).
 #
 # - Several issues may be grouped into a single item, if they are likely to be accepted/rejected as a group.
-
+#
 
 
 == IT1 ==
@@ -170,6 +170,10 @@ stored within the variant itself
 [http://lists.boost.org/MailArchives/boost/msg44146.php]
 [http://lists.boost.org/MailArchives/boost/msg44144.php]
 [http://lists.boost.org/MailArchives/boost/msg44143.php]
+[http://lists.boost.org/MailArchives/boost/msg44197.php]
+[http://lists.boost.org/MailArchives/boost/msg44202.php]
+[http://lists.boost.org/MailArchives/boost/msg44206.php]
+
 
 - Public interface of the extract facility
 - Renaming extract to access
@@ -215,3 +219,22 @@ struct destroyer
   }
 };
 
+
+
+== IT19 ==
+
+Copyrigt notice
+
+[http://lists.boost.org/MailArchives/boost/msg44191.php]
+[http://lists.boost.org/MailArchives/boost/msg43990.php]
+
+
+== IT20 ==
+
+Allowing references as bounded types
+
+[http://lists.boost.org/MailArchives/boost/msg44140.php]
+[http://lists.boost.org/MailArchives/boost/msg44143.php]
+[http://lists.boost.org/MailArchives/boost/msg44147.php]
+[http://lists.boost.org/MailArchives/boost/msg44144.php]
+[http://lists.boost.org/MailArchives/boost/msg44159.php]
