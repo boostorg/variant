@@ -468,7 +468,7 @@ public: // metafunction result
 
     // [Define a macro to convert any void(NN) tags to mpl::void...]
 #   define BOOST_VARIANT_DETAIL_CONVERT_VOID(z, N,_)   \
-        typename detail::variant::convert_void<BOOST_PP_CAT(T,N)>::type
+        typename convert_void<BOOST_PP_CAT(T,N)>::type
 
     // [...so that the specified types can be passed to mpl::list...]
     typedef typename mpl::list< 
