@@ -47,6 +47,7 @@
 #include "boost/mpl/begin_end.hpp"
 #include "boost/mpl/bool_c.hpp"
 #include "boost/mpl/contains.hpp"
+#include "boost/mpl/count_if.hpp"
 #include "boost/mpl/distance.hpp"
 #include "boost/mpl/empty.hpp"
 #include "boost/mpl/comparison/equal_to.hpp"
@@ -635,6 +636,23 @@ public: // typedefs
                 )
             >
         >::type types;
+
+private: // static precondition assertions, cont.
+
+#if !defined(BOOST_MSVC)
+
+    // [Assert no top-level const-qualified types:]
+    BOOST_STATIC_ASSERT((
+          mpl::equal_to<
+              typename mpl::count_if<
+                  types
+                , is_const<mpl::_>
+                >::type
+            , mpl::integral_c<unsigned, 0>
+            >::type::value
+        ));
+
+#endif // !defined(BOOST_MSVC)
 
 private: // representation
 
