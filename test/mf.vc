@@ -14,8 +14,8 @@ CPPC=cl
 NAME_EXE=/Fe
 
 
-all: test1.exe test2.exe test3.exe test4.exe test5.exe test6.exe test8.exe 
-#all: test8.exe s.exe
+all: test1.exe test2.exe test3.exe test4.exe test5.exe test6.exe test7.exe test8.exe 
+# all: test8.exe 
 
 run: all
 	test1.exe
@@ -24,11 +24,13 @@ run: all
 	test4.exe
 	test5.exe
 	test6.exe
+	test7.exe
 	test8.exe
 
 
 clean:
-	del bin\*.*
+	del *.exe
+	del *.obj
 
 
 class_a.obj: class_a.cpp
@@ -59,6 +61,10 @@ test5.exe: test5.cpp
 
 test6.exe: test6.cpp
 	cl test6.cpp /Id:\var\cvsroot\boost-sandbox /Id:\var\lib\boost_1_29_0 /EHsc 
+
+
+test7.exe: test7.cpp
+	cl test7.cpp /Id:\var\cvsroot\boost-sandbox /Id:\var\lib\boost_1_29_0 /EHsc 
 
 test8.exe: test8.cpp
 	cl test8.cpp /Id:\var\cvsroot\boost-sandbox /Id:\var\lib\boost_1_29_0 /EHsc 
