@@ -31,6 +31,8 @@
 //
 #include <boost/variant.hpp>
 #include <boost/incomplete.hpp>
+#include <boost/apply_visitor.hpp>
+
 #include <iostream>
 
 #include <sstream>
