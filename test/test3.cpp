@@ -30,6 +30,7 @@
 // Test program code starts here...
 //
 #include <boost/variant.hpp>
+#include <boost/incomplete.hpp>
 #include <iostream>
 
 #include <sstream>
