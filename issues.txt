@@ -66,9 +66,7 @@ I'd like to be able to compile it with my compiler (BCC551)
 a) In the introduction appears the term 'inhomogeneous'; isn't the term
 'heterogeneous' a much more familiar synonym?
 
-b) The first variant program in the tutorial is actually full of errors :-)
-
-e) Th visitation examples mismatches 'print_int_float_visitor'
+e) The visitation examples mismatches 'print_int_float_visitor'
 with 'print_int_char_visitor'
 
 
@@ -238,3 +236,43 @@ Allowing references as bounded types
 [http://lists.boost.org/MailArchives/boost/msg44147.php]
 [http://lists.boost.org/MailArchives/boost/msg44144.php]
 [http://lists.boost.org/MailArchives/boost/msg44159.php]
+
+== IT21 ==
+
+I ran across some errors in the code shown in the documentation
+for the "first variant program."
+
+[http://lists.boost.org/MailArchives/boost/msg44281.php]
+
+
+== IT22 ==
+
+compiling with Intel C++ 7.0 under strict ansi compliance
+(-ansi) revealed the following nits as well:
+
+
+In addition, compiling with Intel C++ 7.0 under strict ansi compliance
+(-ansi) revealed the following nits as well:
+
+aligned_storage.hpp(70):
+error #308: type "boost::aligned_storage<size_, alignment_>::align_t [with
+size_=28U, alignment_=4U]" is inaccessible
+(I believe this is because the nested classes/unions have no special
+access to private members of the enclosing class.
+I added a friend declaration and union declaration to fix this.
+
+boost/variant.hpp(1010): error #308: function "boost::variant<A, B, T0,
+T1, T2, T3, T4, T5, T6, T7>::inactive_storage [with A=std::string, B=char
+*, T0=int, T1=boost::detail::variant::void_,
+T2=boost::detail::variant::void_, T3=boost::detail::variant::void_,
+T4=boost::detail::variant::void_, T5=boost::detail::variant::void_,
+T6=boost::detail::variant::void_, T7=boost::detail::variant::void_]" is
+inaccessible
+              new(target_.inactive_storage()) T(operand);
+                          ^
+(followed by many more of the same)
+
+Diffs for patches: 
+[http://lists.boost.org/MailArchives/boost/msg44281.php]
+
+[http://lists.boost.org/MailArchives/boost/msg44057.php]
