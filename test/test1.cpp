@@ -3,7 +3,7 @@
 
 #include "boost/test/minimal.hpp"
 #include "boost/variant.hpp"
-#include "boost/apply_visitor.hpp"
+#include "boost/visitor/apply_visitor.hpp"
 
 #include "class_a.h"
 #include "jobs.h"

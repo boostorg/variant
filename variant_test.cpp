@@ -19,9 +19,9 @@
 #include "boost/extract.hpp"
 #include "boost/incomplete.hpp"
 #include "boost/type_switch.hpp"
-#include "boost/apply_visitor.hpp"
-#include "boost/static_visitor.hpp"
-#include "boost/visitor_ptr.hpp"
+#include "boost/visitor/apply_visitor.hpp"
+#include "boost/visitor/static_visitor.hpp"
+#include "boost/visitor/visitor_ptr.hpp"
 
 // Support headers:
 #include <iostream>
@@ -30,7 +30,6 @@
 #include <vector>
 
 #include "boost/test/minimal.hpp"
-#include "boost/cstdlib.hpp"
 
 //////////////////////////////////////////////////////////////////////////
 

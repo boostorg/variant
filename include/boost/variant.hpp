@@ -17,18 +17,13 @@
 #ifndef BOOST_VARIANT_HPP
 #define BOOST_VARIANT_HPP
 
-// MPL as shipped in 1.29 has bug with preprocessed headers, so define following:
-#include "boost/version.hpp"
-#if BOOST_VERSION <= 102900
-#   define BOOST_MPL_AUX_CONFIG_USE_PREPROCESSED_HPP_INCLUDED
-#endif
-
 #include <cstddef> // for std::size_t
 #include <new> // for placement new
 #include <typeinfo> // for std::type_info
 
 #include "boost/config.hpp"
 #include "boost/compressed_pair.hpp"
+#include "boost/empty.hpp"
 #include "boost/utility/addressof.hpp"
 #include "boost/static_assert.hpp"
 #include "boost/preprocessor/cat.hpp"
@@ -52,7 +47,8 @@
 #include "boost/mpl/empty.hpp"
 #include "boost/mpl/equal_to.hpp"
 #include "boost/mpl/identity.hpp"
-#include "boost/mpl/integral_c.hpp"
+#include "boost/mpl/int.hpp"
+#include "boost/mpl/is_sequence.hpp"
 #include "boost/mpl/iter_fold.hpp"
 #include "boost/mpl/list.hpp"
 #include "boost/mpl/limits/list.hpp"
@@ -60,6 +56,7 @@
 #include "boost/mpl/max_element.hpp"
 #include "boost/mpl/remove_if.hpp"
 #include "boost/mpl/sizeof.hpp"
+#include "boost/mpl/size_t.hpp"
 #include "boost/mpl/transform.hpp"
 #include "boost/mpl/void.hpp"
 
@@ -73,43 +70,18 @@
 //#include "boost/mpl/if.hpp"
 
 // The following are new/in-progress headers:
-#include "boost/config/no_class_template_using_declarations.hpp"
+#include "boost/config/no_using_declaration_overloads.hpp"
 #include "boost/aligned_storage.hpp"
 #include "boost/incomplete_fwd.hpp"
 #include "boost/move/move.hpp"
 #include "boost/move/moveable.hpp"
-#include "boost/static_visitable.hpp"
-#include "boost/static_visitor.hpp"
-#include "boost/mpl/guarded_size.hpp"
+#include "boost/visitor/static_visitable.hpp"
+#include "boost/visitor/static_visitor.hpp"
 #include "boost/type_traits/has_nothrow_move.hpp"
 
-// MPL as shipped in 1.29 does not provide is_sequence predicate, so define following:
-#if BOOST_VERSION > 102900
-
-#   if defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#   if defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
 #      define BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
 #   endif
-#
-#   include "boost/mpl/is_sequence.hpp"
-
-#else // BOOST_VERSION <= 102900 || defined(BOOST_MSVC)
-
-#define BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
-
-namespace boost {
-namespace mpl {
-
-template <typename T>
-struct is_sequence
-{
-    typedef false_ type;
-    BOOST_STATIC_CONSTANT(bool, value = type::value);
-};
-
-} // namespace mpl
-} // namespace boost
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////
 // BOOST_VARIANT_LIMIT_TYPES
@@ -127,16 +99,15 @@ namespace detail { namespace variant {
 //////////////////////////////////////////////////////////////////////////
 // (detail) metafunction max_value
 //
-// Applies ValueOp to the maximal element (as determined by ValueOp) of
-// specified type-sequence.
+// Finds the maximum value of the unary metafunction F over Sequence.
 //
-template <typename Sequence, typename ValueOp>
+template <typename Sequence, typename F>
 struct max_value
 {
 private: // helpers, for metafunction result (below)
 
     typedef typename mpl::max_element<
-          typename mpl::transform<Sequence, ValueOp>::type
+          typename mpl::transform<Sequence, F>::type
         >::type max_it;
 
 public: // metafunction result
@@ -205,7 +176,7 @@ struct destroyer
 public: // visitor interfaces
 
     template <typename T>
-    void operator()(const T& operand) const
+    void operator()(T& operand) const
     {
         operand.~T();
     }
@@ -456,15 +427,18 @@ struct convert_void< void_ >
 // (detail) metafunction make_variant_list
 //
 // Provides a MPL-compatible sequence with the specified non-void types
-// as arguments.
+// as arguments. However, if resultant sequence is empty, then resultant
+// sequence contains boost::empty.
 //
-// Rationale: see class template convert_void (above) and using-
+// Rationale #1: see class template convert_void (above) and using-
 // declaration workaround (below).
+//
+// Rationale #2: boost::empty behavior enables variant<> syntax.
 //
 template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
 struct make_variant_list
 {
-public: // metafunction result
+private: // helpers, for metafunction result (below)
 
     // [Define a macro to convert any void(NN) tags to mpl::void...]
 #   define BOOST_VARIANT_DETAIL_CONVERT_VOID(z, N,_)   \
@@ -477,23 +451,31 @@ public: // metafunction result
             , BOOST_VARIANT_DETAIL_CONVERT_VOID
             , _
             )
-        >::type type;
+        >::type initial_result;
 
     // [...and, finally, the conversion macro can be undefined:]
 #   undef BOOST_VARIANT_DETAIL_CONVERT_VOID
 
+public: // metafunction result
+
+    typedef typename mpl::if_<
+          mpl::empty<initial_result>
+        , mpl::list1<boost::empty>
+        , initial_result
+        >::type type;
+
 };
 
 //////////////////////////////////////////////////////////////////////////
-// BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
+// BOOST_NO_USING_DECLARATION_OVERLOADS workaround
 //
-// Needed to work around compilers that don't support using-declarations
-// in class templates. (See the variant::initializer workarounds below.)
+// Needed to work around compilers that don't support using-declaration
+// overloads. (See the variant::initializer workarounds below.)
 //
 
-#if defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#if defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
 
-// (detail) tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES - 2)
+// (detail) tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
 //
 // Defines void types that are each unique and specializations of
 // convert_void that yields mpl::void_ for each voidNN type.
@@ -510,14 +492,14 @@ public: // metafunction result
     /**/
 
 BOOST_PP_REPEAT(
-      BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+      BOOST_VARIANT_LIMIT_TYPES
     , BOOST_VARIANT_DETAIL_DEFINE_VOID_N
     , _
     )
 
 #undef BOOST_VARIANT_DETAIL_DEFINE_VOID_N
 
-#endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
+#endif // BOOST_NO_USING_DECLARATION_OVERLOADS workaround
 
 // (detail) class template variant_base
 //
@@ -539,84 +521,53 @@ class variant_base
 // Efficient, type-safe bounded discriminated union.
 //
 // Preconditions:
-//  - Two or more types must be specified.
 //  - Each type must be unique.
+//  - No type may be const-qualified.
 //
 // Proper declaration form:
-//   variant<A,B,...>  (where A,B,... are NOT type-sequences)
+//   variant<types>    (where types is a type-sequence)
 // or
-//   variant<types>    (where types is a type-sequence with size > 1)
+//   variant<T0,T1,...,Tn>  (where T0 is NOT a type-sequence)
+// or
+//   variant<>, which acts like variant<boost::empty>
 //
 template <
-    typename A
-  , typename B = detail::variant::void_
 
-#if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#if !defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
 
-  , BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
-        BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+    BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
+        BOOST_VARIANT_LIMIT_TYPES
       , typename T
       , detail::variant::void_
       )
 
-#else// defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#else// defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
 
-  , BOOST_PP_ENUM_PARAMS_WITH_DEFAULTS(
-        BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+    BOOST_PP_ENUM_PARAMS_WITH_DEFAULTS(
+        BOOST_VARIANT_LIMIT_TYPES
       , typename T
       , detail::variant::void//NN
       )
 
-#endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
+#endif // BOOST_NO_USING_DECLARATION_OVERLOADS workaround
 
   >
 class variant
     : public detail::variant::variant_base<
           boost::variant<
-              A
-            , B
-            , BOOST_PP_ENUM_PARAMS(
-                  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
-                , T
-                )
+              BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)
             >
         >
 {
 private: // static precondition assertions
 
-#if !defined(BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
-
-    typedef mpl::integral_c<unsigned, 2>
-        min_list_size;
-
-    // NOTE TO USER :
-    // Compile error here indicates that variant's variadic
-    // template parameter list was used inappropriately.
-    BOOST_STATIC_ASSERT((
-          mpl::or_< // B != void_ || (is_sequence<A> && size<A> >= 2)
-              mpl::not_<
-                  is_same<B, detail::variant::void_>
-                >
-            , mpl::and_<
-                  mpl::is_sequence<A>
-                , mpl::equal_to<
-                      mpl::guarded_size<A, min_list_size>
-                    , min_list_size
-                    >
-                >
-            >::type::value
-        ));
-
-#else // defined(BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
+#if defined(BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
 
     // Until mpl_list_initializer (below) works, sequences are not supported
     // for compilers that do not support using declarations in templates.
     BOOST_STATIC_ASSERT((
-          mpl::not_< // !(B == void_ || is_sequence<A>)
-              mpl::or_<
-                  is_same<B, detail::variant::void_>
-                , mpl::is_sequence<A>
-                >
+          mpl::not_< // !is_sequence<T0>
+              mpl::is_sequence<T0>
             >::type::value
         ));
 
@@ -625,15 +576,10 @@ private: // static precondition assertions
 public: // typedefs
 
     typedef typename mpl::apply_if<
-          mpl::is_sequence<A>
-        , mpl::identity<A>
+          mpl::is_sequence<T0>
+        , mpl::identity<T0>
         , detail::variant::make_variant_list<
-              A
-            , B
-            , BOOST_PP_ENUM_PARAMS(
-                  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
-                , T
-                )
+              BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)
             >
         >::type types;
 
@@ -641,14 +587,17 @@ private: // static precondition assertions, cont.
 
 #if !defined(BOOST_MSVC)
 
+    // [Assert unique types: ommitted for compile-time complexity reasons.]
+    /**/
+
     // [Assert no top-level const-qualified types:]
     BOOST_STATIC_ASSERT((
           mpl::equal_to<
-              typename mpl::count_if<
+              mpl::count_if<
                   types
                 , is_const<mpl::_>
-                >::type
-            , mpl::integral_c<unsigned, 0>
+                >
+            , mpl::size_t<0>
             >::type::value
         ));
 
@@ -718,7 +667,7 @@ private: // representation
     {
         if (using_storage1() == false)
             return storage_.first().address();
-        
+ 
         return storage_.second().address();
     }
 
@@ -738,7 +687,7 @@ public: // queries
 private: // helpers, for structors (below)
 
 // [On compilers where using declarations in class templates can correctly avoid name hiding...]
-#if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#if !defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
 
     // [...use an optimal converting initializer based on the variant typelist:]
 
@@ -805,7 +754,7 @@ private: // helpers, for structors (below)
         , mpl::protect< make_initializer_node >
         >::type initializer;
 
-#else // defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+#else // defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
 
     // [...otherwise, use a hackish workaround based on variant's template parameters:]
 
@@ -813,39 +762,22 @@ private: // helpers, for structors (below)
     {
     public: // static functions
 
-        static int initialize(void* dest, const A& operand)
-        {
-            typedef A T;
-            BOOST_STATIC_CONSTANT(int, which = 0);
-
-            new(dest) T(operand);
-            return which;
-        }
-
-        static int initialize(void* dest, const B& operand)
-        {
-            typedef B T;
-            BOOST_STATIC_CONSTANT(int, which = 1);
-
-            new(dest) T(operand);
-            return which;
-        }
-
-        #define BOOST_VARIANT_INITIALIZE_FUNCTION(z,N,_)       \
-            static int initialize(                             \
-                  void* dest                                   \
-                , const BOOST_PP_CAT(T,N)& operand             \
-                )                                              \
-            {                                                  \
-                typedef BOOST_PP_CAT(T,N) T;                   \
-                BOOST_STATIC_CONSTANT(int, which = (N) + 2);   \
-                                                               \
-                new(dest) T(operand);                          \
-                return which;                                  \
-            }
+        #define BOOST_VARIANT_INITIALIZE_FUNCTION(z,N,_)   \
+            static int initialize(                         \
+                  void* dest                               \
+                , const BOOST_PP_CAT(T,N)& operand         \
+                )                                          \
+            {                                              \
+                typedef BOOST_PP_CAT(T,N) T;               \
+                BOOST_STATIC_CONSTANT(int, which = (N));   \
+                                                           \
+                new(dest) T(operand);                      \
+                return which;                              \
+            }                                              \
+            /**/
 
         BOOST_PP_REPEAT(
-              BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+              BOOST_VARIANT_LIMIT_TYPES
             , BOOST_VARIANT_INITIALIZE_FUNCTION
             , _
             )
@@ -970,7 +902,7 @@ private: // helpers, for structors (below)
     typedef preprocessor_list_initializer
         initializer;
 
-#endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
+#endif // BOOST_NO_USING_DECLARATION_OVERLOADS workaround
 
     void destroy_content()
     {
@@ -992,7 +924,7 @@ public: // structors
         // type is default-constructible, and so variant cannot
         // support its own default-construction
 
-        new(storage_.first().address()) A();
+        new(storage_.first().address()) T0();
         activate_storage1(0); // zero is the index of the first bounded type
     }
 
@@ -1463,7 +1395,17 @@ public: // queries
 
     bool empty() const
     {
-        return false;
+        typedef typename mpl::find<
+              types
+            , boost::empty
+            >::type empty_it;
+
+        typedef typename mpl::distance<
+              typename mpl::begin<types>::type
+            , empty_it
+            >::type empty_index;
+
+        return which() == empty_index;
     }
 
     const std::type_info& type() const
@@ -1524,19 +1466,26 @@ private: // helpers, for visitation support (below)
         throw;
     }
 
-public: // helpers, for visitation support (below)
+// helpers, for visitation support (below) -- private when possible
+#if !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
 
-    //////////////////////////////////////////////////////////////////////
-    // WARNING TO USER :
-    // The following functions are not part of the public interface,
-    // despite their public access (which may change in the future).
-    //
+    template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename U) >
+    friend class variant;
+
+private:
+
+#else// defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
+
+public:
+
+#endif// !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
+
     template <typename Visitor>
         typename Visitor::result_type
     raw_apply_visitor(Visitor& visitor)
     {
         return apply_visitor_impl<
-              mpl::integral_c<unsigned long, 0>
+              mpl::int_<0>
             , typename mpl::begin<types>::type
             , typename mpl::end<types>::type
             >(which(), *this, visitor, mpl::false_());
@@ -1547,7 +1496,7 @@ public: // helpers, for visitation support (below)
     raw_apply_visitor(Visitor& visitor) const
     {
         return apply_visitor_impl<
-              mpl::integral_c<unsigned long, 0>
+              mpl::int_<0>
             , typename mpl::begin<types>::type
             , typename mpl::end<types>::type
             >(which(), *this, visitor, mpl::false_());
@@ -1576,10 +1525,10 @@ public: // visitation support
 //////////////////////////////////////////////////////////////////////////
 // function template swap
 //
-// Swaps two variants of the same type (i.e., identical bounded type set).
+// Swaps two variants of the same type (i.e., identical specification).
 //
 template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
-void swap(
+inline void swap(
       boost::variant< BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T) >& lhs
     , boost::variant< BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T) >& rhs
     )

@@ -10,7 +10,7 @@
 #include <typeinfo>
 
 #include "boost/extract.hpp"
-#include "boost/apply_visitor.hpp"
+#include "boost/visitor/apply_visitor.hpp"
 
 #include "varout.h"
 
