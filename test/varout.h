@@ -7,10 +7,8 @@
 #include <string>
 #include <iostream>
 
-struct to_text
+struct to_text : boost::static_visitor<std::string>
 {
-   typedef std::string return_type;
-   
    template<class Value>
    std::string operator()(const Value& value) const
    {

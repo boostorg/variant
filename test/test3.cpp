@@ -103,10 +103,8 @@ std::ostream& operator<<(std::ostream& out, const Sub& a)
 }
 
 
-struct raw_text_maker
+struct raw_text_maker : boost::static_visitor<std::string>
 {
-   typedef std::string return_type;
-
    template<typename T>
    std::string operator()(const T& t) const
    {
@@ -128,10 +126,8 @@ std::ostream& operator<<(std::ostream& out, const Expr& a)
 //
 // Expression evaluation visitor
 //
-struct Calculator
+struct Calculator : boost::static_visitor<int>
 {
-   typedef int return_type;
-   
    Calculator()  { }
 
    int operator()(Add& x) const

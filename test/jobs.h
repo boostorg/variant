@@ -10,10 +10,10 @@
 #include <typeinfo>
 #include <boost/variant.hpp>
 
-struct total_sizeof 
+#include "varout.h"
+
+struct total_sizeof : boost::static_visitor<int>
 {
-   typedef int return_type;
-   
    total_sizeof() : total_(0) { }
 
    template<class Value>
@@ -37,9 +37,8 @@ struct total_sizeof
 //Function object: sum_int
 //Description: Compute total sum of a series of numbers, (when called successively)
 //Use sizeof(T) if applied with a non-integral type
-struct sum_int
+struct sum_int : boost::static_visitor<int>
 {
-   typedef int return_type;
    
    sum_int() : total_(0) { }
 
@@ -90,9 +89,8 @@ private:
 //Function object: sum_double
 //Description: Compute total sum of a series of numbers, (when called successively)
 //Accpetable input types: float, double (Other types are silently ignored)
-struct sum_double
+struct sum_double : boost::static_visitor<double>
 {
-   typedef void return_type;
    
    sum_double() : total_(0) { }
 
@@ -124,9 +122,8 @@ private:
 
 
 
-struct int_printer
+struct int_printer : boost::static_visitor<std::string>
 {
-   typedef std::string return_type;
    
    int_printer(std::string prefix_s = "") : prefix_s_(prefix_s) { }
    int_printer(const int_printer& other) : prefix_s_(other.prefix_s_)
@@ -134,13 +131,13 @@ struct int_printer
       ost_ << other.str();
    }
 
-   return_type operator()(int x) const
+   std::string operator()(int x) const
    {
       ost_ << prefix_s_ << x;
       return str();
    }
 
-   return_type operator()(const std::vector<int>& x) const
+   std::string operator()(const std::vector<int>& x) const
    {
       ost_ << prefix_s_;
 
@@ -162,9 +159,8 @@ private:
 };  //int_printer
 
 
-struct int_adder
+struct int_adder : boost::static_visitor<void>
 {
-   typedef void return_type;
    
    int_adder(int rhs) : rhs_(rhs) { }
 
@@ -185,9 +181,8 @@ struct int_adder
 
 
 
-struct held_type_name
+struct held_type_name : boost::static_visitor<std::string>
 {
-   typedef std::string return_type;
    
    template<typename T>
    std::string operator()(const T& ) const
@@ -219,14 +214,14 @@ void verify(const VariantType& v, spec<S>, std::string str = "")
 {
    using namespace boost;
 
-   BOOST_CHECK(boost::apply_visitor(total_sizeof(), v) == sizeof(S));
+   BOOST_CHECK(apply_visitor(total_sizeof(), v) == sizeof(S));
    BOOST_CHECK(v.type() == typeid(S));
 
    //TODO: Check variant_cast : reference + point
 
    if(str.length() > 0)
    {
-      std::string temp = boost::apply_visitor(to_text(), v);
+      std::string temp = apply_visitor(to_text(), v);
       BOOST_CHECK(temp == str);         
    }
 }
