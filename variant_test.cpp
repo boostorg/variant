@@ -261,21 +261,28 @@ public:
 //
 int test_main( int, char *[] )
 {
-    // initialize, assign, copy, and assign tests
+    // initialize, copy, assign, and swap tests
     {
         my_variant def;
-		my_variant var(2.71);
+        my_variant var(2.71);
         my_variant varcopy(var);
-		def = var;
+        def = var;
 
         BOOST_TEST((
               boost::apply_visitor(are_strict_equals(), var, varcopy)
             ));
-		BOOST_TEST((
+        BOOST_TEST((
               boost::apply_visitor(are_strict_equals(), var, def)
             ));
-		BOOST_TEST((
+        BOOST_TEST((
               boost::apply_visitor(are_strict_equals(), def, varcopy)
+            ));
+
+        my_variant swapped;
+        swapped.swap(varcopy);
+
+        BOOST_TEST((
+              boost::apply_visitor(are_strict_equals(), swapped, var)
             ));
     }
 
