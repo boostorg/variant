@@ -145,28 +145,21 @@ HREF="Reference.html#SetOfTypes">Set-of-types</A> requirements. An Instance of <
 of these types.<BR>
 <BR>
 Examples:
-<PRE>   typedef boost::variant&lt;int, char, double&gt;
-      variant_type_1; // OK
+<PRE>   boost::variant&lt;int, char, double&gt; v1; // OK
 
-   typedef variant&lt;int, char, double, char&gt;
-      variant_type_2; // Error: char appears twice
+   variant&lt;int, char, double, char&gt; v2;  // Error: char appears twice
+   variant&lt;float&gt; v3;                    // Error: At least two types must be specified
+   variant&lt;char, char* const, void*&gt; v4; // Error: top-level const types are illegal
 
-   typedef variant&lt;float&gt;
-      variant_type_3; // Error: At least two types must be specified
-
-   typedef variant&lt;char, char* const, void*&gt;
-      variant_type_4; // Error: top-level const types are illegal
-
-   typedef variant&lt;char, const char*, void*&gt;
-      variant_type_5; // OK - const char* is not a top-level const type
+   variant&lt;char, const char*, void*&gt; v5; // OK - const char* is not a top-level const type
 </PRE>
 
 <br>
 If one of these types is incomplete at the instantiation point, it must
 be enclosed inside an <code>incomplete&lt;&gt;</code> wrapper, as shown below:<br>
 <pre>   struct jas1; // Forward declaration of jas1 (Just Another Struct)
-   variant&lt;jas1, double, std::string&gt; v6; // Error - 
-                                          // jas1 is incomplete
+
+   variant&lt;jas1, double, std::string&gt; v6; // Error: jas1 is incomplete
    struct jas1 { ... };
 
    struct jas2; // Forward declaration of jas2
