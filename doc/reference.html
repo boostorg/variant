@@ -85,6 +85,8 @@ namespace boost
         <ul>
             <li>
                 <i>CopyConstructible</i> [20.1.3].</li>
+            <LI>
+               <I>Assignable</I>.</LI>
             <li>
                 Destructor upholds the no-throw exception-safety guarantee.</li>
             <li>
@@ -99,13 +101,15 @@ namespace boost
         <hr>
         <h2><a name="Visitor"><i>Visitor</i> Concept</a></h2>
         <p>Given <a href="#variant"><code>variant</code></a><code>&lt;T1, T2, ... , T<i>n</i>&gt;</code>, 
-            a function object operable on values implicitly-convertible to each type <code>T<i>i</i></code>
-            is a <b>visitor</b> of the <code>variant</code>.</p>
+            a function object which unambiguously accepts any value of 
+each of the variant's <A HREF=#BoundedType">bounded types</A>, is a 
+<B>Visitor</B> of of the <CODE>variant</CODE>.
         <p>Additional requirements on visitors are as follows:</p>
         <ul>
             <li>
-                Must expose inner type <code>result_type</code>. (See <code><a href="#visitor_ptr">visitor_ptr</a></code>
-                wrapper for a solution to functions as visitors.)</li>
+                Must expose inner type <code>result_type</code>. <!-- (See 
+<code><a href="#visitor_ptr">visitor_ptr</a></code>
+                wrapper for a solution to functions as visitors.)--> </li>
             <li>
                 Each operation of the function object must return a value 
                 implicitly-convertible to <code>result_type</code>.</li>
