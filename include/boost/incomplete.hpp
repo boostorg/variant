@@ -20,9 +20,8 @@
 #include "boost/incomplete_fwd.hpp"
 
 #include "boost/checked_delete.hpp"
+#include "boost/move.hpp"
 #include "boost/mpl/if.hpp"
-
-#include "boost/move_fwd.hpp"
 
 namespace boost {
 
@@ -33,62 +32,72 @@ namespace boost {
 //
 template <typename T>
 class incomplete
+    : moveable< incomplete<T> >
 {
+public: // representation
     T* p_;
 
-public:
-    incomplete();
+public: // structors
     ~incomplete();
+    incomplete();
 
     incomplete(const incomplete& operand);
+    incomplete(move_source<incomplete> source);
 
-    incomplete& operator=(const incomplete& rhs)
+    incomplete(const T& operand);
+    incomplete(move_source<T> source);
+
+public: // modifiers
+    incomplete& operator=(incomplete rhs)
     {
-        incomplete temp(rhs);
-        return swap(temp);
+        swap(rhs);
+        return *this;
     }
 
-    incomplete& swap(incomplete& operand)
+    incomplete& operator=(move_source<incomplete> source)
     {
-        T* temp = operand.p_;
-        operand.p_ = p_;
-        p_ = temp;
+        incomplete& rhs = source.get();
+        get() = move(rhs.get());
 
         return *this;
     }
 
-    incomplete(const T& operand);
-
     incomplete& operator=(const T& rhs)
     {
         incomplete temp(rhs);
-        return swap(temp);
+        swap(temp);
+
+        return *this;
     }
 
+    incomplete& operator=(move_source<T> source)
+    {
+        T& rhs = source.get();
+        get() = move(rhs);
+
+        return *this;
+    }
+
+    void swap(incomplete& operand)
+    {
+        T* temp = operand.p_;
+        operand.p_ = p_;
+        p_ = temp;
+    }
+
+public: // queries
     T& get() { return *get_pointer(); }
     const T& get() const { return *get_pointer(); }
 
     T* get_pointer() { return p_; }
     const T* get_pointer() const { return p_; }
-
-private:
-    enum DoMove { do_move };
-    incomplete(DoMove, incomplete& source)
-        : p_(source.p_)
-    {
-        // The following is allowed because move semantics do not
-        // require the source to be useable after moving:
-        source.p_ = 0;
-    }
-
-public:
-    incomplete& move_to(void* dest)
-    {
-        return *(
-              new(dest) incomplete(do_move, *this) // nothrow
-            );
-    }
 };
+
+template <typename T>
+incomplete<T>::~incomplete()
+{
+    boost::checked_delete(p_);
+}
 
 template <typename T>
 incomplete<T>::incomplete()
@@ -98,9 +107,16 @@ incomplete<T>::incomplete()
 
 template <typename T>
 incomplete<T>::incomplete(const incomplete& operand)
-    : p_(new T(operand.get()))
+    : p_(new T( operand.get() ))
 {
 }
+
+template <typename T>
+incomplete<T>::incomplete(move_source<incomplete> source)
+    : p_(new T( move(source.get().get()) ))
+{
+}
+
 
 template <typename T>
 incomplete<T>::incomplete(const T& operand)
@@ -109,9 +125,9 @@ incomplete<T>::incomplete(const T& operand)
 }
 
 template <typename T>
-incomplete<T>::~incomplete()
+incomplete<T>::incomplete(move_source<T> source)
+    : p_(new T( move(source.get()) ))
 {
-    boost::checked_delete(p_);
 }
 
 // function template swap
@@ -123,23 +139,6 @@ inline void swap(incomplete<T>& lhs, incomplete<T>& rhs)
 {
     lhs.swap(rhs);
 }
-
-#if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-
-// class template move_traits specialization
-//
-// Enables use of move semantics with incomplete.
-//
-template <typename T>
-struct move_traits< incomplete<T> >
-{
-    void move(void* dest, incomplete<T>& src)
-    {
-        src.move_to(dest);
-    }
-};
-
-#endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION unsupported
 
 } // namespace boost
 

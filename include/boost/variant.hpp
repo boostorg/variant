@@ -74,7 +74,7 @@
 // The following are new/in-progress headers or fixes to existing headers:
 #include "boost/config/no_class_template_using_declarations.hpp"
 #include "boost/detail/variant_workaround.hpp"
-#include "boost/detail/boost_swap.hpp"
+#include "boost/swap.hpp"
 #include "boost/aligned_storage.hpp"
 #include "boost/auto_mover.hpp"
 #include "boost/extract_fwd.hpp"
@@ -83,6 +83,7 @@
 #include "boost/static_visitable.hpp"
 #include "boost/static_visitor.hpp"
 #include "boost/mpl/guarded_size.hpp"
+#include "boost/type_traits/has_nothrow_move.hpp"
 
 //////////////////////////////////////////////////////////////////////////
 // metafunction mpl::is_sequence -- dummy, always returns false
@@ -208,6 +209,28 @@ public:
     }
 };
 
+// class move_into
+//
+// Generic Visitor that moves the value it visits into the given buffer.
+//
+class move_into
+    : public static_visitor<>
+{
+    void* storage_;
+
+public:
+    explicit move_into(void* storage)
+        : storage_(storage)
+    {
+    }
+
+    template <typename T>
+    void operator()(T& operand) const
+    {
+        new(storage_) T( move(operand) );
+    }
+};
+
 // class swap_with
 //
 // Generic Visitor that swaps the value it visits with the given value.
@@ -227,7 +250,7 @@ public:
     template <typename T>
     void operator()(T& operand) const
     {
-        detail::boost_swap(operand, *reinterpret_cast<T*>(toswap_));
+        boost::swap(operand, *reinterpret_cast<T*>(toswap_));
     }
 };
 
@@ -500,12 +523,12 @@ private:
 
     typedef typename mpl::remove_if<
           types
-        , is_moveable<mpl::_1>
-        >::type non_moveable_types;
+        , has_nothrow_move_constructor<mpl::_1>
+        >::type throwing_types;
     typedef typename mpl::apply_if<
-          mpl::empty<non_moveable_types>
+          mpl::empty<throwing_types>
         , mpl::identity<detail::variant::null_storage>
-        , detail::variant::make_storage<non_moveable_types>
+        , detail::variant::make_storage<throwing_types>
         >::type storage2_t;
 
     // which_ on:
@@ -790,8 +813,9 @@ public:
         // type is default-constructible, and so variant cannot
         // support its own default-construction
         new(storage_.first().address()) A;
+
         activate_storage1(
-              0 // 0 is the index of the first bounded type
+              0    // zero is the index of the first bounded type
             );
     }
 
@@ -803,6 +827,18 @@ public:
 
         // ...and activate the *this's primary storage on success:
         activate_storage1(operand.which());
+    }
+
+    variant(move_source<variant> source)
+    {
+        variant& operand = source.get();
+
+        // Move the value of operand into *this...
+        detail::variant::move_into visitor(storage_.first().address());
+        operand.raw_apply_visitor(visitor);
+
+        // ...and activate the *this's primary storage on success:
+        activate_storage1(operand.which());         
     }
 
 private:
@@ -933,7 +969,7 @@ private:
         template <typename T>
         void assign_impl(
               const T& operand
-            , mpl::true_c// is_moveable
+            , mpl::true_c// has_nothrow_move_constructor
             )
         {
             // Attempt to make a temporary copy...
@@ -943,7 +979,8 @@ private:
             target_.destroy_content(); // nothrow
 
             // ...move the temporary copy into the target's storage1...
-            move(target_.storage_.first().address(), temp); // nothrow
+            new(target_.storage_.first().address())  // nothrow
+                T( move(temp) );
 
             // ...and activate the target's storage1:
             target_.activate_storage1(source_which_); // nothrow
@@ -952,7 +989,7 @@ private:
         template <typename T>
         void assign_impl(
               const T& operand
-            , mpl::false_c// is_moveable
+            , mpl::false_c// has_nothrow_move_constructor
             )
         {
             // Attempt a copy into target's inactive storage...
@@ -976,7 +1013,7 @@ private:
         {
             assign_impl(
                   operand
-                , mpl::bool_c< is_moveable<T>::value >()
+                , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
                 );
         }
     };
@@ -984,20 +1021,103 @@ private:
     void assign(const variant& operand)
     {
         assign_into visitor(*this, operand.which());
-        operand.raw_apply_visitor(visitor);
+        operand.raw_apply_visitor(visitor);        
     }
 
 public: // modifiers
-    template <typename T>
-    variant& operator=(const T& rhs)
+    variant& operator=(const variant& rhs)
     {
         assign(rhs);
         return *this;
     }
 
-    variant& operator=(const variant& rhs)
+    template <typename T>
+    variant& operator=(const T& rhs)
     {
+        // While potentially inefficient, the following temporary
+        // construction of a variant allows T as any type convertible
+        // to a bounded type (i.e., opposed to an exact match).
         assign(rhs);
+        return *this;
+    }
+
+private:
+    // class move_assign_into
+    //
+    // Generic visitor that moves the value it visits to the variant it is
+    // given, maintaining the strong guarantee of exception safety.
+    //
+    friend class move_assign_into;
+
+    class move_assign_into
+        : public static_visitor<>
+    {
+        variant& target_;
+        int source_which_;
+
+    public:
+        move_assign_into(variant& target, int source_which)
+            : target_(target)
+            , source_which_(source_which)
+        {
+        }
+
+    private:
+        template <typename T>
+        void move_assign_impl(
+              T& operand
+            , mpl::true_c// has_nothrow_move_constructor
+            )
+        {
+            // Destroy the target's active storage...
+            target_.destroy_content(); // nothrow
+
+            // ...move the operand into the target's storage1...
+            new(target_.storage_.first().address())  // nothrow
+                T( move(operand) );
+
+            // ...and activate the target's storage1:
+            target_.activate_storage1(source_which_); // nothrow
+        }
+
+        template <typename T>
+        void move_assign_impl(
+              T& operand
+            , mpl::false_c// has_nothrow_move_constructor
+            )
+        {
+            // Attempt a move into target's inactive storage...
+            new(target_.inactive_storage()) T( move(operand) );
+
+            // ...and upon success destroy the target's active storage...
+            target_.destroy_content(); // nothrow
+
+            // ...and if the target _was_ using storage1...
+            if (target_.using_storage1())
+                // ...then activate storage2:
+                target_.activate_storage2(source_which_); // nothrow
+            else
+                // ...otherwise, activate storage1:
+                target_.activate_storage1(source_which_); // nothrow
+        }
+
+    public:
+        template <typename T>
+        void operator()(T& operand)
+        {
+            move_assign_impl(
+                  operand
+                , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
+                );
+        }
+    };
+
+public:
+    variant& operator=(move_source<variant> source)
+    {
+        move_assign_into visitor(*this, operand.which());
+        operand.raw_apply_visitor(visitor);
+
         return *this;
     }
 
@@ -1027,7 +1147,7 @@ private:
         template <typename T>
         void swap_impl(
               T& rhs_content
-            , mpl::true_c// is_moveable
+            , mpl::true_c// has_nothrow_move_constructor
             )
         {
             // Cache rhs's which-index (because it will be overwritten)...
@@ -1038,16 +1158,14 @@ private:
 
             try
             {
-                // ...attempt to assign lhs to (now-moved) rhs:
-                rhs_ = lhs_;
+                // ...attempt to move-assign lhs to (now-moved) rhs:
+                rhs_ = move(lhs_);
             }
             catch(...)
             {
                 // In case of failure, restore rhs's old contents...
-                move(                                // nothrow
-                      boost::addressof(rhs_content)
-                    , rhs_old_content.get()
-                    );
+                new(boost::addressof(rhs_content))     // nothrow
+                    T( move(rhs_old_content.get()) );
 
                 // ...and rethrow:
                 throw;
@@ -1057,10 +1175,8 @@ private:
             lhs_.destroy_content(); // nothrow
 
             // ...move rhs's old contents to lhs's storage1...
-            move(                                  // nothrow
-                 lhs_.storage_.first().address()
-               , rhs_old_content.get()
-               );
+            new(lhs_.storage_.first().address())   // nothrow
+                T( move(rhs_old_content.get()) );
 
             // ...and activate lhs's storage1:
             lhs_.activate_storage1(rhs_old_which); // nothrow
@@ -1069,24 +1185,24 @@ private:
         template <typename T>
         void swap_impl(
               T& rhs_content
-            , mpl::false_c// is_moveable
+            , mpl::false_c// has_nothrow_move_constructor
             )
         {
             // Cache rhs's which-index (because it will be overwritten)...
             int rhs_old_which = rhs_.which();
 
-            // ...copy rhs's content into lhs's inactive storage...
-            new(lhs_.inactive_storage()) T(rhs_content);
+            // ...move rhs's content into lhs's inactive storage...
+            new(lhs_.inactive_storage()) T(move(rhs_content));
 
             try
             {
-                // ...attempt to assign lhs to (now-copied) rhs:
-                rhs_ = lhs_;
+                // ...attempt to move-assign lhs to (now-copied) rhs:
+                rhs_ = move(lhs_);
             }
             catch(...)
             {
                 // In case of failure, destroy the copied value...
-                reinterpret_cast<T*>(lhs_.inactive_storage())->~T(); // nothrow
+                static_cast<T*>(lhs_.inactive_storage())->~T(); // nothrow
             }
 
             // In case of success, destroy lhs's active storage...
@@ -1111,13 +1227,13 @@ private:
         {
             swap_impl(
                   rhs_content
-                , mpl::bool_c< is_moveable<T>::value >()
+                , mpl::bool_c< has_nothrow_move_constructor<T>::value >()
                 );
         }
     };
 
 public:
-    variant& swap(variant& rhs)
+    void swap(variant& rhs)
     {
         // If the types are the same...
         if (which() == rhs.which())
@@ -1125,15 +1241,13 @@ public:
             // ...then swap the values directly:
             detail::variant::swap_with visitor(active_storage());
             rhs.raw_apply_visitor(visitor);
-
-            return *this;
         }
-
-        // Otherwise, perform general variant swap:
-        swap_variants visitor(*this, rhs);
-        rhs.raw_apply_visitor(visitor);
-
-        return *this;
+        else
+        {
+            // Otherwise, perform general variant swap:
+            swap_variants visitor(*this, rhs);
+            rhs.raw_apply_visitor(visitor);
+        }
     }
 
 public: // queries
@@ -1144,7 +1258,8 @@ public: // queries
 
     const std::type_info& type() const
     {
-        return this->apply_visitor(detail::variant::reflect());
+        detail::variant::reflect visitor;
+        return this->apply_visitor(visitor);
     }
 
 private:
