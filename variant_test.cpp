@@ -16,12 +16,8 @@
 
 // Headers whose facilities are to be tested:
 #include "boost/variant.hpp"
-#include "boost/extract.hpp"
 #include "boost/incomplete.hpp"
 #include "boost/type_switch.hpp"
-#include "boost/visitor/apply_visitor.hpp"
-#include "boost/visitor/static_visitor.hpp"
-#include "boost/visitor/visitor_ptr.hpp"
 
 // Support headers:
 #include <iostream>
@@ -98,6 +94,11 @@ struct handle_double
         std::cout << "double(" << d << ')';
     }
 };
+
+int return_int(const int& i)
+{
+    return i;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // incomplete types example (thanks to Itay Maman)
@@ -285,26 +286,37 @@ int test_main( int, char *[] )
             ));
     }
 
-    // extract<T> tests
+    // get<T> tests
     {
         double d = 12.345;
         my_variant var(d);
+        const my_variant& cvar = var;
 
-        boost::extract<int> xi(var);
+        // expected pass
         BOOST_TEST((
-              xi.check() == false
-            ));
-
-        boost::extract<double> xd(var);
-        BOOST_TEST((
-              xd.check() == true
+              boost::get<double>(var) == d
             ));
         BOOST_TEST((
-              xd() == d
+              boost::get<const double>(cvar) == d
+            ));
+        double* pd = boost::get<double>(&var);
+        BOOST_TEST((
+               pd && *pd == d
+            ));
+        const double* pcd = boost::get<const double>(&cvar);
+        BOOST_TEST((
+               pcd && *pcd == d
             ));
 
+        // expected fail
         BOOST_TEST((
-              boost::extract<double>(var) == d
+              !boost::get<double>(&cvar)
+            ));
+        BOOST_TEST((
+              !boost::get<int>(&var)
+            ));
+        BOOST_TEST((
+              !boost::get<my_variant>(&var)
             ));
     }
 
@@ -344,12 +356,12 @@ int test_main( int, char *[] )
 
     // visitor_ptr/apply_visitor (w/ ptr) tests
     {
-        std::cout << "\n\n* variant apply visitor_ptr tests:\n";
-
         my_variant var(42);
 
-        std::cout << "\nexpected int = 42; actual = ";
-        boost::apply_visitor(boost::visitor_ptr(&handle_int), var);
+        int result = boost::apply_visitor(boost::visitor_ptr(&return_int), var);
+        BOOST_TEST((
+              result == 42
+            ));
     }
 
     // type_switch tests

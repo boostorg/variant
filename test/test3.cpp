@@ -1,38 +1,27 @@
 // File: test3.cpp
 
 #include "boost/test/minimal.hpp"
-
 #include "boost/variant.hpp"
 #include "boost/incomplete.hpp"
-#include "boost/visitor/apply_visitor.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <string>
 
-
 /////////////////////////////////////////////////////////////////////
-
 
 using boost::variant;
 using boost::incomplete;
 using std::cout;
 using std::endl;
 
-
 /////////////////////////////////////////////////////////////////////
-
-
-
 /////////////////////////////////////////////////////////////////////
-
 
 struct Add;
 struct Sub;
 
 typedef variant<int, incomplete<Add>, incomplete<Sub> > Expr;
-
-
 
 struct Sub
 {
@@ -57,7 +46,6 @@ struct Add
 Sub::Sub() { }
 Sub::Sub(const Expr& l, const Expr& r) : lhs_(l), rhs_(r) { }
 Sub::Sub(const Sub& other) : lhs_(other.lhs_), rhs_(other.rhs_) { }
-
 
 
 //

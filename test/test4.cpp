@@ -1,9 +1,9 @@
 // File: test4.cpp
 
 #include "boost/test/minimal.hpp"
-
 #include "boost/variant.hpp"
 #include "boost/incomplete.hpp"
+
 #include "varout.h"
 #include "jobs.h"
 

@@ -1,11 +1,10 @@
 // File: test6.cpp
 
 #include "boost/test/minimal.hpp"
-
+#include "boost/variant.hpp"
 
 #include <iostream>
 
-#include "boost/variant.hpp"
 #include "jobs.h"
 #include "varout.h"
 

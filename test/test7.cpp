@@ -1,9 +1,8 @@
 // File: test7.cpp
 
 #include "boost/test/minimal.hpp"
-
-#include "boost/config.hpp"
 #include "boost/variant.hpp"
+
 #include "jobs.h"
 #include "varout.h"
 

@@ -1,11 +1,7 @@
 // File: test8.cpp
 
 #include "boost/test/minimal.hpp"
-
 #include "boost/variant.hpp"
-#include "boost/extract.hpp"
-#include "boost/visitor/static_visitor.hpp"
-#include "boost/visitor/apply_visitor.hpp"
 
 #include <iostream>
 #include <vector>
@@ -35,17 +31,15 @@ struct int_sum : static_visitor<void>
 template <typename T, typename Variant>
 T& check_pass(Variant& v, T value)
 {
-    BOOST_CHECK(extract<T>(v).check() == true);
+    BOOST_CHECK(get<T>(&v));
 
     try
     {
-//        T& r = extract<T>(v);
-        extract<T> x(v);
-        T& r = x();
+        T& r = get<T>(v);
         BOOST_CHECK(r == value);
         return r;
     }
-    catch(boost::bad_extract&)
+    catch(boost::bad_get&)
     {
         throw; // must never reach
     }
@@ -54,16 +48,14 @@ T& check_pass(Variant& v, T value)
 template <typename T, typename Variant>
 void check_fail(Variant& v)
 {
-    BOOST_CHECK(extract<T>(v).check() == false);
+    BOOST_CHECK(!get<T>(&v));
 
     try
     {
-//        T& r = extract<T>(v);
-        extract<T> x(v);
-        T& r = x();
+        T& r = get<T>(v);
         BOOST_CHECK(false); // should never reach
     }
-    catch(boost::bad_extract&)
+    catch(boost::bad_get&)
     {
         // (do nothing here)
     }
@@ -74,7 +66,7 @@ int test_main(int , char* [])
    int_sum acc;
    t_var1 v1 = 800;
 
-   // check extract on non-const variant
+   // check get on non-const variant
    {
       int& r1 = check_pass<int>(v1, 800);
       
@@ -107,5 +99,3 @@ int test_main(int , char* [])
 
    return boost::exit_success;
 }
-
-

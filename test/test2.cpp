@@ -1,12 +1,12 @@
 // File: test2.cpp
 
 #include "boost/test/minimal.hpp"
-
 #include "boost/variant.hpp"
+
 #include "jobs.h"
 #include "varout.h"
 
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <algorithm>
 

@@ -1,9 +1,8 @@
 // File: test5.cpp
 
 #include "boost/test/minimal.hpp"
-
 #include "boost/variant.hpp"
-#include "boost/visitor/apply_visitor.hpp"
+
 #include "jobs.h"
 #include "varout.h"
 
