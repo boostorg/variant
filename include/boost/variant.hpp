@@ -43,8 +43,6 @@
 #include "boost/type_traits/is_const.hpp"
 #include "boost/type_traits/is_same.hpp"
 
-#include "boost/apply_visitor.hpp"
-
 #include "boost/mpl/apply_if.hpp"
 #include "boost/mpl/begin_end.hpp"
 #include "boost/mpl/bool_c.hpp"
@@ -73,12 +71,14 @@
 //#include "boost/mpl/find.hpp"
 //#include "boost/mpl/if.hpp"
 
-// The following are new/in-progress headers or fixes to existing headers:
+// The following are new/in-progress headers:
 #include "boost/config/no_class_template_using_declarations.hpp"
 #include "boost/aligned_storage.hpp"
+#include "boost/apply_visitor.hpp" // for user convenience
 #include "boost/extractable.hpp"
 #include "boost/incomplete_fwd.hpp"
-#include "boost/move.hpp"
+#include "boost/move/move.hpp"
+#include "boost/move/moveable.hpp"
 #include "boost/static_visitable.hpp"
 #include "boost/static_visitor.hpp"
 #include "boost/mpl/guarded_size.hpp"
@@ -128,7 +128,8 @@ namespace detail { namespace variant {
 //////////////////////////////////////////////////////////////////////////
 // (detail) metafunction max_value
 //
-// Applies ValueOp to the maximal element (as determined by ValueOp) of Sequence.
+// Applies ValueOp to the maximal element (as determined by ValueOp) of
+// specified type-sequence.
 //
 template <typename Sequence, typename ValueOp>
 struct max_value
@@ -612,7 +613,14 @@ private: // static precondition assertions
 
     // Until mpl_list_initializer (below) works, sequences are not supported
     // for compilers that do not support using declarations in templates.
-    BOOST_STATIC_ASSERT((!mpl::is_sequence<A>::type::value));
+    BOOST_STATIC_ASSERT((
+          mpl::logical_not< // !(B == void_ || is_sequence<A>)
+              mpl::logical_or<
+                  is_same<B, detail::variant::void_>
+                , mpl::is_sequence<A>
+                >
+            >::type::value
+        ));
 
 #endif // BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
 
@@ -935,6 +943,8 @@ private: // helpers, for structors (below)
 
     };
 
+    // Even though mpl-based (list) initializer always *works*, it is expensive...
+    // ...so choose preprocessor-based initializer if possible:
     typedef typename mpl::if_<
           mpl::is_sequence<A>
         , mpl_list_initializer
