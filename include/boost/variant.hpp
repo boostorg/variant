@@ -706,7 +706,7 @@ private: // representation
 
 public: // queries
 
-    int which() const
+    unsigned int which() const
     {
         // If NOT using storage1...
         if (using_storage1() == false)
@@ -1460,7 +1460,7 @@ private: // helpers, for visitation support (below)
     static
         typename Visitor::result_type
     apply_visitor_impl(
-          const int var_which // [const-ness may aid in optimization by compiler]
+          const unsigned int var_which // [const-ness may aid in optimization by compiler]
         , Variant& var
         , Visitor& visitor
         , mpl::false_c// is_last
@@ -1494,15 +1494,15 @@ private: // helpers, for visitation support (below)
     static
         typename Visitor::result_type
     apply_visitor_impl(
-          const int
+          const unsigned int
         , Variant&
         , Visitor&
         , mpl::true_c// is_last
         )
     {
-        // / This is never called at runtime: a visitor must handle at \
+        // | This is never called at runtime: a visitor must handle at |
         // | least one of the variant's types. Throw to circumvent the |
-        // \ compile-time requirement that a value is returned:        /
+        // | compile-time requirement that a value is returned:        |
         throw;
     }
 
