@@ -1,11 +1,14 @@
-
+//
+//    IMPORTANT:
+//   This test is currently deprecated !!!
+//
 
 //File: test4.cpp
 //Written by: Itay Mamamn
 
-//
-//    IMPORTANT:
-//
+
+
+
 //RDSL sequence must be use for variants with 20 params. (Currently, MPL-based 
 //variants support up to 8 params).
 //
