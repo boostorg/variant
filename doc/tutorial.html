@@ -1,3 +1,4 @@
+ <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
@@ -9,6 +10,7 @@
 
     <body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
         <table summary="header" border="0" cellpadding="7" cellspacing="0" width="100%">
+                <tr>
                 <td valign="top" width="300">
                     <h3>
                     <A HREF="..\..\..\index.htm">
@@ -314,7 +316,7 @@ Variant-to-variant assignment: Consider this case:
               // trg and src are two variants of different types
 
 </pre>
-What will <code>trg</code>'s value be, following such an assignment?</br>
+What will <code>trg</code>'s value be, following such an assignment?<br>
 <ul>
 <li>
 Case 1: If <code>rhs_type</code> is not part of <code>lhs_type</code>'s
@@ -342,8 +344,8 @@ then <code>src</code> itself will be assigned into <code>trg</code>, turning <co
                   // an std::string (Case 2)
 </pre>
 
-Note that a variant-to-variant assignment will fail - at compile time - if one 
-of <code>src</code>'s bounded types cannot be assigned to <code>trg</code> 
+Note that a variant-to-variant assignment will fail - at compile time - if one
+of <code>src</code>'s bounded types cannot be assigned to <code>trg</code>
 (due to ambiguity/lack of conversion).<br>
 For instance:
 <pre>
@@ -584,7 +586,7 @@ the code's safety and stability<BR> <br> <BR> <hr>
 
 <p>Last modified: 2002-12-04</p>
 
-<p>&copy; Copyright Eric Friedman and Itay Maman</a> 2002. Permission to
+<p>&copy; Copyright Eric Friedman and Itay Maman 2002. Permission to
 copy, use, modify, sell and distribute this software and its documentation
 is granted provided this copyright notice appears in all copies. This
 software and its documentation is provided "as is" without express or
