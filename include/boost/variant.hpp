@@ -43,6 +43,8 @@
 #include "boost/type_traits/is_const.hpp"
 #include "boost/type_traits/is_same.hpp"
 
+#include "boost/apply_visitor.hpp"
+
 #include "boost/mpl/apply_if.hpp"
 #include "boost/mpl/begin_end.hpp"
 #include "boost/mpl/bool_c.hpp"
