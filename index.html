@@ -1,323 +1,99 @@
-<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+ <html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+        <meta name="keywords" content="Variant, design pattern, generic programming, C++">
+        <link rel="stylesheet" type="text/css" href="styles.css">
 
-<head>
-<title>variant</title>
-<meta content="Eric Friedman, mailto:ebf@users.sourceforge.net" name="author">
-</head>
+        <title>Boost::variant</title>
+    </head>
 
-<body text="#000000" bgColor="#ffffff">
+    <body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+        <table summary="header" border="0" cellpadding="2" cellspacing="0" width="100%">
+                <td valign="top" width="300">
+                    <h3>
+                    <A HREF="..\..\..\index.htm">
+                    <img src="../../../c++boost.gif" alt="C++ Boost"
+width="277" height="86" BORDER=0> </A>
+                    </h3>
+                </td>
+                <td valign="top">
+                    <h1 align="center">boost::variant</a></h1>
+                </td>
+            </tr>
+        </table>
+        <hr>
 
-<h1>
-<img height="86" src="../../c++boost.gif" width="277" align="center" border="0">Header 
-&lt;<a href="../../boost/variant.hpp">boost/variant.hpp</a>&gt;</h1>
+<h2><a name="Introduction">Introduction</a></h2>
+<CODE>boost::varaint</code> offers a type-safe solution for manipulating several distinguished
+types in a unifrom manner. Once a <code>variant</code> object is instantiated, it becmoes very
+simple for the rest of the code to handle, an apparently unrelated set of types, in a
+polymorphic way. This reduces code duplications and enhances maintainability. <BR>
+<CODE>Boost::variant</CODE>'s main features are:
+<UL>
+<LI>Full value semantics</LI>
+<LI>A type-safe, Visitor-based facility for extracting the held value</LI>
+<LI>Overload resolution rules used for
+initialization/assignment/visitation</LI>
+<LI>High degree of safety thru tight compile-time checking</LI>
+<LI>Support for incomplete types and recursive variant types</LI>
+</UL>
+<br>
+<hr>
+<H2>Table of contents</H2>
+<UL>
+<li><a href="#Introduction">Introduction</a></li>
+<LI><a href="Tutorial.html">Tutorial</a>
+<UL>
+<LI><a href="tutorial.html#Motivation">Motivation</a></LI>
+<LI><a href="tutorial.html#FirstVariantProgram">First variant program</a></LI>
+<LI><a href="tutorial.html#Instantiation">Instantiation</a></LI>
+<LI><a href="tutorial.html#ValueSemantics">Value semantics</a></LI>
+<LI><a href="tutorial.html#FunctorBasedVisitation">Functor-based
+visitation</a></LI>
+</UL>
+</LI>
+
+<LI><a href="reference.html">Reference</a>
+<UL>
+<LI><a HREF="reference.html#Definitions">Definitions</a></LI>
+<UL>
+<LI><A HREF="reference.html#SetOfTypes">Set of types</A></LI>
+<LI><A HREF="reference.html#VisitorOf">Visitor of</A></LI>
+<LI><A HREF="reference.html#BoostVariantLimitTypes">BOOST_VARIANT_LIMIT_TYPES</A></LI>
+</UL>
+<LI><a href="reference.html#Synopsis">Synopsis</a></LI>
+<LI><a href="reference.html#ExceptionSafety">Exception safety</a></LI>
+<LI><a href="reference.html#Members">Members of boost::variant</a></LI>
+<LI><a href="reference.html#ApplyingVisitors">boost::apply_visitor</a></LI>
+<LI><a href="reference.html#Incomplete">boost::incomplete</a></LI>
+</UL>
+</LI>
+<LI><a href="sample.html">Sample programs</a>
+<UL>
+<LI><a href="sample.html#quick">A quick example</a></LI>
+<LI><a href="sample.html#tree">A binary tree implementation</a></LI>
+<LI><a href="sample.html#poly">Polymorphism: Inheritance Vs.
+Variants</a></LI>
+</UL>
+</LI>
+<LI><a href="misc.html">Miscellaneous</A>
 <ul>
-  <li><a href="#motivation">Motivation</a> </li>
-  <li><a href="#examples">Examples</a> </li>
-  <li><a href="#synopsis">Synopsis</a> </li>
-  <li><a href="#BoundedType"><em>BoundedType</em> requirements</a> </li>
-  <li><a href="#BOOST_VARIANT_LIMIT_TYPES"><code>BOOST_VARIANT_LIMIT_TYPES</code></a> </li>
-  <li><a href="#variant"><code>variant</code></a> </li>
-  <li><a href="#apply_visitor"><code>apply_visitor</code> support</a> </li>
-  <li><a href="#extract"><code>extract&lt;T&gt;</code> support</a> </li>
-  <li><a href="#portability">Portability</a> </li>
-  <li><a href="#credits">Credits</a>
-    <ul>
-      <li><a href="#acknowledgments">Acknowledgments</a> </li>
-      <li><a href="#bibliography">Bibliography</a> </li>
-    </ul>
-  </li>
-  </ul>
+<LI><a href="misc.html#HeaderFiles">Header files</a></LI>
+<LI><a href="misc.html#Compatibility">Compatibility</a></LI>
+<LI><a href="misc.html#Credits">Credits</a></LI>
 </ul>
+</LI>
+</UL>
+<BR>
 <hr>
-<h2><a name="motivation">Motivation</a></h2>
-<p>Many times, during the development of a C++ program, the programmer finds 
-himself in need of manipulating several distinguished types in a uniform manner. 
-Indeed,&nbsp;C++ features&nbsp;direct language support for such types through its <code>
-union</code> keyword: </p>
-<blockquote>
-  <pre>union { int i; double d; } u;
-u.d = 3.14;
-u.i = 3; // overwrites u.d (OK: u.d is a POD type)</pre>
-</blockquote>
-<p>C++'s <code>union</code> construct, however,&nbsp;is nearly useless in an 
-object-oriented environment. The construct entered the language primarily as a 
-means for preserving compatibility with C, which supports only POD types, and so 
-does not accept types exhibiting non-trivial construction or destruction:</p>
-<blockquote>
-  <pre>union {
-  int i;
-  std::string s; // illegal: std::string is not a POD type!
-};</pre>
-</blockquote>
-<p>Typical solutions to the problem often feature the dynamic-allocation of 
-objects, which are subsequently manipulated through a common base type (often a 
-virtual base class [<a href="#bib-hen01">Hen01</a>]&nbsp;or, more dangerously, a <code>void*</code>). These 
-solutions, while functional, incur a relatively significant&nbsp;abstraction penalty 
-due to the use of the free store, virtual function calls, and polymorphic 
-downcasts.</p>
-<p>The <code>variant</code> template class (inspired by Andrei Alexandrescu's 
-class of the same name described in [<a href="#bib-ale01a">Ale01</a>]) is an efficient, recursive-capable, bounded 
-discriminated union value type capable of containing both POD and non-POD value types. It 
-supports direct initialization from any type convertible to one of its bounded 
-types or from a source <code>variant</code> whose bounded types are each convertible to 
-one of the destination <code>variant</code>'s bounded types. As well, <code>
-variant</code> supports the <a href="../extract/index.html#extract"><code>
-extract&lt;T&gt;</code></a> facility for checked type-safe value extraction and the
-<a href="../apply_visitor/index.html#apply_visitor"><code>apply_visitor</code></a> 
-facility for generic visitation.</p>
-<p></p>
-<hr>
-<h2><a name="examples">Examples</a></h2>
-<p>[TODO]</p>
-<hr>
-<h2><a name="synopsis">Synopsis</a></h2>
-<p>Dependencies and library features defined in
-<a href="../../boost/variant.hpp"><code>&lt;boost/variant.hpp&gt;</code></a>: </p>
-<blockquote>
-  <pre>#include &lt;typeinfo&gt;
+<br>
+<br>
 
-#define <a href="#BOOST_VARIANT_LIMIT_TYPES">BOOST_VARIANT_LIMIT_TYPES</a> <i>implementation-defined</i>
+<p>Last modified: 2002-12-04</p>
 
-namespace boost
-{
-    template
-    &lt;
-        typename T1,
-        typename T2 = <em>implementation-defined</em>,
-        ...
-        typename TN = <em>implementation-defined</em>
-    &gt;
-    class <a href="#variant">variant</a>;
-    
-    template &lt;typename T1, typename T2, ... , typename TN&gt;
-    void swap(
-          variant&lt;T1, T2, ... , TN&gt; &amp;
-        , variant&lt;T1, T2, ... , TN&gt; &amp;
-        );
-
-    template &lt;typename T1, T2, ... , TN&gt;
-    struct <a href="#apply_visitor">apply_visitor_traits</a>&lt; variant&lt;T1, T2, ... , TN&gt; &gt;;
-    
-    template &lt;typename T1, T2, ... , TN&gt;
-    struct <a href="#extract">extract_traits</a>&lt; variant&lt;T1, T2, ... , TN&gt; &gt;;
-}
-</pre>
-</blockquote>
-<p>Test harness defined in <a href="variant_test.cpp">&quot;<code>variant_test.cpp</code>&quot;</a>.</p>
-<p></p>
-<hr>
-<h2><a name="BoundedType"><i>BoundedType</i>&nbsp;requirements</a></h2>
-<p>The requirements on types to be used in a&nbsp; <a href="#variant"><code>
-variant</code></a> are:</p>
-<ul>
-  <li>A <i>BoundedType</i> is <i>CopyConstructible</i> [20.1.3].</li>
-  <li>The destructor for a <i>BoundedType</i> upholds the no-throw 
-  exception-safety guarantee.</li>
-</ul>
-<p>A <code>variant</code>'s first bounded type has the additional requirement that it&nbsp;is <em>DefaultConstructible</em> [??].</p>
-<p></p>
-<hr>
-<h2><code><a name="#BOOST_VARIANT_LIMIT_TYPES">BOOST_VARIANT_LIMIT_TYPES</a></code></h2>
-<blockquote>
-  <pre>#define BOOST_VARIANT_LIMIT_TYPES <i>implementation-defined</i></pre>
-</blockquote>
-<p>Implementation-defined value equal to the length of <a href="#variant"><code>
-variant</code></a>'s template parameter list.</p>
-<p>Conforming implementations must evaluate the expression <code>(BOOST_VARIANT_LIMIT_TYPES >= 10)</code> as <code>true</code>.</p>
-<hr>
-<h2><a name="variant"><code>variant</code></a></h2>
-<blockquote>
-  <pre>template
-&lt;
-    typename T1,
-    typename T2 = <em>implementation-defined</em>,
-    ...
-    typename TN = <em>implementation-defined</em>
-&gt;
-class variant
-{
-public: // <a href="#structors"><i>structors</i></a>
-
-    <a href="#default-ctor">variant</a>();
-    <a href="#copy-ctor">variant</a>(const variant &amp;);
-    template &lt;typename U1, typename U2, ... , typename UN&gt;
-      <a href="#converting-ctor">variant</a>(const variant&lt;U1, U2, ... , UN&gt; &amp;);
-    template &lt;typename U&gt;
-      <a href="#template-ctor">variant</a>(const U &amp;);
-    <a href="#dtor">~variant</a>();
-
-public: // <a href="#modifiers"><i>modifiers</i></a>
-
-    variant &amp; <a href="#swap">swap</a>(variant &amp;);
-    variant &amp; <a href="#copy-assign">operator=</a>(const variant &amp;);
-    template &lt;typename U1, typename U2, ... , typename UN&gt;
-      variant &amp; <a href="#converting-assign">operator=</a>(const variant&lt;U1, U2, ... , UN&gt; &amp;);
-    template &lt;typename U&gt;
-      variant &amp; <a href="#template-assign">operator=</a>(const U &amp;);
-
-public: // <a href="#queries"><i>queries</i></a>
-
-    int <a href="#which">which</a>() const;
-    const std::type_info &amp; <a href="#type">type</a>() const;
-
-    bool <a href="#empty">empty</a>() const; // always false (<a href="../any/index.html#any">boost::any</a> compatibility)
-
-private: // <i>representation</i>
-    ...
-};</pre>
-</blockquote>
-<p>An instance of <code>variant</code> contains exactly one 
-instance of one of its bounded types, which are specified as arguments to <code>
-variant</code>'s template parameter list. The length of <code>variant</code>'s 
-template parameter list is equal to the implementation defined value
-<a href="#BOOST_VARIANT_LIMIT_TYPES"><code>BOOST_VARIANT_LIMIT_TYPES</code></a>.</p>
-<p>Each type specified as a bounded type must satisfy the <a href="#BoundedType">
-<i>BoundedType</i></a> requirements. Note that&nbsp; <code>variant</code> itself 
-satisfies <a href="#BoundedType"><i>BoundedType</i></a> requirements with 
-default construction. </p>
-<p>All members of <code>variant</code> satisfy the strong guarantee of 
-exception-safety, unless otherwise specified.</p>
-<p></p>
-<blockquote>
-  <hr>
-  <h3><a name="structors">Structors</a></h3>
-  <blockquote>
-    <pre><a name="default-ctor">variant();</a></pre>
-  </blockquote>
-  <p>Default constructor that sets content of new instance to default-constructed value of <code>variant</code>'s first bounded type. May fail with any exceptions arising from the default constructor of <code>variant</code>'s first bounded type.</p>
-  <blockquote>
-    <pre><a name="copy-ctor">variant(const variant &amp; other);</a></pre>
-  </blockquote>
-  <p>Copy constructor that copies content of <code>other</code> into new 
-  instance, so that content of new instance is equivalent in both type 
-  and value to content of <code>other</code>. May fail with any exceptions arising from the copy constructor of 
-  the contained type.</p>
-  <blockquote>
-    <pre><a name="converting-ctor">template &lt;typename U1, typename U2, ... , typename UN&gt;
-  variant(const variant&lt;U1, U2, ... , UN&gt; &amp; other);</a></pre>
-  </blockquote>
-  <p>Templated constructor makes a copy of <code>other</code>, so 
-  that content of new instance is equivalent in type and value to <code>
-  <em>BoundedTypeNN</em>(value)</code>, where <code><em>BoundedTypeNN</em></code> 
-  is one of <code>variant</code>'s bounded types for which a non-ambiguous 
-  conversion from content of <code>other</code> exists. May fail with any exceptions arising from the copy 
-  constructor of the contained type. This operation will result in a 
-  compile-time error if a non-ambiguous conversion from content of <code>
-  other</code> to one of <code>variant</code>'s bounded types does not exist.</p>
-  <blockquote>
-    <pre><a name="template-ctor">template &lt;typename U&gt;
-  variant(const U &amp; value);</a></pre>
-  </blockquote>
-  <p>Templated constructor makes a copy of <code>value</code>, so 
-  that content of new instance is equivalent in type and value to <code>
-  <em>BoundedTypeNN</em>(value)</code>, where <code><em>BoundedTypeNN</em></code> 
-  is one of <code>variant</code>'s bounded types for which a non-ambiguous conversion 
-  from <code>value</code> exists. May fail with any exceptions arising from the 
-  copy constructor of <code>U</code>. This operation will result in a 
-  compile-time error if a non-ambiguous conversion from <code>value</code> to 
-  one of <code>variant</code>'s bounded types does not exist.</p>
-  <blockquote>
-    <pre><a name="dtor">~variant();</a></pre>
-  </blockquote>
-  <p>Non-throwing destructor that releases all resources used in management of 
-  instance. </p>
-  <p></p>
-  <hr>
-  <h3><a name="modifiers">Modifiers</a></h3>
-  <blockquote>
-    <pre><a name="swap">variant &amp; swap(variant &amp; rhs);</a></pre>
-  </blockquote>
-  <p>Exchanges contents of instance&nbsp;and <code>rhs</code>. May fail with 
-  any exceptions arising from from the copy constructors of the contained types of 
-  instance or <code>rhs</code>, or from the <code>swap</code> of the contents if <code>this->type() == rhs.type()</code>.</p>
-  <blockquote>
-    <pre><a name="copy-assign">variant &amp; operator=(const variant &amp; rhs);</a></pre>
-  </blockquote>
-  <p>Copy assignment operator that copies content of <code>rhs</code> into 
-  instance,&nbsp;destroying&nbsp;previous content, so that new content is equivalent 
-  in both type and value to content of <code>rhs</code>. May fail with any 
-  exceptions arising from the copy constructor of <code>rhs</code>'s contained type.</p>
-  <blockquote>
-    <pre><a name="converting-assign">template &lt;typename U1, typename U2, ... , typename UN&gt;
-  variant &amp; operator=(const variant&lt;U1, U2, ... , UN&gt; &amp; rhs);</a></pre>
-  </blockquote>
-  <p>Templated assignment operator makes a copy of <code>rhs</code> into 
-  instance, destroying previous content, so that new content is equivalent 
-  in type and value to <code><em>BoundedTypeNN</em>(value)</code>, where <code>
-  <em>BoundedTypeNN</em></code> is one of <code>variant</code>'s bounded types 
-  for which a non-ambiguous conversion from content of <code>rhs</code> 
-  exists. May fail with any exceptions 
-  arising from the copy constructor of <code>rhs</code>'s contained type. This operation will 
-  result in a compile-time error if a non-ambiguous conversion from content 
-  of <code>rhs</code> to one of <code>variant</code>'s bounded types does not 
-  exist.</p>
-  <blockquote>
-    <pre><a name="template-assign">template &lt;typename U&gt;
-  variant &amp; operator=(const U &amp; rhs);</a></pre>
-  </blockquote>
-  <p>Templated assignment operator makes a copy of <code>rhs</code> 
-  into&nbsp;instance,&nbsp;destroying previous content, so that new content is 
-  equivalent in both type and value to <code><em>BoundedTypeNN</em>(value)</code>, 
-  where <code><em>BoundedTypeNN</em></code> is one of <code>variant</code>'s bounded 
-  types for which a non-ambiguous conversion from <code>rhs</code> exists. May fail with any exceptions arising from 
-  the copy constructor of <code>U</code>. This operation will result in a 
-  compile-time error if a non-ambiguous conversion from <code>rhs</code> to one 
-  of the variant's bounded types does not exist.</p>
-  <p></p>
-  <hr>
-  <h3><a name="queries">Queries</a></h3>
-  <blockquote>
-    <pre><a name="which">int which() const;</a></pre>
-  </blockquote>
-  <p>Non-throwing query that returns the index of the type of the contained 
-  value.</p>
-  <blockquote>
-    <pre><a name="type">const std::type_info &amp; type() const;</a></pre>
-  </blockquote>
-  <p>Non-throwing query that returns the <code>typeid</code> of the contained 
-  value. Useful for querying against types known either at compile time or only at runtime.</p>
-
-  <blockquote>
-    <pre><a name="empty">bool empty() const;</a></pre>
-  </blockquote>
-  <p>Returns <code>false</code>. Provided for <a href="../any/index.html#any">boost::any</a> compatibility.</p>
-</blockquote>
-<hr>
-<h2><a name="apply_visitor"><code>apply_visitor_traits</code></a></h2>
-<p>Specialization of the
-<a href="../apply_visitor/index.html#apply_visitor_traits"><code>
-apply_visitor_traits</code></a> class template. Enables use of the
-<a href="../apply_visitor/index.html#apply_visitor"><code>apply_visitor</code></a> 
-facility for generic visitation of a <a href="#variant"><code>variant</code></a>.
+<p>&copy; Copyright Eric Friedman and Itay Maman</a> 2002. Permission to
+copy, use, modify, sell and distribute this software and its documentation
+is granted provided this copyright notice appears in all copies. This
+software and its documentation is provided "as is" without express or
+implied warranty, and with no claim as to its suitability for any purpose.
 </p>
-<hr>
-<h2><a name="extract"><code>extract_traits</code></a></h2>
-<p>Specialization of the <a href="../extract/index.html#extract_traits"><code>
-extract_traits</code></a> class template. Enables use of the
-<a href="../extract/index.html#extract"><code>extract&lt;T&gt;</code></a> facility for 
-checked type-safe value extraction from a <a href="#variant"><code>variant</code></a>.
-</p>
-<hr>
-<h2><a name="portability">Portability</a></h2>
-<p>To date the code and test harness have been compiled and tested successfully 
-using Microsoft Visual C++ 7.0 and GNU g++ 2.95. </p>
-<hr>
-<h2><a name="credits">Credits</a></h2>
-<h3><a name="acknowledgments">Acknowledgments</a></h3>
-<p>Eric Friedman and Itay Maman designed and implemented the initial submission.</p>
-<p>Andrei Alexandrescu's work in [<a href="bib-ale01">Ale01</a>] inspired the library's design.</p>
-<p>Anthony Williams designed the method by which <code>variant</code> guarantees strong exception-safety.</p>
-<p>Douglas Gregor, Dave Abrahams, Fernando Cacciola, and others provided helpful feedback and suggestions to refine the semantics and interface of the library.</p>
-<h3><a name="bibliography">Bibliography</a></h2>
-<p><a name="bib-ale01a">[Ale01A]</a> Andrei Alexandrescu. "Generic<Programming>: Discriminated Unions (I)," C/C++ Users Journal C++ Experts Forum. April 2002. Available at <a href="http://www.cuj.com/experts/2004/alexandr.htm">&lt;http://www.cuj.com/experts/2004/alexandr.htm&gt;</a>.</p>
-<p><a name="bib-ale01b">[Ale01B]</a> Andrei Alexandrescu. "Generic<Programming>: Discriminated Unions (II)," C/C++ Users Journal C++ Experts Forum. June 2002. Available at <a href="http://www.cuj.com/experts/2006/alexandr.htm">&lt;http://www.cuj.com/experts/2006/alexandr.htm&gt;</a>.</p>
-<p><a name="bib-ale01c">[Ale01C]</a> Andrei Alexandrescu. "Generic<Programming>: Discriminated Unions (III)," C/C++ Users Journal C++ Experts Forum. August 2002. Available at <a href="http://www.cuj.com/experts/2008/alexandr.htm">&lt;http://www.cuj.com/experts/2008/alexandr.htm&gt;</a>.</p>
-<p><a name="bib-hen01">[Hen01]</a> Kevlin Henney. The Boost Any Library. 2001. See <a href="http://www.boost.org/libs/any/index.html">&lt;http://www.boost.org/libs/any/index.html&gt;</a>.</p>
-<hr>
-<div align="right">
-  <small><i>© Copyright Eric Friedman, 2002</i></small></div>
-
-</body>
-
-</html>
