@@ -7,7 +7,7 @@
 //
 // Boost.Test
 //
-#include <boost/test/minimal.hpp>
+#include "boost/test/minimal.hpp"
 
 
 //
@@ -15,7 +15,8 @@
 //
 
 
-#include <boost/variant.hpp>
+#include "boost/variant.hpp"
+#include "boost/apply_visitor.hpp"
 
 #include "jobs.h"
 #include "varout.h"
