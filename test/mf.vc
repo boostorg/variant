@@ -1,4 +1,10 @@
-# INCLUDE="c:\Program Files\Microsoft Visual Studio .NET\vc7\include";"c:\Program Files\Microsoft Visual Studio .NET\vc7\PlatformSDK\Include"
+#
+# Important! Important!
+#
+# change the environment variable INCLUDE as follows:
+#
+# C:\>set INCLUDE="c:\Program Files\Microsoft Visual Studio .NET\vc7\include";"c:\Program Files\Microsoft Visual Studio .NET\vc7\PlatformSDK\Include"
+#
 
 INC=/Id:\var\cvsroot\boost-sandbox /Id:\var\lib\boost_1_29_0 "/IC:\Program Files\Microsoft Visual Studio .NET\VC7\INCLUDE" "/IC:\Program Files\Microsoft Visual Studio .NET\VC7\PlatformSDK\include" 
 
@@ -8,16 +14,17 @@ CPPC=cl
 NAME_EXE=/Fe
 
 
-all: test1.exe test2.exe test3.exe test4.exe test5.exe test6.exe
-# all: bin/test1.exe bin/test2.exe bin/test3.exe bin/test4.exe bin/test5.exe bin/test6.exe
+all: test1.exe test2.exe test3.exe test4.exe test5.exe test6.exe test8.exe 
+#all: test8.exe s.exe
 
 run: all
-	bin\test1.exe
-	bin\test2.exe
-	bin\test3.exe
-	bin\test4.exe
-	bin\test5.exe
-	bin\test6.exe
+	test1.exe
+	test2.exe
+	test3.exe
+	test4.exe
+	test5.exe
+	test6.exe
+	test8.exe
 
 
 clean:
@@ -52,6 +59,13 @@ test5.exe: test5.cpp
 
 test6.exe: test6.cpp
 	cl test6.cpp /Id:\var\cvsroot\boost-sandbox /Id:\var\lib\boost_1_29_0 /EHsc 
+
+test8.exe: test8.cpp
+	cl test8.cpp /Id:\var\cvsroot\boost-sandbox /Id:\var\lib\boost_1_29_0 /EHsc 
+
+
+s.exe: s.cpp
+	cl s.cpp /Id:\var\cvsroot\boost-sandbox /Id:\var\lib\boost_1_29_0 /EHsc 
 
 bin:
 	mkdir bin
