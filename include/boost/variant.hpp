@@ -63,7 +63,8 @@
 #include "boost/mpl/limits/list.hpp"
 #include "boost/mpl/logical.hpp"
 #include "boost/mpl/max_element.hpp"
-#include "boost/mpl/size_of.hpp"
+#include "boost/mpl/remove_if.hpp"
+#include "boost/mpl/sizeof.hpp"
 #include "boost/mpl/transform.hpp"
 #include "boost/mpl/void.hpp"
 
@@ -81,7 +82,7 @@
 #include "boost/mpl/guarded_size.hpp"
 
 //////////////////////////////////////////////////////////////////////////
-// metafunction mpl::is_sequence 
+// metafunction mpl::is_sequence -- dummy, always returns false
 //
 // Temporary dummy implementation until a real one is implemented.
 //
@@ -140,11 +141,11 @@ struct make_storage
 private:
     BOOST_STATIC_CONSTANT(
           std::size_t
-        , max_size = (max_value< Types, mpl::size_of<_> >::type::value)
+        , max_size = (max_value< Types, mpl::sizeof_<mpl::_1> >::type::value)
         );
     BOOST_STATIC_CONSTANT(
           std::size_t
-        , max_alignment = (max_value< Types, alignment_of<_> >::type::value)
+        , max_alignment = (max_value< Types, alignment_of<mpl::_1> >::type::value)
         );
 
 public:
@@ -358,7 +359,7 @@ template <typename T> struct convert_void
 // Defines void types that are each unique and specializations of
 // convert_void that yields mpl::void_ for each voidNN type.
 //
-#define BOOST_VARIANT_DETAIL_DEFINE_VOID_N(N,_)            \
+#define BOOST_VARIANT_DETAIL_DEFINE_VOID_N(z,N,_)          \
     struct BOOST_PP_CAT(void,N);                           \
                                                            \
     template <> struct convert_void<BOOST_PP_CAT(void,N)>  \
@@ -382,7 +383,7 @@ template < BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T) >
 struct make_variant_list
 {
     // [Define a macro to convert any voidNN tags to mpl::void...]
-#   define BOOST_VARIANT_DETAIL_CONVERT_VOID(N,_)   \
+#   define BOOST_VARIANT_DETAIL_CONVERT_VOID(z, N,_)   \
         typename detail::variant::convert_void<BOOST_PP_CAT(T,N)>::type
 
     // [...so that the specified types can be passed to mpl::list...
@@ -488,7 +489,7 @@ private:
 
     typedef typename mpl::remove_if<
           types
-        , is_moveable<_>
+        , is_moveable<mpl::_1>
         >::type non_moveable_types;
     typedef typename mpl::apply_if<
           mpl::empty<non_moveable_types>
@@ -637,7 +638,7 @@ private:
             return which;
         }
 
-        #define BOOST_VARIANT_INITIALIZE_FUNCTION(N,_)         \
+        #define BOOST_VARIANT_INITIALIZE_FUNCTION(z,N,_)       \
             static int initialize(                             \
                   void* dest                                   \
                 , const BOOST_PP_CAT(T,N)& operand             \
