@@ -63,13 +63,13 @@ struct convert_void< void_ >
 };
 
 //////////////////////////////////////////////////////////////////////////
-// (detail) BOOST_NO_USING_DECLARATION_OVERLOADS workaround
+// (workaround) BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE
 //
 // Needed to work around compilers that don't support using-declaration
 // overloads. (See the variant::initializer workarounds below.)
 //
 
-#if defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
+#if defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE)
 
 // (detail) tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
 //
@@ -95,7 +95,7 @@ BOOST_PP_REPEAT(
 
 #undef BOOST_VARIANT_DETAIL_DEFINE_VOID_N
 
-#endif // BOOST_NO_USING_DECLARATION_OVERLOADS workaround
+#endif // BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE workaround
 
 }} // namespace detail::variant
 
@@ -117,7 +117,7 @@ BOOST_PP_REPEAT(
 //
 template <
 
-#if !defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
+#if !defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE)
 
     BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
         BOOST_VARIANT_LIMIT_TYPES
@@ -125,7 +125,7 @@ template <
       , detail::variant::void_
       )
 
-#else// defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
+#else// defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE)
 
     BOOST_PP_ENUM_PARAMS_WITH_DEFAULTS(
         BOOST_VARIANT_LIMIT_TYPES
@@ -133,7 +133,7 @@ template <
       , detail::variant::void//NN
       )
 
-#endif // BOOST_NO_USING_DECLARATION_OVERLOADS workaround
+#endif // BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE workaround
 
   >
 class variant;

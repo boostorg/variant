@@ -81,7 +81,7 @@
 //
 // Defined if variant does not support variant<Types> syntax (see below). 
 //
-#if defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
+#if defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE)
 #   define BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
 #endif
 
@@ -565,7 +565,7 @@ public: // queries
 private: // helpers, for structors (below)
 
 // [On compilers where using declarations in class templates can correctly avoid name hiding...]
-#if !defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
+#if !defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE)
 
     // [...use an optimal converting initializer based on the variant typelist:]
 
@@ -632,7 +632,7 @@ private: // helpers, for structors (below)
         , mpl::protect< make_initializer_node >
         >::type initializer;
 
-#else // defined(BOOST_NO_USING_DECLARATION_OVERLOADS)
+#else // defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE)
 
     // [...otherwise, use a hackish workaround based on variant's template parameters:]
 
@@ -780,7 +780,7 @@ private: // helpers, for structors (below)
     typedef preprocessor_list_initializer
         initializer;
 
-#endif // BOOST_NO_USING_DECLARATION_OVERLOADS workaround
+#endif // BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE workaround
 
     void destroy_content()
     {
