@@ -74,12 +74,11 @@
 // The following are new/in-progress headers or fixes to existing headers:
 #include "boost/config/no_class_template_using_declarations.hpp"
 #include "boost/detail/variant_workaround.hpp"
-#include "boost/swap.hpp"
 #include "boost/aligned_storage.hpp"
-#include "boost/auto_mover.hpp"
 #include "boost/extract_fwd.hpp"
 #include "boost/incomplete.hpp"
-#include "boost/move.hpp"
+#include "boost/move_fwd.hpp"
+#include "boost/move/algorithm.hpp" // for move_swap
 #include "boost/static_visitable.hpp"
 #include "boost/static_visitor.hpp"
 #include "boost/mpl/guarded_size.hpp"
@@ -250,7 +249,7 @@ public:
     template <typename T>
     void operator()(T& operand) const
     {
-        boost::swap(operand, *reinterpret_cast<T*>(toswap_));
+        boost::move_swap(operand, *static_cast<T*>(toswap_));
     }
 };
 
@@ -1154,7 +1153,7 @@ private:
             int rhs_old_which = rhs_.which();
 
             // ...move rhs_content to the side...
-            auto_mover<T> rhs_old_content(rhs_content); // nothrow
+            T rhs_old_content( move(rhs_content) ); // nothrow
 
             try
             {
@@ -1165,7 +1164,7 @@ private:
             {
                 // In case of failure, restore rhs's old contents...
                 new(boost::addressof(rhs_content))     // nothrow
-                    T( move(rhs_old_content.get()) );
+                    T( move(rhs_old_content) );
 
                 // ...and rethrow:
                 throw;
@@ -1176,7 +1175,7 @@ private:
 
             // ...move rhs's old contents to lhs's storage1...
             new(lhs_.storage_.first().address())   // nothrow
-                T( move(rhs_old_content.get()) );
+                T( move(rhs_old_content) );
 
             // ...and activate lhs's storage1:
             lhs_.activate_storage1(rhs_old_which); // nothrow
@@ -1285,7 +1284,7 @@ private:
         if (var_which == Which::value)
         {
             return visitor(
-                  *reinterpret_cast<T*>( var.active_storage() )
+                  *static_cast<T*>( var.active_storage() )
                 );
         }
 
