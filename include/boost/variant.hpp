@@ -73,9 +73,8 @@
 
 // The following are new/in-progress headers or fixes to existing headers:
 #include "boost/config/no_class_template_using_declarations.hpp"
-#include "boost/detail/variant_workaround.hpp"
 #include "boost/aligned_storage.hpp"
-#include "boost/extract_fwd.hpp"
+#include "boost/extractable.hpp"
 #include "boost/incomplete.hpp"
 #include "boost/move_fwd.hpp"
 #include "boost/move/algorithm.hpp" // for move_swap
@@ -264,6 +263,27 @@ struct reflect
     const std::type_info& operator()(const T&)
     {
         return typeid(T);
+    }
+};
+
+// class cast_to
+//
+// Generic Visitor that: if the value matches the specified type,
+// returns a pointer to the value it visits; else a null pointer.
+//
+template <typename T>
+struct cast_to
+    : public static_visitor<T*>
+{
+    template <typename U>
+    T* operator()(U&) const
+    {
+        return static_cast<T*>(0);
+    }
+
+    T* operator()(T& operand) const
+    {
+        return boost::addressof(operand);
     }
 };
 
@@ -475,11 +495,16 @@ class variant
                 )
             >
         >
-
-#if defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-    , public detail::variant_workaround_base
-#endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION workaround
-
+     , public extractable<
+          boost::variant<
+              A
+            , B
+            , BOOST_PP_ENUM_PARAMS(
+                  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+                , T
+                )
+            >
+        >
 {
 /*    typedef mpl::integral_c<unsigned, 2>
         min_list_size;
@@ -1355,6 +1380,20 @@ public:
         detail::variant::invoke_visitor<Visitor> invoker(visitor);
         return raw_apply_visitor(invoker);
     }
+
+    template <typename T>
+    T* extract()
+    {
+        detail::variant::cast_to<T> visitor;
+        return apply_visitor(visitor);
+    }
+
+    template <typename T>
+    T* extract() const
+    {
+        detail::variant::cast_to<T> visitor;
+        return apply_visitor(visitor);
+    }
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -1401,85 +1440,6 @@ void swap(
 {
     lhs.swap(rhs);
 }
-
-//////////////////////////////////////////////////////////////////////////
-// class template extract_traits<variant> specialization
-//
-// Enables the extract<T> facility for variants.
-//
-
-namespace detail { namespace variant {
-
-template <typename T>
-struct caster
-    : public static_visitor<T*>
-{
-    template <typename U>
-    T* operator()(U&) const
-    {
-        return static_cast<T*>(0);
-    }
-
-    T* operator()(T& operand) const
-    {
-        return boost::addressof(operand);
-    }
-};
-
-}} // namespace detail::variant
-
-#if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-
-template <BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
-struct extract_traits<
-  boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>
->
-{
-private:
-    typedef boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>
-        variant_t;
-
-public:
-    template <typename T>
-    static T* execute(variant_t& operand)
-    {
-        detail::variant::caster<T> visitor;
-        return operand.apply_visitor(visitor);
-    }
-
-    template <typename T>
-    static T* execute(const variant_t& operand)
-    {
-        detail::variant::caster<T> visitor;
-        return operand.apply_visitor(visitor);
-    }
-};
-
-#else// defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-
-namespace detail {
-
-template <typename T, BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
-T* variant_extract_pointer(
-      boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>& operand
-    )
-{
-    detail::variant::caster<T> visitor;
-    return operand.apply_visitor(visitor);
-}
-
-template <typename T, BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, typename T)>
-T* variant_extract_pointer(
-      const boost::variant<BOOST_PP_ENUM_PARAMS(BOOST_VARIANT_LIMIT_TYPES, T)>& operand
-    )
-{
-    detail::variant::caster<T> visitor;
-    return operand.apply_visitor(visitor);
-}
-
-} // namespace detail
-
-#endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION workaround
 
 } // namespace boost
 
