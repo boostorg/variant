@@ -992,7 +992,7 @@ public: // structors
         // type is default-constructible, and so variant cannot
         // support its own default-construction
 
-        new(storage_.first().address()) A();
+        new(storage_.first().address()) A(A());
         activate_storage1(0); // zero is the index of the first bounded type
     }
 
