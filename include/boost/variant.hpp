@@ -506,6 +506,19 @@ BOOST_PP_REPEAT(
 
 #endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS workaround
 
+// (detail) class template variant_base
+//
+// Derives the base classes of variant. Avoids having to repeat template
+// parameters for variant when passing off to base classes.
+//
+template <typename Variant>
+class variant_base
+    : public ::boost::static_visitable<Variant>
+    , public ::boost::extractable<Variant>
+    , public ::boost::moveable<Variant>
+{
+};
+
 }} // namespace detail::variant
 
 //////////////////////////////////////////////////////////////////////////
@@ -546,7 +559,17 @@ template <
 
   >
 class variant
-    : public static_visitable<
+    : public detail::variant::variant_base<
+          boost::variant<
+              A
+            , B
+            , BOOST_PP_ENUM_PARAMS(
+                  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
+                , T
+                )
+            >
+        >
+/*    : public static_visitable<
           boost::variant<
               A
             , B
@@ -566,7 +589,7 @@ class variant
                 )
             >
         >
-{
+*/{
 private: // static precondition assertions
 
 /*
@@ -1266,6 +1289,8 @@ public: // modifiers, cont.
 
     variant& operator=(move_source<variant> source)
     {
+        variant& operand = source.get();
+
         move_assign_into visitor(*this, operand.which());
         operand.raw_apply_visitor(visitor);
 
