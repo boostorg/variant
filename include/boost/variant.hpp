@@ -18,7 +18,10 @@
 #define BOOST_VARIANT_HPP
 
 // MPL as shipped in 1.29 has bug with preprocessed headers, so define following:
-#define BOOST_MPL_AUX_CONFIG_USE_PREPROCESSED_HPP_INCLUDED
+#include "boost/version.hpp"
+#if BOOST_VERSION <= 102900
+#   define BOOST_MPL_AUX_CONFIG_USE_PREPROCESSED_HPP_INCLUDED
+#endif
 
 #include <cstddef> // for std::size_t
 #include <new> // for placement new
@@ -81,7 +84,13 @@
 #include "boost/mpl/guarded_size.hpp"
 #include "boost/type_traits/has_nothrow_move.hpp"
 
-//////////////////////////////////////////////////////////////////////////
+// MPL as shipped in 1.29 does not provide is_sequence predicate, so define following:
+#if BOOST_VERSION > 102900
+
+#   include "boost/mpl/is_sequence.hpp"
+
+#else
+
 // metafunction mpl::is_sequence -- dummy, always returns false
 //
 // Temporary dummy implementation until a real one is implemented.
@@ -98,6 +107,8 @@ struct is_sequence
 
 } // namespace mpl
 } // namespace boost
+
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 // BOOST_VARIANT_LIMIT_TYPES
@@ -569,30 +580,11 @@ class variant
                 )
             >
         >
-/*    : public static_visitable<
-          boost::variant<
-              A
-            , B
-            , BOOST_PP_ENUM_PARAMS(
-                  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
-                , T
-                )
-            >
-        >
-     , public extractable<
-          boost::variant<
-              A
-            , B
-            , BOOST_PP_ENUM_PARAMS(
-                  BOOST_PP_SUB(BOOST_VARIANT_LIMIT_TYPES, 2)
-                , T
-                )
-            >
-        >
-*/{
+{
 private: // static precondition assertions
 
-/*
+#if !defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+
     typedef mpl::integral_c<unsigned, 2>
         min_list_size;
 
@@ -600,20 +592,27 @@ private: // static precondition assertions
     // Compile error here indicates that variant's variadic
     // template parameter list was used inappropriately.
     BOOST_STATIC_ASSERT((
-          mpl::logical_or< // (is_sequence<A> && size<A> >= 2) || B != void_
-              mpl::logical_and<
+          mpl::logical_or< // B != void_ || (is_sequence<A> && size<A> >= 2)
+              mpl::logical_not<
+                  is_same<B, detail::variant::void_>
+                >
+            , mpl::logical_and<
                   mpl::is_sequence<A>
                 , mpl::equal_to<
                       mpl::guarded_size<A, min_list_size>
                     , min_list_size
                     >
                 >
-            , mpl::logical_not<
-                  is_same<B, detail::variant::void_>
-                >
             >::type::value
         ));
-*/
+
+#else // defined(BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS)
+
+    // Until mpl_list_initializer (below) works, sequences are not supported
+    // for compilers that do not support using declarations in templates.
+    BOOST_STATIC_ASSERT((!mpl::is_sequence<A>::type::value));
+
+#endif // BOOST_NO_CLASS_TEMPLATE_USING_DECLARATIONS
 
 public: // typedefs
 
