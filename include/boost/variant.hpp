@@ -75,7 +75,7 @@
 #include "boost/aligned_storage.hpp"
 #include "boost/extractable.hpp"
 #include "boost/incomplete_fwd.hpp"
-#include "boost/move/move.hpp"
+#include "boost/move.hpp"
 #include "boost/static_visitable.hpp"
 #include "boost/static_visitor.hpp"
 #include "boost/mpl/guarded_size.hpp"
