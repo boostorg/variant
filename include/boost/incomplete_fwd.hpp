@@ -19,9 +19,11 @@
 
 namespace boost {
 
+//////////////////////////////////////////////////////////////////////////
 // class template incomplete
 //
 // Treats an incomplete type as a value type.
+//
 template <typename T> class incomplete;
 
 } // namespace boost

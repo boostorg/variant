@@ -35,9 +35,11 @@ class incomplete
     : moveable< incomplete<T> >
 {
 public: // representation
+
     T* p_;
 
 public: // structors
+
     ~incomplete();
     incomplete();
 
@@ -48,6 +50,7 @@ public: // structors
     incomplete(move_source<T> source);
 
 public: // modifiers
+
     incomplete& operator=(incomplete rhs)
     {
         swap(rhs);
@@ -86,11 +89,13 @@ public: // modifiers
     }
 
 public: // queries
+
     T& get() { return *get_pointer(); }
     const T& get() const { return *get_pointer(); }
 
     T* get_pointer() { return p_; }
     const T* get_pointer() const { return p_; }
+
 };
 
 template <typename T>
