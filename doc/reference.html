@@ -1,0 +1,397 @@
+ <html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+        <meta name="keywords" content="Variant, design pattern, generic programming, C++">
+        <link rel="stylesheet" type="text/css" href="styles.css">
+
+        <title>Boost::variant</title>
+    </head>
+
+    <body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+        <table summary="header" border="0" cellpadding="7" cellspacing="0" width="100%">
+                <td valign="top" width="300">
+                    <h3>
+                    <A HREF="..\..\..\index.htm">
+                    <img src="../../../c++boost.gif" alt="C++ Boost"
+width="277" height="86" BORDER=0> </A>
+                    </h3>
+                </td>
+
+                <td valign="top">
+                    <h1 align="center"><a
+href='index.html'>[boost::variant]</A>  Reference</h1>
+
+                </td>
+            </tr>
+        </table>
+        <hr>
+
+
+
+<p>
+<UL>
+<LI><a href="#Definitions">Definitions</a></LI>
+<UL>
+<LI><A HREF="#SetOfTypes">Set of types</A></LI>
+<LI><A HREF="#VisitorOf">Visitor of</A></LI>
+<LI><A HREF="#BoostVariantLimitTypes">BOOST_VARIANT_LIMIT_TYPES</A></LI>
+</UL>
+<LI><a href="#Synopsis">Synopsis</a></LI>
+<LI><a href="#ExceptionSafety">Exception safety</a></LI>
+<LI><a href="#Members">Members of boost::variant</a></LI>
+<LI><a href="#ApplyingVisitors">boost::apply_visitor</a></LI>
+<LI><a href="#Incomplete">boost::incomplete</a></LI>
+</UL>
+<HR>
+<BR>
+<h2><a name="Definitions">Definitions</a></h2>
+<BR>
+<a name="SetOfTypes"><h3>- Set of Types / Bounded Types:</h3></A>
+Assuming that:<br>
+<UL>
+<LI><CODE>variant_type</code> is 
+a concrete variant instantiation defined as: <CODE>typedef 
+variant&lt;T1 T2, ... TN&gt; variant_type;</CODE></LI>
+</UL>
+
+Then, the types <code>T1, T2, ... TK</code> are referred to as the <B>Set 
+of types of variant_type</b> (aka: <B>Bounded types of variant_type</B>), if the 
+following conditions are met: <BR>
+<BR>
+<UL>
+<LI>Type requirements:
+<UL>
+<LI>The types (<CODE>T1, T2, ... TK</code>) must be copy-constructible 
+with a non-throwing destructor.
+<LI>The first type (<CODE>T1</CODE>) must be default-constructible.
+<LI>Each of the types (<CODE>T1, T2, ... TK</code>) must not be top-level 
+const qualified.
+<LI>The types (<CODE>T1, T2, ... TK</code>) must be complete at the point 
+of instantiation, unless <a href="#Incomplete">incomplete&lt;T&gt;</a> is 
+used.
+</UL>
+</LI>
+<BR>
+<LI>Additional requirements:
+<UL>
+<LI>At least two types must be specified.
+<LI>The maximum number of types depends on the compiler, and is specified 
+by the preprocessor symbol <CODE>BOOST_VARIANT_LIMIT_TYPES</CODE>.
+<LI>Multiple occurrences of a type within a set of types are not allowed.
+</UL>
+</LI>
+</UL>
+<BR>
+<BR>
+
+<a name="VisitorOf"><h3>- Visitor Of:</h3></A>
+Assuming that:<br>
+<UL>
+<LI><code>functor</CODE> is an instance of a given a 
+function object, <CODE>functor_type</CODE></LI>
+<LI><CODE>variant_type</code> is 
+a concrete variant instantiation defined as: <CODE>typedef 
+variant&lt;T1 T2, ... TN&gt; variant_type;</CODE></LI>
+<LI><CODE>t1, t2, ..., tn</CODE> are instances of <CODE>T1, T2, ..., 
+TN</CODE> (respectively)</LI>
+<LI><code>E1, E2, ..., En</code> denote these C++ expressions:
+<PRE>     functor(t1); // E1
+     functor(t2); // E2
+     .
+     .
+     functor(tn); // En
+</PRE>
+</LI>
+</UL>
+then <B>functor_type is a visitor of variant_type</B>, if for each expression <code>Ei</code>
+(of {<Code>E1, E2, ..., En</CODE>} ), these conditions are met:
+<UL>
+<LI><code>Ei</code> is unambiguously defined
+<LI><code>Ei</code>'s return type is implicitly-convertible to
+<CODE>typename functor_type::result_type</code>
+</UL>
+<BR>
+<BR>
+<a name="BoostVariantLimitTypes"><h3>- BOOST_VARIANT_LIMIT_TYPES</h3></A>
+<pre>#define BOOST_VARIANT_LIMIT_TYPES <i>implementation-defined</i></pre>
+Implementation-defined value equal to the length of <code>boost::variant</code>'s 
+template parameter list.<br>
+Conforming implementations must evaluate the expression 
+<code>(BOOST_VARIANT_LIMIT_TYPES >= 10)</code> as <code>true</code>.<br>
+<BR>
+<BR>
+<HR>
+
+<BR>
+<h2><a name="Synopsis">Synopsis</a></h2>
+
+<pre>
+template
+&lt;
+    typename T1
+    typename T2,
+    typename T3 = <i>implementation-defined</i>,
+    typename T4 = <i>implementation-defined</i>,
+    .
+    .
+    typename TN = <i>implementation-defined</i>
+&gt;
+struct variant 
+{
+   ~variant() { }
+
+   variant()  { }
+
+
+   template&lt;typename OperandType&gt;
+   variant(const OperandType& operand);
+
+   variant(const variant& other);
+
+   void swap(variant& other);
+
+   template&lt;class OperandType&gt;
+   variant& operator=(const OperandType& rhs);
+
+   variant& operator=(const variant& rhs);
+
+   const std::type_info& type() const;
+   bool empty() const;
+   int which() const;
+};
+
+
+</pre>
+<BR>
+<HR>
+<BR>
+<h2><a name="ExceptionSafety">Exception-safety</a></h2>
+<ul>
+<li>All constructors and modifiers of <code>boost::variant</code> satisfy
+the strong guarantee of exception-safety.</li>
+<li>The destructor, and all queries, uphold the no-throw exception-safety guarantee.</li>
+</ul>
+<br>
+<hr>
+<br>
+
+<h2><a name="Members">Members of boost::variant</a></h2>
+<BR>
+<h3>Constructors</h3>
+<pre>
+variant()  { }
+
+</pre>
+<p>Default constructor. Initializes <code>*this</code> with the default
+value of the first type (<CODE>T1</CODE>). May fail with any exceptions
+arising from the default constructor of <code>T1</code>.<BR>
+<BR>
+<BR>
+<a name="CopyConstructor"></a>
+<PRE>
+variant(const variant& other);
+
+</PRE>
+<P>Standard copy constructor. Copies the content of <CODE>other</CODE>
+into <code>*this</CODE>. May fail with any exceptions arising from the copy
+constructor of <code>other</code>'s contained type.<br>
+<BR>
+<BR>
+<a name="TemplatedConstructor"></a>
+<PRE>
+template&lt;typename OperandType&gt;
+variant(const OperandType& operand);
+</pre>
+Templated constructor. Initializes <code>*this</code> according to the following logic:
+
+<ol>
+<li>If <CODE>OperandType</CODE> is <b>not a <CODE>variant</CODE></b>:
+<ul>
+<li>If <code>OperandType</code> belongs to <code>*this</code>'s set-of-types, initalize <code>*this</code> with a copy of <code>operand</code>.</li>
+<li>Otherwise, use overload resolution rules to find the best conversion for <code>OperandType</code>, and initialize <code>*this</code> with a copy of the converted <code>operand</code>. <br>
+If the conversion is ambigious, or if none exists, a compiler error is generated.</li>
+</ul>
+</li>
+<li>Otherwise (i.e: <code>OperandType</code> <b>is a <code>variant</code></b>):
+<ul>
+<li>If <CODE>OperandType</CODE> does not appear on <CODE>*this</CODE>'s set
+of types, then <CODE>*this</CODE> is initialized with <code>operand</code>'s held value
+(as described in item 1, above).</li>
+<li>Othewise, <CODE>operand</CODE> is assigned, as-is, into
+<code>*this</code>. Hence, the held value of <code>*this</code> is, by itself, a variant</li>.
+</ul>
+</li>
+</ol>
+May fail with any exceptions arising from the copy constructor of <code>OperandType</code>.<br>
+<BR>
+<BR>
+<PRE>
+~variant();
+
+</pre>
+Non-throwing destructor that releases all resources used in management of <code>*this</code>,
+as well as, the currently held value.
+<BR>
+<BR>
+<br>
+<h3>Modifiers</h3>
+<pre>
+void swap(variant& other);
+
+</pre>
+<p>Exchanges contents of <code>*this</code> and <code>other</code>.<BR>
+May fail with any exceptions arising from the copy constructors of the contained types of <CODE>*this</code>
+or <code>other</code>, or from the swap primitive of the held values,
+if <code>this->type() == other.type()</code>.<br>
+<BR>
+<BR>
+<pre>
+variant& operator=(const variant& rhs);
+
+</pre>
+Copy assignment. Assigns <code>rhs</code>'s value into <code>*this</code>. The old value held by
+<code>*this</code> is properly destroyed.<BR>
+This operator follows the same behaviour as <CODE>variant</code>'s <a href="#CopyConstructor">copy constructor</a>.<BR>
+<BR>
+<BR>
+<pre>
+template&lt;class OperandType&gt;
+variant& operator=(const OperandType& rhs);
+</pre>
+<P>Assigns <CODE>rhs</CODE> into <code>*this</code>. The old value held by
+<code>*this</code> is properly destroyed.<BR>
+This operator follows the same behaviour as
+<CODE>variant</code>'s <a href="#TemplatedConstructor">templated constructor</a>.<BR>
+<BR>
+<BR>
+<h3>Queries</h3>
+<pre>
+const std::type_info& type() const;
+
+</pre>
+Non-throwing query that returns the <code>typeid()</code> of the contained value<BR>
+<BR>
+<br>
+<pre>
+bool empty() const;
+
+</pre>
+Always returns <CODE>false</CODE>. This non-throwing member function is provided
+for <A HREF="../../any/index.html">boost::any</A> compatibility.<BR>
+Note that a <CODE>variant</CODE> object is never empty. The default
+constructor initializes the object with the default value of the first
+type.<BR>
+<br>
+<br>
+<pre>
+int which() const;
+
+</pre>
+A Non-throwing query that returns the index of the type of the contained value.<br>
+<BR>
+<HR>
+<BR>
+<h2><a name="ApplyingVisitors">boost::apply_visitor</a></h2>
+<br>
+<pre>
+// Binary form
+template&lt;typename VisitorType, typename VariantType&gt;
+typename VisitorType::result_type apply_visitor(VisitorType& visitor,
+   VariantType& var_inst);
+
+// Unary form
+template&lt;class VisitorType&gt;
+boost::apply_visitor_t&lt;VisitorType&gt; apply_visitor(VisitorType& visitor);
+
+template &lt;typename VisitorType&gt;
+class apply_visitor_t
+{
+public:
+    typedef typename VisitorType::result_type result_type;
+
+    template &lt;typename VariantType&gt;
+    result_type operator()(VariantType& var_inst);
+
+    ...
+};
+
+</PRE>
+<CODE>boost::apply_visitor(visitor, var_inst)</CODE> passes the variant
+object, <code>var_inst</code>, to the given visitor
+(<code>visitor</code>). This is equivalent to calling
+<CODE>visitor</code>'s function-call operator, with
+<CODE>var_inst</CODE>'s currently held value.<br>
+<CODE>VisitorType</code>
+must be a <a href="#VisitorOf">visitor of</a> <CODE>VariantType</CODE>.
+See <A HREF="tutorial.html#FunctorBasedVisitation"> Functor-based
+visitation</A> for an in-depth description of visitors.<BR>
+<BR>
+The unary form of <CODE>apply_visitor()</CODE> tranforms the given visitor
+into a unary function object which accepts a variant object, thus,
+the following two lines are equivalent:<BR>
+<PRE>
+      boost::apply_visitor(visitor, var_inst); // Binary form
+      boost::apply_visitor(visitor)(var_inst); // Unary form
+</PRE>
+<BR>
+Consequently, the unary <CODE>apply_visitor()</CODE> function, is
+highly useful when <code>std::for_each</CODE> (or a similar STL algorithm)
+needs to be applied on a sequence of <CODE>variant</code> objects, as illustrated in 
+the <a href="sample.html#poly">Polymorphism: Inheritance Vs. Variants</a> sample.<br>
+<BR>
+<hr>
+<BR>
+<h2><a name="Incomplete">boost::incomplete</a></h2>
+
+<CODE>incomplete&lt;T&gt;</CODE> is a template class, which allows a
+<CODE>variant</CODE> type to be instantiated with incomplete types.<br>
+By specifying <CODE>incomplete&lt;T&gt;</CODE> as one of the actual template
+parameters, the instantiated variant will be able to handle
+values of type <CODE>T</code>, although <CODE>T</CODE> is incomplete at
+the instantiation point.<br>
+<CODE>incomplete&lt;&gt;</CODE> is typically used for solving circular
+dependencies, but, more importantly, it also enables the creation of
+<B>recursive</B>, variant-based, constructs.<BR>
+The snip below demonstrates the usage of <CODE>Incomplete&lt;&gt;</CODE>.
+A complete sample program is available <A
+HREF="sample.html#tree">here</A>.
+
+<PRE>
+   using boost::variant;
+   using boost::incomplete;
+   
+   struct non_leaf_node; // Forward declaration
+   
+   // Define a tree_node variant with these two types:
+   //   (1) int, (2) non_leaf node
+   typedef variant
+   &lt;
+      int,
+      incomplete&lt;non_leaf_node&gt;  // non_leaf_node is incomplete at
+                                 // this point so it must be wrapperd
+                                 // by incomplete&lt;&gt;
+   &gt; tree_node;
+
+   struct non_leaf_node
+   {
+      non_leaf_node(const non_leaf_node& other)
+         :   left_(other.left_), right_(other.right_), num_(other.num_)
+      { }
+
+      int num_;
+      tree_node left_;
+      tree_node right_;
+   };
+</PRE>
+<BR>
+<HR>
+<BR>
+
+<p>Last modified: 2002-12-04</p>
+
+<p>&copy; Copyright Eric Friedman and Itay Maman</a> 2002. Permission to
+copy, use, modify, sell and distribute this software and its documentation
+is granted provided this copyright notice appears in all copies. This
+software and its documentation is provided "as is" without express or
+implied warranty, and with no claim as to its suitability for any purpose.
+</p>

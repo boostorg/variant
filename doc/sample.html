@@ -1,0 +1,338 @@
+ <html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+        <meta name="keywords" content="Variant, design pattern, generic programming, C++">
+        <link rel="stylesheet" type="text/css" href="styles.css">
+
+        <title>Boost::variant</title>
+    </head>
+
+    <body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+        <table summary="header" border="0" cellpadding="7" cellspacing="0" width="100%">
+            <tr>
+                <td valign="top" width="300">
+                    <h3>
+                    <A HREF="..\..\..\index.htm">
+                    <img src="../../../c++boost.gif" alt="C++ Boost" 
+width="277" height="86" BORDER=0> </A>
+                    </h3>
+                </td>
+
+                <td valign="top">
+<h1 align="center"><a href='index.html'>[boost::variant]</A>  Sample 
+programs </h1> </td>
+            </tr>
+        </table>
+
+
+
+
+<HR>
+
+<h2><a name="quick">A quick example</a></h2>
+
+This program, computes the total sum of numerical values of various types.<BR>
+<BR>
+The code defines a <CODE>variant</CODE> object, <CODE>v1</CODE>, which
+can hold a value of this set of types: <CODE>short, int, float</CODE> and
+<code>double</CODE>. <br>
+
+<CODE>double_sum</CODE> is a visitor class: Its function-call
+operator, <code>double_sum::operator()</code>, accepts a single value, and
+adds it to the <CODE>total_</CODE> data member. The program uses the
+construct: "<CODE>boost::apply_visitor(visitor, variant);</CODE>" to
+invoke the visitor object, <CODE>(ds)</CODE> on the specified variant
+<CODE>(v1)</CODE>. <BR>
+Naturally, <CODE>ds.total_</Code> holds the
+total of all previously "visited" values, and - therefore - at the bottom
+ of <CODE>main()</code>, its value is: 5 + 16 + 3.11 + 15.3 = 39.41.
+
+<PRE>
+#include &lt;iostream&gt;
+#include &lt;cassert&gt;
+
+#include&lt;boost/variant.hpp&gt;
+#include&lt;boost/apply_visitor.hpp&gt;
+
+struct double_sum : boost::generic_visitor&lt;double&gt;
+
+{
+   double_sum() : total_(0.0) { }
+
+   template&lt;class X&gt;
+   double operator()(X x) 
+   { 
+      total_ += x; 
+      return total_;
+   }
+   
+   double total_;
+};
+	
+int main(int, char* [] )
+{   
+   double_sum ds;      
+   boost::variant&lt;short, int, float, double&gt; v1;  
+   
+   v1 = short(5);
+   boost::apply_visitor(ds, v1);  // Apply ds to v1 (1st time)
+   
+   v1 = 16;
+   boost::apply_visitor(ds, v1);  // 2nd time
+   
+   v1 = 3.11f;
+   boost::apply_visitor(ds, v1);  // 3rd
+   
+   v1 = 15.3; 
+   double total = boost::apply_visitor(ds, v1);  // 4th
+   
+   // Expected output: "Total = 39.41"
+   std::cout &lt;&lt; "Total = " &lt;&lt; total &lt;&lt; std::endl;
+
+   return 0; 
+}
+
+
+</pre>
+<BR>
+<HR>
+<BR>
+<h2><a name="tree">A binary tree implementation</a></h2>
+This sample program shows how <CODE>incomplete&lt;T&gt;</code> can be 
+used to define recursive <CODE>variants</CODE>.<br>
+The code creates a small binary tree and then performs an in-order 
+walk thru its nodes, producing this output: 3 4 6 10 19 20 23<BR>
+<PRE>
+#include &lt;iostream&gt;
+#include &lt;boost/variant.hpp&gt;
+#include &lt;boost/apply_visitor.hpp&gt;
+
+
+using boost::variant;
+using boost::incomplete;
+using std::cout;
+using std::endl;
+
+
+struct non_leaf_node; // Forward declaration
+
+// Define a variant with these two types:
+//   1) int
+//   2) The (incomplete) non_leaf_node struct
+typedef variant&lt;int, incomplete&lt;non_leaf_node&gt; &gt; tree_node;
+ 
+struct non_leaf_node
+{
+   non_leaf_node(const tree_node& l, int num, const tree_node& r)
+      :  left_(l), right_(r), num_(num) { }
+   non_leaf_node(const non_leaf_node& other) 
+      :  left_(other.left_), right_(other.right_), num_(other.num_)  { }
+     
+   int num_;       
+   tree_node left_;
+   tree_node right_;
+};  
+
+
+struct tree_printer : boost::generic_visitor&lt;void&gt;
+{
+   void operator()(int n) const
+   { 
+      cout &lt;&lt; n &lt;&lt; ' ';
+   }
+   
+   void operator()(const non_leaf_node& node) const
+   {
+      boost::apply_visitor(*this, node.left_);
+      cout &lt;&lt; node.num_ &lt;&lt; ' ';
+      boost::apply_visitor(*this, node.right_);
+   }
+}; 
+
+
+int main(int, char* [] )
+{
+   //Build a binary search tree:
+   non_leaf_node a(3,4, 6);
+   non_leaf_node b(19, 20, 23);
+   non_leaf_node c(a,10, b);
+   
+   tree_node root(c);
+   
+   //Perform an in-order walk
+   boost::apply_visitor(tree_printer(), root);
+      
+   return 0;
+}
+
+</PRE>
+
+<BR>
+<HR>
+<BR>
+<h2><a name="poly">Polymorphism: Inheritance Vs. Variants</a></h2>
+Let's assume we need to write a program that manipulates instances of 
+<CODE>star</CODE> and <CODE>space_ship</CODE>, where each of these 
+two classes inherits from <code> space_object</CODE>. The program 
+maintains a <CODE>vector</CODE> of pointers to these objects, which is 
+used to calculate the total weight of all <code>star</code> objects:
+<pre>
+   //
+   //  'classic' inheritance-based implementation
+   //
+   #include &lt;vector&gt;
+   #include &lt;algorithm&gt;
+   #include &lt;iostream&gt;
+   
+   struct space_object
+   {
+      virtual int weight() cosnt = 0;
+      virtual ~space_object() { }
+   };
+      
+   struct space_ship : space_object
+   {
+      int weight() const { return w_; }
+      int get_speed() const { return 15; }
+          
+      int w_;
+   };
+   
+   struct star : space_object
+   {
+      int weight() const { return w_; }
+          
+      int w_;
+   };
+         
+   struct total_weight
+   {
+      total_weight() : total_(0) { }  
+        
+      void operator(space_object* so_p)
+      {
+         if(dynamic_cast&lt;star*&gt;(so_p))
+            total_ += so_p->weight();
+      }
+      
+      int total_;
+   };
+        
+   int main(int, char* [] )
+   {   
+      typedef std::vector&lt;space_object*&gt; main_vec;
+      main_vec space_objects;
+      
+      //fill space_objects
+      // ...
+           
+      total_weight tw_job;
+      std::for_each(space_objects.begin(), space_objects.end(), 
+         tw_job);
+      
+      std::cout << "Total weight of all stars = " << tw_job.total_ 
+         << std::endl;
+            
+      return 0; 
+   }
+</PRE>
+The are several issues worth noticing about this sample:<BR>
+<UL>
+    <LI>The code is bound to define a vector of pointers, rather 
+than objects. This incurs considerable time overhead and could cause 
+memory leaks if destruction is not handled properly.
+    <LI>the dynamic_cast&lt;&gt; used by <code>total_weight::operator()</code> 
+is a costly operation. Alternatively, one can define an <code>enum</code> type which 
+will be used to correctly identify the concrete object, but this is an 
+error prone technique: the author must manually set the correct value 
+for each new concrete class.
+    <LI><CODE>total_weight</CODE> is unsafe when new classes are 
+introduced. Suppose a new class, <CODE>black_hole</CODE> - inherits 
+directly from <CODE>space_object</CODE> - is added to the code. 
+<CODE>total_weight</CODE> will silently ignore this class, possibly
+creating a havoc of run-time problems. This is a major flaw from software
+engineering standpoint.
+ 
+</UL>
+This real-life design problem can be elegantly solved using variants. 
+Here is the variant-based code:
+<pre>
+   //
+   //  Variant-based implementation
+   //
+   #include &lt;vector&gt;
+   #include &lt;algorithm&gt;
+   #include &lt;iostream&gt;
+
+   #include &lt;boost/variant.hpp&gt;
+   #include &lt;boost/apply_visitor.hpp&gt;
+   
+   struct space_ship 
+   {
+      int weight() const { return w_; }
+      int get_speed() const { return 15; }
+          
+      int w_;
+   };
+   
+   struct star 
+   {
+      int weight() const { return w_; }
+          
+      int w_;
+   };
+        
+   struct total_weight : boost::generic_visitor&lt;void&gt;
+   {
+      total_weight() : total_(0) { }  
+        
+      void operator()(const star& a_star)
+      {
+         total_ += a_star.weight();
+      }
+      
+      //space_ship objects are ignored:              
+      void operator()(const space_ship& ) { }
+      
+      int total_;
+   };
+        
+   int main(int, char* [] )
+   {   
+      typedef boost::variant&lt;star, space_ship&gt; space_var;
+      typedef std::vector&lt;space_var&gt; main_vec;
+      main_vec space_objects;
+      
+      //fill space_objects
+      // ...
+            
+      total_weight tw_job;
+      std::for_each(space_objects.begin(), space_objects.end(), 
+         boost::apply_visitor(tw_job));
+      
+      std::cout << "Total weight of all stars = " << tw_job.total_ 
+         << std::endl;
+           
+      return 0; 
+   }
+
+</pre>
+This implementation directly addresses the three issues raised by the non-variant 
+implementation: (1) The <CODE>space_objects</code> vector now holds 
+<B>objects</B> (rather than pointers), (2) <CODE>dynamic_cast&lt;&gt;</CODE>s
+are <B>not needed</b> at all, and - most importantly - (3) the compiler 
+<b>will yell</b> if <code>total_weight</CODE> is not changed, when a new 
+class is introduced.
+
+ 
+ 
+<hr>
+
+<p>Last modified: 2002-12-04</p>
+
+<p>&copy; Copyright Eric Friedman and Itay Maman</a> 2002. Permission to
+copy, use, modify, sell and distribute this software and its documentation
+is granted provided this copyright notice appears in all copies. This
+software and its documentation is provided "as is" without express or
+implied warranty, and with no claim as to its suitability for any purpose.
+</p>
