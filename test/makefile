@@ -1,9 +1,9 @@
-INC=-I..\..\..\..\boost-sandbox -I..\..\..\..\..\lib\boost_1_29_0 
+INC=-I..\..\..\..\boost-sandbox -Id:\var\lib\boost_1_29_0 
 
 
 
-# all: bin/s.exe 
-all: bin/test1.exe bin/test2.exe bin/test3.exe bin/test4.exe bin/test5.exe bin/test6.exe bin/test8.exe
+# all: bin/test7.exe 
+all: bin/test1.exe bin/test2.exe bin/test3.exe bin/test4.exe bin/test5.exe bin/test6.exe bin/test7.exe bin/test8.exe
 
 run: all
 	bin\test1.exe
@@ -12,6 +12,7 @@ run: all
 	bin\test4.exe
 	bin\test5.exe
 	bin\test6.exe
+	bin\test7.exe
 	bin\test8.exe
 
 
@@ -47,6 +48,9 @@ bin/test5.exe: bin test5.cpp
 
 bin/test6.exe: bin test6.cpp
 	gxx test6.cpp -o bin\test6.exe $(INC)
+
+bin/test7.exe: bin test7.cpp
+	gxx test7.cpp -o bin\test7.exe $(INC)
 
 bin/test8.exe: bin test8.cpp
 	gxx test8.cpp -o bin\test8.exe $(INC)
