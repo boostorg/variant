@@ -1,0 +1,215 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+        <title>variant</title>
+        <meta content="Eric Friedman, mailto:ebf@users.sourceforge.net" name="author">
+    </head>
+    <body text="#000000" bgColor="#ffffff">
+        <h1><IMG height="86" src="../../c++boost.gif" width="277" align="center" border="0">Header 
+            &lt;<A href="../../boost/variant.hpp">boost/variant.hpp</A>&gt;</h1>
+        <ul>
+            <li>
+                <A href="#motivation">Motivation</A>
+            <li>
+                <A href="#examples">Examples</A>
+            <li>
+                <A href="#synopsis">Synopsis</A>
+            <li>
+                <A href="#BoundedType"><EM>BoundedType</EM> requirements</A>
+            <li>
+                <A href="#variant"><code>variant</code></A>
+            <li>
+                <A href="#apply_visitor"><code>apply_visitor</code></A> support
+            <li>
+                <A href="#extract"><code>extract&lt;T&gt;</code></A> support
+            <li>
+                <A href="#portability">Portability</A>
+            </li>
+        </ul>
+        <hr>
+        <h2><a name="motivation">Motivation</a></h2>
+        <P>The need for a union type is a common one. Indeed,&nbsp;C++ features&nbsp;direct 
+            language support for such types through its <CODE>union</CODE> keyword:
+        </P>
+        <blockquote><pre>union { int i; double d; } u;
+u.d = 3.14;
+u.i = 3; // overwrites u.d (ok: u.d is of a POD type)</pre>
+        </blockquote>
+        <P>C++'s <code>union</code> construct, however,&nbsp;is nearly useless in 
+            object-oriented and generic programming environments. The construct entered the 
+            language primarily as a means for preserving compatibility with C, which 
+            supports only Plain-Old Data (POD) types, and so (for good reasons, see [??]) 
+            does not accept data types exhibiting non-trivial construction or destruction:</P>
+        <blockquote><pre>union {
+  int i;
+  std::string s; // illegal: std::string is not a POD type!
+};</pre>
+        </blockquote>
+        <P>Typical solutions to the problem often feature dynamically-allocated data 
+            manipulated through a base type (often a virtual base class [Hen00]&nbsp;or a <code>
+                void *</code>). These solutions, while functional, incur a relatively 
+            significant&nbsp;abstraction penalty. Like the C-style <CODE>union</CODE>, 
+            then, what is desired is an efficient,&nbsp;stack-allocated variant type; but <EM>unlike</EM>
+            the C-style <CODE>union</CODE>, what is also desired is a type-safe variant 
+            type capable of holding any value type.</P>
+        <P>The <code>variant</code> template class (inspired by Andrei Alexandrescu's class 
+            of the same name described in [Ale01]) is a bounded discriminated union value 
+            type that meets these desires and more. It supports direct initialization from 
+            any type convertible to one of the bounded types or from a <CODE>variant</CODE> 
+            whose bounded types are each convertible to one of the destination <CODE>variant</CODE>'s 
+            bounded types. As well, <CODE>variant</CODE> supports the <A href="../extract/index.html#extract"><code>
+                    extract&lt;T&gt;</code></A> facility for explicit value extraction and the <a href="../apply_visitor/index.html#apply_visitor"><code>apply_visitor</code></a> facility for the generic visitation by user-supplied or <a href="../type_switch/index.html"><code>type_switch</code></a>-generated visitors.</P>
+        <p>
+            <hr>
+            <h2><a name="examples">Examples</a></h2>
+        <p>[TODO]</p>
+        <hr>
+        <h2><a name="synopsis">Synopsis</a></h2>
+        Dependencies and library features defined in <A href="../../boost/variant.hpp"><code>&lt;boost/variant.hpp&gt;</code></A>:
+        <blockquote><pre>#include &lt;typeinfo&gt;
+
+namespace boost
+{
+    template &lt;typename <A href="#BoundedType" >BoundedType</A>1, typename <A href="#BoundedType" >BoundedType</A>2, ... , typename <A href="#BoundedType" >BoundedType</A>N&gt;
+    class <A href="#variant" >variant</A>;
+    
+    template &lt;typename T1, typename T2, ... , typename TN&gt;
+    void swap(
+          variant&lt;T1, T2, ... , TN&gt; &amp;
+        , variant&lt;T1, T2, ... , TN&gt; &amp;
+        );
+
+    template &lt;typename T1, T2, ... , TN&gt;
+    struct <A href="#apply_visitor" >apply_visitor_traits</A>&lt; variant&lt;T1, T2, ... , TN&gt; &gt;;
+    
+    template &lt;typename T1, T2, ... , TN&gt;
+    struct <A href="#extract" >extract_traits</A>&lt; variant&lt;T1, T2, ... , TN&gt; &gt;;
+}
+</pre>
+        </blockquote>
+        <P>Test harness defined in <A href="variant_test.cpp"><code>"variant_test.cpp"</code></A>
+            .
+        </P>
+        <p>
+            <hr>
+            <h2><a name="ValueType"><i>BoundedType</i>&nbsp;requirements</a></h2>
+        <p>The requirements on types to be used in a&nbsp; <A href="#variant"><code>variant</code></A>
+            are:
+            <UL>
+                <li>
+                    A <i>BoundedType</i> is <i>CopyConstructible</i>
+                [20.1.3].
+                <li>
+                    The destructor for a <i>BoundedType</i> upholds the no-throw exception-safety 
+                    guarantee.
+                </li>
+            </UL>
+        <P>The first type specified in a variant definition (i.e., <code>variant&lt;<strong>T1</strong>, 
+                ...&gt;</code>) has the additional requirement that it&nbsp;is <EM>DefaultConstructible</EM>
+            [??].</P>
+        <p>
+            <hr>
+            <h2><a name="variant"><code>variant</code></a></h2>
+            <blockquote><pre>template &lt;typename <A href="#BoundedType" >BoundedType</A>1, typename <A href="#BoundedType" >BoundedType</A>2, ... , typename <A href="#BoundedType" >BoundedType</A>N&gt;
+class variant
+{
+public: // <A href="#structors" ><i>structors</i></A>
+
+    <A href="#default-ctor" >variant</A>();
+    <A href="#copy-ctor" >variant</A>(const variant &amp;);
+    template &lt;typename <A href="#ValueType" >ConvertibleToBoundedType</A>&gt;
+      <A href="#template-ctor" >variant</A>(const <A href="#ValueType" >ConvertibleToBoundedType</A> &amp;);
+    <A href="#dtor" >~variant</A>();
+
+public: // <A href="#modifiers" ><i>modifiers</i></A>
+
+    variant &amp; <A href="#swap" >swap</A>(variant &amp;);
+    variant &amp; <A href="#copy-assign" >operator=</A>(const variant &amp;);
+    template &lt;typename <A href="#ValueType" >ConvertibleToBoundedType</A>&gt;
+      variant &amp; <A href="#template-assign" >operator=</A>(const <A href="#ValueType" >ConvertibleToBoundedType</A> &amp;);
+
+public: // <A href="#queries" ><i>queries</i></A> (provided for <a href="../any/index.html#any">boost::any</a> compatibility)
+
+    bool <A href="#empty" >empty</A>() const;
+    const std::type_info &amp; <A href="#type" >type</A>() const;
+
+private: // <i>representation</i>
+    ...
+};</pre>
+            </blockquote>
+        <P>A class whose instances can hold instances of any type that: 1) satisfies <A href="#BoundedType">
+                <i>BoundedType</i></A> requirements; and 2) is specified as one of the 
+            bounded types. Note that&nbsp; <code>variant</code> itself satisfies <A href="#BoundedType">
+                <i>BoundedType</i></A> requirements with default construction.
+        </P>
+        <P>All members of <code>variant</code> satisfy the strong guarantee of exception 
+            safety.</P>
+        <p>
+            <ul>
+                <hr>
+                <h3><a name="structors">Structors</a></h3>
+                <blockquote><pre><a name="default-ctor">variant();</a></pre>
+                </blockquote>Default constructor that sets content of new instance to default 
+                constructed value of the <code>variant</code>'s first bounded type. <blockquote><pre><a name="copy-ctor">variant(const variant &amp; other);</a></pre>
+                </blockquote>Copy constructor that copies content of <code>other</code> into 
+                new instance, so that the content of the new instance is equivalent in both 
+                type and value to the content of <code>other</code>. May fail with any 
+                exceptions arising from the copy constructor of the <blockquote><pre><a name="template-ctor">template &lt;typename </a>ConvertibleToBoundedType&gt;
+  variant(const ConvertibleToBoundedType &amp; value);</pre>
+                </blockquote>Templated converting constructor makes a copy of <code>value</code>, 
+                so that the content of the new instance is equivalent in type and value to <code>
+                    <em>BoundedTypeNN</em>(value)</code>, where <code><em>BoundedTypeNN</em></code> is one of the variant's bounded types for which a non-ambiguous conversion from <code>value</code> exists. May fail with any exceptions arising from the copy 
+                constructor of the contained type. <blockquote><pre><a name="dtor">~variant();</a></pre>
+                </blockquote>Non-throwing destructor that releases all resources used in 
+                management of instance.
+                <p>
+                    <hr>
+                    <h3><a name="modifiers">Modifiers</a></h3>
+                    <blockquote><pre><a name="swap">variant &amp; swap(variant &amp; rhs);</a></pre>
+                    </blockquote>Exchange of the contents of instance&nbsp;and <code>rhs</code>. <blockquote><pre><a name="copy-assign">variant &amp; operator=(const variant &amp; rhs);</a></pre>
+                    </blockquote>Copy assignment operator that copies content of <code>rhs</code> into 
+                    instance,&nbsp;destroying&nbsp;previous content, so that the new content is 
+                    equivalent in both type and value to the content of <code>rhs</code>. May fail 
+                    with any exceptions arising from the copy constructor of the contained type. <blockquote><pre><a name="template-assign">template&lt;typename </a>ConvertibleToBoundedType&gt;
+  variant &amp; operator=(const ConvertibleToBoundedType &amp; rhs);
+</pre>
+                    </blockquote>Templated assignment operator makes a copy of <code>rhs</code> into&nbsp;instance,&nbsp;destroying 
+                    previous content, so that the new content is equivalent in both type and value 
+                    to <code><em>BoundedTypeNN</em>(value)</code>, where <code><em>BoundedTypeNN</em></code> is one of the variant's bounded types for which a non-ambiguous conversion from <code>value</code> exists.
+                 May fail with any exceptions arising from the copy constructor of the 
+                contained type.
+                <p>
+                    <hr><hr>
+<p><em>The following are included only for compatibility with <a href="../any/index.html#any"><code>boost::any</code></A> and their use is not considered good style. See <a href="#transitioning">"Transitioning from <code>boost::any</code>"</a> for more details.</em></p>
+                    <hr>
+                    <h3><a name="queries">Queries</a></h3>                    
+<blockquote><pre><a name="empty">bool empty() const;</a>
+</pre>
+                    </blockquote>Returns <code>false</code>, as a <code>variant</code> always holds exactly one value of its bounded types.
+                    <blockquote><pre><a name="type">const std::type_info &amp; type() const;</a>
+</pre>
+                    </blockquote>Returns the <code>typeid</code>
+                of the contained value. Useful for querying against types known either at 
+                compile time or only at runtime.
+            </ul>
+            <hr>
+            <h2><a name="apply_visitor"><code>apply_visitor_traits</code></a></h2>
+            Specialization of the <a href="../apply_visitor/index.html#apply_visitor_traits"><code>apply_visitor_traits</code></a>
+            class template. Enables use of the <a href="../apply_visitor/index.html#apply_visitor"><code>apply_visitor</code></a>
+            facility for generic visitation of a <a href="#variant"><code>variant</code></a>.
+
+            <hr>
+            <h2><a name="extract"><code>extract_traits</code></a></h2>
+            Specialization of the <a href="../extract/index.html#extract_traits"><code>extract_traits</code></a>
+            class template. Enables use of the <a href="../extract/index.html#extract"><code>extract&lt;T&gt;</code></a>
+            facility for explicit value extraction from a <a href="#variant"><code>variant</code></a>.
+
+            <hr>
+            <h2><a name="portability">Portability</a></h2>
+        To date the code and test harness have been compiled and tested successfully 
+        using Microsoft Visual C++ 7.0 and GNU g++ 2.95.
+        <p>
+            <hr>
+            <div align="right"><small><i>© Copyright Eric Friedman, 2002</i></small></div>
+    </body>
+</html>
