@@ -74,7 +74,6 @@
 // The following are new/in-progress headers:
 #include "boost/config/no_class_template_using_declarations.hpp"
 #include "boost/aligned_storage.hpp"
-#include "boost/apply_visitor.hpp" // for user convenience
 #include "boost/extractable.hpp"
 #include "boost/incomplete_fwd.hpp"
 #include "boost/move/move.hpp"
