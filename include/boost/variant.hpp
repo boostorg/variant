@@ -397,13 +397,13 @@ private:
 
     void copy_into_storage1(const variant& operand)
     {
-        operand.raw_apply_visitor(detail::variant::copy_into(storage1_.raw_pointer()));
+        operand.raw_apply_visitor(detail::variant::copy_into(storage1_.address()));
         which_ = operand.which();
     }
 
     void copy_into_storage2(const variant& operand)
     {
-        operand.raw_apply_visitor(detail::variant::copy_into(storage2_.raw_pointer()));
+        operand.raw_apply_visitor(detail::variant::copy_into(storage2_.address()));
         which_ = -(operand.which() + 1);
     }
 
@@ -686,7 +686,7 @@ public:
     {
         // Attempt a converting copy into *this's storage:
         which_ = operand.raw_apply_visitor(
-              convert_copy_into(storage1_.raw_pointer())
+              convert_copy_into(storage1_.address())
             );
     }
 
@@ -698,7 +698,7 @@ public:
         // unambiguously convertible to one of the variant's types
         // (or that no conversion exists).
         which_ = initializer::initialize(
-              storage1_.raw_pointer()
+              storage1_.address()
             , operand
             );
     }
@@ -713,7 +713,7 @@ private:
     {
         // Attempt a converting copy into *this's storage:
         which_ = operand.raw_apply_visitor(
-              convert_copy_into(storage1_.raw_pointer())
+              convert_copy_into(storage1_.address())
             );
     }
 
@@ -725,7 +725,7 @@ private:
         // unambiguously convertible to one of the variant's types
         // (or that no conversion exists).
         which_ = initializer::initialize(
-              storage1_.raw_pointer()
+              storage1_.address()
             , operand
             );
     }
@@ -775,7 +775,7 @@ public: // modifiers
         if (which_ == operand.which_)
         {
             // ...then swap the values directly:
-            raw_apply_visitor(detail::variant::swapper(operand.active_storage().raw_pointer()));
+            raw_apply_visitor(detail::variant::swapper(operand.active_storage().address()));
             return *this;
         }
 

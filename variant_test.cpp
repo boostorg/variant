@@ -300,7 +300,7 @@ int test_main( int, char *[] )
             ));
     }
 
-        // recursive variant tests
+    // recursive variant tests
     {
         expression expr( // 10 + (40 + 2) - (4 + x) = 48 - x
             add(
