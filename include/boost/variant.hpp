@@ -729,33 +729,12 @@ private:
     {
     }
 
-public:
+public: // modifiers
     template <typename T>
     variant& operator=(const T& rhs)
     {
-        // [Assert that we can find the given type in variant's bounds...]
-        typedef typename mpl::find<types, T>::type found_it;
-        BOOST_MPL_ASSERT_NOT_SAME(found_it, typename mpl::end<types>::type);
-
-        // [...so we can get the which-index of the given type:]
-        BOOST_STATIC_CONSTANT(
-              int
-            , which = (
-                mpl::distance<
-                      typename mpl::begin<types>::type
-                    , found_it
-                    >::type::value
-                    )
-            );
-
-        // Clear *this...
-        clear();
-
-        // ...so we can attempt to copy rhs into *this's storage...
-        new(storage_.raw_pointer()) T(rhs);
-
-        // ...and set *this's which-index to the given type's index:
-        which_ = which;
+        variant temp(rhs);
+		*this = temp;
 
         return *this;
     }
@@ -789,14 +768,14 @@ public:
         }
 
         // Otherwise, perform normal swap:
-        variant temp(operand);
-        operand = *this;
-        *this = temp;
+        variant temp(*this);
+        *this = operand;
+        operand = temp;
 
         return *this;
     }
 
-public:
+private:
     void clear()
     {
         if (!empty())
@@ -806,6 +785,7 @@ public:
         }
     }
 
+public: // queries
     bool empty() const
     {
         return (which_ == -1);
