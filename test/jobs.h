@@ -218,12 +218,38 @@ void verify(const VariantType& vari, spec<S>, std::string str = "")
    BOOST_CHECK(apply_visitor(total_sizeof(), vari) == sizeof(S));
    BOOST_CHECK(vari.type() == typeid(S));
 
+   VariantType& mut_vari = const_cast<VariantType&>(vari);
    //
    // Check extract<>()
    //
-   bool passes_extraction = extract<const S>(vari).check();
-   
-   BOOST_CHECK(passes_extraction);
+   BOOST_CHECK(extract<const S>(vari).check());
+   BOOST_CHECK(extract<S>(mut_vari).check());
+
+   const S* ptr1 = 0;
+   const S* ptr2 = 0;
+   int count = 0;
+   try
+   {
+      const S& r = extract<const S>(vari);
+      ptr1 = &r;
+   }
+   catch(bad_extract& )
+   {
+      count += 1;
+   }
+
+   try
+   {
+      S& mut_r = extract<S>(mut_vari);
+      ptr2 = &mut_r;
+   }
+   catch(bad_extract& )
+   {
+      count += 1;
+   }
+
+   BOOST_CHECK(count == 0);
+   BOOST_CHECK(ptr1 != 0 && ptr2 == ptr1);
 
    //
    // Check string content
@@ -244,10 +270,39 @@ void verify_not(const VariantType& vari, spec<S>)
 
    BOOST_CHECK(vari.type() != typeid(S));
    
-   bool passes_extraction = extract<const S>(vari).check();
-   BOOST_CHECK(!passes_extraction);
-   
-   //TODO: Check variant_cast : reference + point
+   //
+   // Check extract<>()
+   //
+   BOOST_CHECK(!extract<const S>(vari).check());
+
+   VariantType& mut_vari = const_cast<VariantType&>(vari);
+   BOOST_CHECK(!extract<S>(mut_vari).check());
+
+   const S* ptr1 = 0;
+   const S* ptr2 = 0;
+   int count = 0;
+   try
+   {
+      const S& r = extract<const S>(vari);
+      ptr1 = &r;
+   }
+   catch(bad_extract& )
+   {
+      count += 1;
+   }
+
+   try
+   {
+      S& mut_r = extract<S>(mut_vari);
+      ptr2 = &mut_r;
+   }
+   catch(bad_extract& )
+   {
+      count += 1;
+   }
+
+   BOOST_CHECK(count == 2);
+   BOOST_CHECK(ptr1 == 0 && ptr2 == 0);   
 }
 
 
