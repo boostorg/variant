@@ -2,9 +2,6 @@
 <html>
 
 <head>
-<meta http-equiv="Content-Language" content="en-us">
-<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
-<meta name="ProgId" content="FrontPage.Editor.Document">
 <title>variant</title>
 <meta content="Eric Friedman, mailto:ebf@users.sourceforge.net" name="author">
 </head>
@@ -66,7 +63,7 @@ supports direct initialization from any type convertible to one of its bounded
 types or from a source <code>variant</code> whose bounded types are each convertible to 
 one of the destination <code>variant</code>'s bounded types. As well, <code>
 variant</code> supports the <a href="../extract/index.html#extract"><code>
-extract&lt;T&gt;</code></a> facility for explicit value extraction and the
+extract&lt;T&gt;</code></a> facility for checked type-safe value extraction and the
 <a href="../apply_visitor/index.html#apply_visitor"><code>apply_visitor</code></a> 
 facility for generic visitation.</p>
 <p></p>
@@ -299,7 +296,7 @@ facility for generic visitation of a <a href="#variant"><code>variant</code></a>
 <p>Specialization of the <a href="../extract/index.html#extract_traits"><code>
 extract_traits</code></a> class template. Enables use of the
 <a href="../extract/index.html#extract"><code>extract&lt;T&gt;</code></a> facility for 
-explicit value extraction from a <a href="#variant"><code>variant</code></a>.
+checked type-safe value extraction from a <a href="#variant"><code>variant</code></a>.
 </p>
 <hr>
 <h2><a name="portability">Portability</a></h2>
