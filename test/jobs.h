@@ -231,7 +231,9 @@ void verify(const VariantType& vari, spec<S>, std::string str = "")
    int count = 0;
    try
    {
-      const S& r = extract<const S>(vari);
+//      const S& r = extract<const S>(vari);
+      extract<const S> x(vari);
+      const S& r = x;
       ptr1 = &r;
    }
    catch(bad_extract& )
@@ -241,7 +243,9 @@ void verify(const VariantType& vari, spec<S>, std::string str = "")
 
    try
    {
-      S& mut_r = extract<S>(mut_vari);
+//      S& mut_r = extract<S>(mut_vari)();
+      extract<S> x(mut_vari);
+      S& mut_r = x;
       ptr2 = &mut_r;
    }
    catch(bad_extract& )
@@ -284,7 +288,9 @@ void verify_not(const VariantType& vari, spec<S>)
    int count = 0;
    try
    {
-      const S& r = extract<const S>(vari);
+//      const S& r = extract<const S>(vari);
+      extract<const S> x(vari);
+      const S& r = x;
       ptr1 = &r;
    }
    catch(bad_extract& )
@@ -294,7 +300,9 @@ void verify_not(const VariantType& vari, spec<S>)
 
    try
    {
-      S& mut_r = extract<S>(mut_vari);
+//      S& mut_r = extract<S>(mut_vari);
+      extract<S> x(mut_vari);
+      S& mut_r = x;
       ptr2 = &mut_r;
    }
    catch(bad_extract& )

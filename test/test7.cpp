@@ -61,7 +61,7 @@ void var_compare(const VariantType& v, ExpectedType expected)
 
 void run()
 {   
-   variant<short, string> v0;
+   variant<short, string> v0 = 0;
 
    var_compare(v0, static_cast<short>(0));
 
