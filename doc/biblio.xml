@@ -5,7 +5,7 @@
   <title>References</title>
 
 <para id="variant.refs.abr00">
-    <ulink url="http://beta.boost.org/community/exception_safety.html">[Abr00]</ulink>
+    <ulink url="http://boost.org/more/generic_exception_safety.html">[Abr00]</ulink>
     David Abrahams.
     &quot;Exception-Safety in Generic Components.&quot;
     M. Jazayeri, R. Loos, D. Musser (eds.):
@@ -14,7 +14,7 @@
     2000.
 </para>
 <para id="variant.refs.abr01">
-    <ulink url="http://beta.boost.org/community/error_handling.html">[Abr01]</ulink>
+    <ulink url="http://boost.org/more/error_handling.html">[Abr01]</ulink>
     David Abrahams.
     &quot;Error and Exception Handling.&quot;
     Boost technical article.
