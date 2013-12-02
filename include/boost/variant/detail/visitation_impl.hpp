@@ -47,8 +47,16 @@
 // and potentially increase runtime performance. (TODO: Investigate further.)
 //
 #if !defined(BOOST_VARIANT_VISITATION_UNROLLING_LIMIT)
+
+#ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
+#   include "boost/mpl/limits/list.hpp"
+#   define BOOST_VARIANT_VISITATION_UNROLLING_LIMIT   \
+        BOOST_MPL_LIMIT_LIST_SIZE
+#else
 #   define BOOST_VARIANT_VISITATION_UNROLLING_LIMIT   \
         BOOST_VARIANT_LIMIT_TYPES
+#endif
+
 #endif
 
 namespace boost {

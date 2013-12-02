@@ -116,7 +116,7 @@ struct substitute<
       BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(Arity)
     >
 {
-#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && defined(BOOST_VARIANT_USE_VARIADIC_TEMPLATES)
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
     
     typedef ::boost::variant<
         typename enable_recursive<   
@@ -131,7 +131,7 @@ struct substitute<
         >::type...  
     > type;
 
-#else
+#else // defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 
 private: // helpers, for metafunction result (below)
 
@@ -154,7 +154,7 @@ private: // helpers, for metafunction result (below)
 public: // metafunction result
 
     typedef ::boost::variant< BOOST_VARIANT_ENUM_PARAMS(wknd_T) > type;
-#endif
+#endif // BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES workaround
 };
 
 #else // defined(BOOST_VARIANT_DETAIL_NO_SUBSTITUTE)

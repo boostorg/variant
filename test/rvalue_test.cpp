@@ -264,5 +264,14 @@ int test_main(int , char* [])
    run_moves_are_noexcept();
    run_tricky_compilation_test();
    run_const_rvalues();
+
+#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ > 6)
+#   ifdef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
+        BOOST_CHECK(false && 
+            "Something wrong with macro definitions. GCC-4.7+ is known to work with variadic templates"
+        );
+#   endif
+#endif
+
    return 0;
 }
