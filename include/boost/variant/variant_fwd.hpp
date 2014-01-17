@@ -127,7 +127,7 @@
     BOOST_VARIANT_MAKE_VARIADIC( (BOOST_VARIANT_CLASS_OR_TYPENAME_TO_SEQ_ ## x), x) \
     /**/
 
-#else // defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
+#endif // defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 
 ///////////////////////////////////////////////////////////////////////////////
 // macro BOOST_VARIANT_LIMIT_TYPES
@@ -167,8 +167,6 @@
 //
 #define BOOST_VARIANT_ENUM_SHIFTED_PARAMS( param )  \
     BOOST_PP_ENUM_SHIFTED_PARAMS(BOOST_VARIANT_LIMIT_TYPES, param)
-
-#endif // BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES workaround
 
 
 namespace boost {
