@@ -68,10 +68,13 @@
 
 /* 
     GCC before 4.0 had no variadic tempaltes; 
-    GCC 4.6 has incomplete implementation of variadic templates  
+    GCC 4.6 has incomplete implementation of variadic templates.
+
+    MSVC2013 has variadic templates, but they have issues.
 */
 #if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) \
   || (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 7)) \
+  || (defined(_MSC_VER) && (_MSC_VER <= 1800)) \
   || defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE) \
   || defined (BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
 

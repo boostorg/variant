@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2012-2013 Antony Polukhin
+// Copyright (c) 2012-2014 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -14,6 +14,7 @@
 #include "boost/test/minimal.hpp"
 #include "boost/variant.hpp"
 #include "boost/type_traits/is_nothrow_move_assignable.hpp"
+#include "boost/mpl/bool.hpp"
 
 // Most part of tests from this file require rvalue references support
 
@@ -256,6 +257,25 @@ void run_tricky_compilation_test()
     v = nothrow_copyable_throw_movable();
 }
 
+template <typename T>
+struct is_container : boost::mpl::false_ {};
+
+template <typename T>
+struct is_container<boost::variant<T> > : is_container<T> {};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
+struct is_container<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
+  : boost::mpl::bool_<is_container<T0>::value
+     || is_container<boost::variant<BOOST_VARIANT_ENUM_SHIFTED_PARAMS(T)> >::value>
+{};
+
+void run_is_container_compilation_test()
+{
+    BOOST_CHECK((!is_container<boost::variant<double, int> >::value));
+    BOOST_CHECK((!is_container<boost::variant<double, int, char> >::value));
+    BOOST_CHECK((!is_container<boost::variant<double, int, char, float> >::value));
+}
+
 int test_main(int , char* [])
 {
    run();
@@ -264,6 +284,7 @@ int test_main(int , char* [])
    run_moves_are_noexcept();
    run_tricky_compilation_test();
    run_const_rvalues();
+   run_is_container_compilation_test();
 
 #if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ > 6)
 #   ifdef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
