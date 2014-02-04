@@ -26,16 +26,6 @@
 #include "boost/preprocessor/repeat.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
-// macro BOOST_VARIANT_LIMIT_TYPES
-//
-// Implementation-defined preprocessor symbol describing the actual
-// length of variant's pseudo-variadic template parameter list.
-//
-#include "boost/mpl/limits/list.hpp"
-#define BOOST_VARIANT_LIMIT_TYPES \
-    BOOST_MPL_LIMIT_LIST_SIZE
-
-///////////////////////////////////////////////////////////////////////////////
 // macro BOOST_VARIANT_NO_REFERENCE_SUPPORT
 //
 // Defined if variant does not support references as bounded types. 
@@ -67,11 +57,34 @@
 #include "boost/variant/detail/substitute_fwd.hpp"
 
 #if defined(BOOST_VARIANT_DETAIL_NO_SUBSTITUTE) \
- && !defined(BOOST_VARIANT_NO_FULL_RECURSIVE_VARIANT_SUPPORT)
+  && !defined(BOOST_VARIANT_NO_FULL_RECURSIVE_VARIANT_SUPPORT)
 #   define BOOST_VARIANT_NO_FULL_RECURSIVE_VARIANT_SUPPORT
 #endif
 
-#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && defined(BOOST_VARIANT_USE_VARIADIC_TEMPLATES)
+
+///////////////////////////////////////////////////////////////////////////////
+// macro BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
+//
+
+/* 
+    GCC before 4.0 had no variadic tempaltes; 
+    GCC 4.6 has incomplete implementation of variadic templates.
+
+    MSVC2013 has variadic templates, but they have issues.
+*/
+#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) \
+  || (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 7)) \
+  || (defined(_MSC_VER) && (_MSC_VER <= 1800)) \
+  || defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE) \
+  || defined (BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
+
+#ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
+#   define BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
+#endif
+
+#endif
+
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 #include <boost/preprocessor/seq/size.hpp>
 
 #define BOOST_VARIANT_CLASS_OR_TYPENAME_TO_SEQ_class class)(
@@ -104,7 +117,7 @@
 // Rationale: Cleaner, simpler code for clients of variant library. Minimal 
 // code modifications to move from C++03 to C++11.
 //
-// Without !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && defined(BOOST_VARIANT_USE_VARIADIC_TEMPLATES)
+// With BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES defined
 // will be used BOOST_VARIANT_ENUM_PARAMS and BOOST_VARIANT_ENUM_SHIFTED_PARAMS from below `#else`
 //
 
@@ -117,7 +130,17 @@
     BOOST_VARIANT_MAKE_VARIADIC( (BOOST_VARIANT_CLASS_OR_TYPENAME_TO_SEQ_ ## x), x) \
     /**/
 
-#else 
+#else // defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
+
+///////////////////////////////////////////////////////////////////////////////
+// macro BOOST_VARIANT_LIMIT_TYPES
+//
+// Implementation-defined preprocessor symbol describing the actual
+// length of variant's pseudo-variadic template parameter list.
+//
+#include "boost/mpl/limits/list.hpp"
+#define BOOST_VARIANT_LIMIT_TYPES \
+    BOOST_MPL_LIMIT_LIST_SIZE
 
 ///////////////////////////////////////////////////////////////////////////////
 // macro BOOST_VARIANT_RECURSIVE_VARIANT_MAX_ARITY
@@ -148,7 +171,8 @@
 #define BOOST_VARIANT_ENUM_SHIFTED_PARAMS( param )  \
     BOOST_PP_ENUM_SHIFTED_PARAMS(BOOST_VARIANT_LIMIT_TYPES, param)
 
-#endif // BOOST_NO_CXX11_VARIADIC_TEMPLATES
+#endif // BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES workaround
+
 
 namespace boost {
 
@@ -188,7 +212,6 @@ struct convert_void< void_ >
 //
 
 #if defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE)
-
 // (detail) tags voidNN -- NN defined on [0, BOOST_VARIANT_LIMIT_TYPES)
 //
 // Defines void types that are each unique and specializations of
@@ -217,11 +240,10 @@ BOOST_PP_REPEAT(
 
 }} // namespace detail::variant
 
-#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && defined(BOOST_VARIANT_USE_VARIADIC_TEMPLATES)
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
+#   define BOOST_VARIANT_AUX_DECLARE_PARAMS BOOST_VARIANT_ENUM_PARAMS(typename T)
+#else // defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 
-#define BOOST_VARIANT_AUX_DECLARE_PARAMS BOOST_VARIANT_ENUM_PARAMS(typename T)
-
-#else
 ///////////////////////////////////////////////////////////////////////////////
 // (detail) macro BOOST_VARIANT_AUX_DECLARE_PARAM
 //
@@ -250,7 +272,7 @@ BOOST_PP_REPEAT(
         ) \
     /**/
 
-#endif // BOOST_NO_CXX11_VARIADIC_TEMPLATES
+#endif // BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES workaround
 
 ///////////////////////////////////////////////////////////////////////////////
 // class template variant (concept inspired by Andrei Alexandrescu)
