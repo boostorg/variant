@@ -126,12 +126,18 @@ struct substitute<
 //
 
 #if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
-template <template <typename...> class F, typename... Ts, typename Dest, typename Source>
+template <
+      template <typename...> class F
+    , typename... Ts
+    , typename Dest
+    , typename Source
+      BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(typename Arity)
+    >
 struct substitute<
       F<Ts...>
     , Dest
     , Source
-      BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(mpl::int_<-1>)
+      BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(Arity)
     >
 {
     typedef F<typename substitute<
