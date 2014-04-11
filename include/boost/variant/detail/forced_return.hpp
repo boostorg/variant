@@ -41,10 +41,7 @@ inline T forced_return()
 {
     // logical error: should never be here! (see above)
     BOOST_ASSERT(false);
-
-    typedef typename boost::remove_reference<T>::type basic_type;
-    basic_type* dummy = 0;
-    return *static_cast< basic_type* >(dummy);
+    throw;
 }
 
 template <>
