@@ -125,7 +125,7 @@ struct substitute<
 // template expression (i.e., F<...>) specializations
 //
 
-#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 template <
       template <typename...> class F
     , typename... Ts
@@ -144,7 +144,7 @@ struct substitute<
           Ts, Dest, Source
         >::type...> type;
 };
-#endif // !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
+#endif // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 
 #define BOOST_VARIANT_AUX_SUBSTITUTE_TYPEDEF_IMPL(N) \
     typedef typename substitute< \
