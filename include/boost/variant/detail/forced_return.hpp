@@ -71,6 +71,8 @@ forced_return()
 
 #else // defined(BOOST_MSVC)
 
+# pragma warning( push )
+# pragma warning( disable : 4702 ) // unreachable code
 // msvc-specific implementation
 //
 // Leverages __declspec(noreturn) for optimized implementation.
@@ -89,6 +91,8 @@ forced_return()
 
     forced_return_no_return();
 }
+
+# pragma warning( pop )
 
 #endif // BOOST_MSVC optimization
 

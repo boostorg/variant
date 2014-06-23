@@ -346,20 +346,12 @@ public: // visitor interface
         return operand;
     }
 
-#if defined BOOST_MSVC 
-# pragma warning( push ) 
-# pragma warning( disable : 4702 ) // unreachable code 
-#endif 
     template <typename U>
     T& operator()(U&) const
     {
         // logical error to be here: see precondition above
-        BOOST_ASSERT(false);
         return ::boost::detail::variant::forced_return< T& >();
     }
-#if defined BOOST_MSVC 
-# pragma warning( pop ) 
-#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////
