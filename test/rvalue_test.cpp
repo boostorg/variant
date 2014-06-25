@@ -190,6 +190,13 @@ private:
     move_only_structure& operator=(const move_only_structure&);
 };
 
+struct visitor_returning_move_only_type: boost::static_visitor<move_only_structure> {
+    template <class T>
+    move_only_structure operator()(const T&) const {
+        return move_only_structure();
+    }
+};
+
 void run_move_only()
 {
     move_only_structure mo;
@@ -205,6 +212,9 @@ void run_move_only()
     vi = static_cast<move_only_structure&&>(mo);
     vi2 = static_cast<move_only_structure&&>(mo);
     BOOST_CHECK(vi.which() == 1);
+
+    move_only_structure from_visitor = boost::apply_visitor(visitor_returning_move_only_type(), vi);
+    (void)from_visitor;
 }
 
 void run_moves_are_noexcept() {

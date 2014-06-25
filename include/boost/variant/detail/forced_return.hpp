@@ -17,10 +17,6 @@
 #include "boost/variant/detail/generic_result_type.hpp"
 #include "boost/assert.hpp"
 
-#if !defined(BOOST_MSVC)
-#   include "boost/type_traits/remove_reference.hpp"
-#endif
-
 namespace boost {
 namespace detail { namespace variant {
 
@@ -42,9 +38,8 @@ inline T forced_return()
     // logical error: should never be here! (see above)
     BOOST_ASSERT(false);
 
-    typedef typename boost::remove_reference<T>::type basic_type;
-    basic_type* dummy = 0;
-    return *static_cast< basic_type* >(dummy);
+    T (*dummy_function_ptr)() = 0;
+    return dummy_function_ptr();
 }
 
 template <>
@@ -76,6 +71,8 @@ forced_return()
 
 #else // defined(BOOST_MSVC)
 
+# pragma warning( push )
+# pragma warning( disable : 4702 ) // unreachable code
 // msvc-specific implementation
 //
 // Leverages __declspec(noreturn) for optimized implementation.
@@ -94,6 +91,8 @@ forced_return()
 
     forced_return_no_return();
 }
+
+# pragma warning( pop )
 
 #endif // BOOST_MSVC optimization
 

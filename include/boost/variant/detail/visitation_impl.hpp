@@ -20,7 +20,6 @@
 #include "boost/variant/detail/forced_return.hpp"
 #include "boost/variant/detail/generic_result_type.hpp"
 
-#include "boost/assert.hpp"
 #include "boost/mpl/eval_if.hpp"
 #include "boost/mpl/bool.hpp"
 #include "boost/mpl/identity.hpp"
@@ -162,8 +161,7 @@ inline
     BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
 visitation_impl_invoke(int, Visitor&, VoidPtrCV, apply_visitor_unrolled*, NBF, long)
 {
-    // should never be here at runtime:
-    BOOST_ASSERT(false);
+    // should never be here at runtime!
     typedef typename Visitor::result_type result_type;
     return ::boost::detail::variant::forced_return< result_type >();
 }
@@ -187,8 +185,7 @@ visitation_impl(
     , NBF, W* = 0, S* = 0
     )
 {
-    // should never be here at runtime:
-    BOOST_ASSERT(false);
+    // should never be here at runtime!
     typedef typename Visitor::result_type result_type;
     return ::boost::detail::variant::forced_return< result_type >();
 }
