@@ -7,7 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-project boost/doc ;
+project variant/doc ;
 import boostbook : boostbook ;
 
 boostbook variant-doc 
