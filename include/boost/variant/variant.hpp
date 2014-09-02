@@ -18,9 +18,7 @@
 #include <cstddef> // for std::size_t
 #include <new> // for placement new
 
-#if !defined(BOOST_NO_TYPEID)
-#include <typeinfo> // for typeid, std::type_info
-#endif // BOOST_NO_TYPEID
+#include "boost/type_index.hpp"
 
 #include "boost/variant/detail/config.hpp"
 #include "boost/mpl/aux_/value_wknd.hpp"
@@ -822,22 +820,18 @@ private:
 // Generic static visitor that performs a typeid on the value it visits.
 //
 
-#if !defined(BOOST_NO_TYPEID)
-
 class reflect
-    : public static_visitor<const std::type_info&>
+    : public static_visitor<const boost::typeindex::type_info&>
 {
 public: // visitor interfaces
 
     template <typename T>
-    const std::type_info& operator()(const T&) const BOOST_NOEXCEPT
+    const boost::typeindex::type_info& operator()(const T&) const BOOST_NOEXCEPT
     {
-        return typeid(T);
+        return boost::typeindex::type_id<T>().type_info();
     }
 
 };
-
-#endif // BOOST_NO_TYPEID
 
 ///////////////////////////////////////////////////////////////////////////////
 // (detail) class comparer
@@ -2147,13 +2141,11 @@ public: // queries
         return false;
     }
 
-#if !defined(BOOST_NO_TYPEID)
-    const std::type_info& type() const
+    const boost::typeindex::type_info& type() const
     {
         detail::variant::reflect visitor;
         return this->apply_visitor(visitor);
     }
-#endif
 
 public: // prevent comparison with foreign types
 
