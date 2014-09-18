@@ -36,6 +36,7 @@ before_install:
     - git reset --hard; git clean -fxd
     - git status
     - rm -rf $BOOST/libs/$PROJECT_TO_TEST
+    - mv $PROJECT_DIR/../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
     - PROJECT_DIR=$BOOST/libs/$PROJECT_TO_TEST
     - ./bootstrap.sh
     - ./b2 headers
@@ -65,7 +66,7 @@ after_success:
     # ... erasing data that is not related to this project
     - OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/\1\/\*"/g'| sed '/"\*\/$PROJECT_TO_TEST\/\*"/d' | sed ':a;N;$!ba;s/\n/ /g'`
     - echo $OTHER_LIBS
-    - eval 'lcov --remove $PROJECT_DIR/coverals/coverage.info $OTHER_LIBS -o $PROJECT_DIR/coverals/coverage.info'
+    - eval "lcov --remove $PROJECT_DIR/coverals/coverage.info $OTHER_LIBS -o $PROJECT_DIR/coverals/coverage.info"
 
     # Sending data to Coveralls
     - cd $PROJECT_DIR
