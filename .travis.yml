@@ -17,7 +17,7 @@ before_install:
     # Autodetect branch by using the following code: - BRANCH_TO_TEST=`git rev-parse --abbrev-ref HEAD`
     - BRANCH_TO_TEST=develop
 
-
+    # From this point and below code is same for all the Boost libs
     # Cloning Boost libraries (fast nondeep cloning)
     - PROJECT_DIR=`pwd`
     - BOOST=$HOME/boost-local
@@ -47,19 +47,22 @@ script:
 
 after_success:
     # Copying Coveralls data to a separate folder
-    - cd $PROJECT_DIR
-    - mkdir coverals
-    - find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" coverals \;
-    - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" coverals \;
+    - mkdir $PROJECT_DIR/coverals
+    - find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" $PROJECT_DIR/coverals \;
+    - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $PROJECT_DIR/coverals \;
 
     # Preparing Coveralls data by
     # ... installing the tools
     - sudo apt-get install -qq python-yaml lcov
     # ... changind data format to a readable one
-    - lcov --directory coverals --base-directory ./ --capture --output-file $PROJECT_DIR/coverals/coverage.info
+    - lcov --directory $PROJECT_DIR/coverals --base-directory ./ --capture --output-file $PROJECT_DIR/coverals/coverage.info
+
     # ... erasing data that is not related to this project and erasing /test/ folder data
-    - lcov --remove coverals/coverage.info '/usr*' '*/filesystem*' '*/container*' '*/core/*' '*/exception/*' '*/intrusive/*' '*/smart_ptr/*' '*/move/*' '*/fusion/*' '*/io/*' '*/function/*' '*/iterator/*' '*/preprocessor/*' '*/system/*' '*/boost/test/*' '*/boost/detail/*' '*/utility/*' '*/example/*' '*/test/*' '*/pe_info.hpp' '*/macho_info.hpp' -o coverals/coverage.info
+    - OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/\*\| sed '/\/$PROJECT_TO_TEST\//d' | xargs echo -n`
+    - echo $OTHER_LIBS
+    - lcov --remove coverals/coverage.info /usr* $OTHER_LIBS */test/* -o coverals/coverage.info
 
     # Sending data to Coveralls
+    - cd $PROJECT_DIR
     - gem install coveralls-lcov
     - coveralls-lcov coverals/coverage.info
