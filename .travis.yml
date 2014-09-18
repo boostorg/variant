@@ -37,6 +37,7 @@ before_install:
     - rm -rf $BOOST/libs/$PROJECT_TO_TEST
     - mv $PROJECT_DIR/../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
     - ./bootstrap.sh
+    - ./b2 headers
 
 script:
     - if [ "$CCFLAGS" != "" ]; then FLAGS="cxxflags=\"$CCFLAGS\" linkflags=\"$LINKFLAGS\""; else FLAGS=""; fi
