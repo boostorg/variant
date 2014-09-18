@@ -36,6 +36,7 @@ before_install:
     - git status
     - rm -rf $BOOST/libs/$PROJECT_TO_TEST
     - mv $PROJECT_DIR/../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
+    - PROJECT_DIR=$BOOST/libs/$PROJECT_TO_TEST
     - ./bootstrap.sh
     - ./b2 headers
 
@@ -58,9 +59,10 @@ after_success:
     - lcov --directory $PROJECT_DIR/coverals --base-directory ./ --capture --output-file $PROJECT_DIR/coverals/coverage.info
 
     # ... erasing data that is not related to this project and erasing /test/ folder data
+    - cd $BOOST
     - OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/\1\/"/g'| sed '/\/$PROJECT_TO_TEST\//d'`
     - echo $OTHER_LIBS
-    - lcov --remove coverals/coverage.info "/usr*" $OTHER_LIBS "*/$PROJECT_TO_TEST/test/*" "*/$PROJECT_TO_TEST/tests/*" "*/$PROJECT_TO_TEST/examples/*" "*/$PROJECT_TO_TEST/example/*" -o coverals/coverage.info
+    - lcov --remove $PROJECT_DIR/coverals/coverage.info "/usr*" $OTHER_LIBS "*/$PROJECT_TO_TEST/test/*" "*/$PROJECT_TO_TEST/tests/*" "*/$PROJECT_TO_TEST/examples/*" "*/$PROJECT_TO_TEST/example/*" -o $PROJECT_DIR/coverals/coverage.info
 
     # Sending data to Coveralls
     - cd $PROJECT_DIR
