@@ -47,9 +47,9 @@ script:
 
 after_success:
     # Copying Coveralls data to a separate folder
-    - mkdir $PROJECT_DIR/coverals
-    - find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" $PROJECT_DIR/coverals \;
-    - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $PROJECT_DIR/coverals \;
+    - mkdir -p $PROJECT_DIR/coverals
+    - find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" $PROJECT_DIR/coverals/ \;
+    - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $PROJECT_DIR/coverals/ \;
 
     # Preparing Coveralls data by
     # ... installing the tools
@@ -58,9 +58,9 @@ after_success:
     - lcov --directory $PROJECT_DIR/coverals --base-directory ./ --capture --output-file $PROJECT_DIR/coverals/coverage.info
 
     # ... erasing data that is not related to this project and erasing /test/ folder data
-    - OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/\*\| sed '/\/$PROJECT_TO_TEST\//d' | xargs echo -n`
+    - OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/\1\/"/g'| sed '/\/$PROJECT_TO_TEST\//d'`
     - echo $OTHER_LIBS
-    - lcov --remove coverals/coverage.info /usr* $OTHER_LIBS */test/* -o coverals/coverage.info
+    - lcov --remove coverals/coverage.info "/usr*" $OTHER_LIBS "*/$PROJECT_TO_TEST/test/*" "*/$PROJECT_TO_TEST/tests/*" "*/$PROJECT_TO_TEST/examples/*" "*/$PROJECT_TO_TEST/example/*" -o coverals/coverage.info
 
     # Sending data to Coveralls
     - cd $PROJECT_DIR
