@@ -14,10 +14,11 @@ env:
 before_install:
     # Set this to the name of your Boost library
     - PROJECT_TO_TEST=variant
+    # Autodetect branch by using the following code: - BRANCH_TO_TEST=`git rev-parse --abbrev-ref HEAD`
+    - BRANCH_TO_TEST=develop
 
 
     # Cloning Boost libraries (fast nondeep cloning)
-    - BRANCH_TO_TEST=`git rev-parse --abbrev-ref HEAD`
     - PROJECT_DIR=`pwd`
     - BOOST=$HOME/boost-local
     - git init $BOOST
