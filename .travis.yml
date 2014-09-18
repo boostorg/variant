@@ -1,3 +1,9 @@
+# Use, modification, and distribution are
+# subject to the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+# Copyright Antony Polukhin 2014. 
+
 os:
     - linux
 
@@ -6,28 +12,52 @@ env:
     - CXX_STANDARD=c++0x
 
 before_install:
+    # Set this to the name of your Boost library
     - PROJECT_TO_TEST=variant
-    - echo OS is ${TRAVIS_OS_NAME}
-    - wget https://github.com/ned14/boost-release/archive/master.tar.gz
-    - tar xf master.tar.gz
-    - mv boost-release-master $HOME/boost-local
-    - BOOST="$HOME/boost-local"
-    - rm -rf $BOOST/libs/$PROJECT_TO_TEST
-    - mv ../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
+
+
+    # Cloning Boost libraries (fast nondeep cloning)
+    - BRANCH_TO_TEST=`git rev-parse --abbrev-ref HEAD`
+    - PROJECT_DIR=`pwd`
+    - BOOST=$HOME/boost-local
+    - git init $BOOST
     - cd $BOOST
+    - git remote add --no-tags -t $BRANCH_TO_TEST origin https://github.com/boostorg/boost.git
+    - git fetch --depth=1
+    - git checkout $BRANCH_TO_TEST
+    - git submodule update --init --merge
+    - git remote set-branches --add origin $BRANCH_TO_TEST
+    - git pull --recurse-submodules
+    - git submodule update --init
+    - git checkout $BRANCH_TO_TEST
+    - git submodule foreach "git reset --quiet --hard; git clean -fxd"
+    - git reset --hard; git clean -fxd
+    - git status
+    - rm -rf $BOOST/libs/$PROJECT_TO_TEST
+    - mv $PROJECT_DIR/../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
     - ./bootstrap.sh
 
 script:
-    - echo OS is ${TRAVIS_OS_NAME}
     - if [ "$CCFLAGS" != "" ]; then FLAGS="cxxflags=\"$CCFLAGS\" linkflags=\"$LINKFLAGS\""; else FLAGS=""; fi
     - cd $BOOST/libs/$PROJECT_TO_TEST/test/
+    # `--coverage` flags required to generate coverage info for Coveralls
     - ../../../b2 cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage"
 
 after_success:
-    - find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" ./ \;
-    - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" ./ \;
+    # Copying Coveralls data to a separate folder
+    - cd $PROJECT_DIR
+    - mkdir coverals
+    - find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" coverals \;
+    - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" coverals \;
+
+    # Preparing Coveralls data by
+    # ... installing the tools
     - sudo apt-get install -qq python-yaml lcov
-    - lcov --directory ./ --base-directory ./ --capture --output-file coverage.info
-    - lcov --remove coverage.info '/usr*' '*/filesystem*' '*/container*' '*/core/*' '*/exception/*' '*/intrusive/*' '*/smart_ptr/*' '*/move/*' '*/fusion/*' '*/io/*' '*/function/*' '*/iterator/*' '*/preprocessor/*' '*/system/*' '*/boost/test/*' '*/boost/detail/*' '*/utility/*' '*/example/*' '*/test/*' '*/pe_info.hpp' '*/macho_info.hpp' -o coverage.info
+    # ... changind data format to a readable one
+    - lcov --directory coverals --base-directory ./ --capture --output-file $PROJECT_DIR/coverals/coverage.info
+    # ... erasing data that is not related to this project and erasing /test/ folder data
+    - lcov --remove coverals/coverage.info '/usr*' '*/filesystem*' '*/container*' '*/core/*' '*/exception/*' '*/intrusive/*' '*/smart_ptr/*' '*/move/*' '*/fusion/*' '*/io/*' '*/function/*' '*/iterator/*' '*/preprocessor/*' '*/system/*' '*/boost/test/*' '*/boost/detail/*' '*/utility/*' '*/example/*' '*/test/*' '*/pe_info.hpp' '*/macho_info.hpp' -o coverals/coverage.info
+
+    # Sending data to Coveralls
     - gem install coveralls-lcov
-    - cd .. && coveralls-lcov test/coverage.info
+    - coveralls-lcov coverals/coverage.info
