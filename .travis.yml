@@ -1,0 +1,33 @@
+os:
+    - linux
+
+env:
+    - CXX_STANDARD=c++98
+    - CXX_STANDARD=c++0x
+
+before_install:
+    - PROJECT_TO_TEST=variant
+    - echo OS is ${TRAVIS_OS_NAME}
+    - wget https://github.com/ned14/boost-release/archive/master.tar.gz
+    - tar xf master.tar.gz
+    - mv boost-release-master $HOME/boost-local
+    - BOOST="$HOME/boost-local"
+    - rm -rf $BOOST/libs/$PROJECT_TO_TEST
+    - mv ../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
+    - cd $BOOST
+    - ./bootstrap.sh
+
+script:
+    - echo OS is ${TRAVIS_OS_NAME}
+    - if [ "$CCFLAGS" != "" ]; then FLAGS="cxxflags=\"$CCFLAGS\" linkflags=\"$LINKFLAGS\""; else FLAGS=""; fi
+    - cd $BOOST/libs/$PROJECT_TO_TEST/test/
+    - ../../../b2 cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage"
+
+after_success:
+    - find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" ./ \;
+    - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" ./ \;
+    - sudo apt-get install -qq python-yaml lcov
+    - lcov --directory ./ --base-directory ./ --capture --output-file coverage.info
+    - lcov --remove coverage.info '/usr*' '*/filesystem*' '*/container*' '*/core/*' '*/exception/*' '*/intrusive/*' '*/smart_ptr/*' '*/move/*' '*/fusion/*' '*/io/*' '*/function/*' '*/iterator/*' '*/preprocessor/*' '*/system/*' '*/boost/test/*' '*/boost/detail/*' '*/utility/*' '*/example/*' '*/test/*' '*/pe_info.hpp' '*/macho_info.hpp' -o coverage.info
+    - gem install coveralls-lcov
+    - cd .. && coveralls-lcov test/coverage.info
