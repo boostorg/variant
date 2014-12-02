@@ -397,12 +397,12 @@ struct if_visitor: public <classname>boost::static_visitor</classname>&lt;arithm
     arguments by means of <code>apply_visitor</code>:
 
 <programlisting>
-bool_like_t v0(1), v1(true), v2(1.0);
+bool_like_t v0(true), v1(1), v2(2.0);
 
 assert(
     <functionname>boost::apply_visitor</functionname>(if_visitor(), v0, v1, v2)
     ==
-    arithmetics_t(true)
+    arithmetics_t(1)
 );
 </programlisting>
   </para>
