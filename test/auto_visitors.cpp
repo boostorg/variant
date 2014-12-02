@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// boost-libs variant/test/rvalue_test.cpp source file
+// boost-libs variant/test/auto_visitors.cpp source file
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
@@ -17,8 +17,13 @@
 
 struct lex_streamer_explicit: boost::static_visitor<std::string> {
     template <class T>
-    const char* operator()(const T& val) {
+    const char* operator()(const T& ) {
         return "10";
+    }
+
+    template <class T1, class T2>
+    const char* operator()(const T1& , const T2& ) {
+        return "100";
     }
 };
 
@@ -26,12 +31,13 @@ struct lex_streamer_explicit: boost::static_visitor<std::string> {
 void run_explicit()
 {
     typedef boost::variant<int, std::string, double> variant_type;
-    variant_type v2("10");
+    variant_type v2("10"), v1("100");
 
     lex_streamer_explicit visitor_ref;
 
     // Must return instance of std::string
     BOOST_CHECK(boost::apply_visitor(visitor_ref, v2).c_str() == std::string("10"));
+    BOOST_CHECK(boost::apply_visitor(visitor_ref, v2, v1).c_str() == std::string("100"));
 }
 
 
@@ -44,6 +50,10 @@ void run()
     BOOST_CHECK(true);
 }
 
+void run2()
+{
+    BOOST_CHECK(true);
+}
 
 #else
 
@@ -61,6 +71,12 @@ struct lex_streamer_void {
     void operator()(const T& val) const {
         std::cout << val << std::endl;
     }
+
+
+    template <class T1, class T2>
+    void operator()(const T1& val, const T2& val2) const {
+        std::cout << val << '+' << val2 << std::endl;
+    }
 };
 
 
@@ -72,9 +88,21 @@ struct lex_streamer2 {
         return "fail";
     }
 
+    template <class T1, class T2>
+    const char* operator()(const T1& v1, const T2& v2) const {
+        return "fail2";
+    }
+
     template <class T>
     std::string& operator()(const T& val) {
         res = boost::lexical_cast<std::string>(val);
+        return res;
+    }
+
+
+    template <class T1, class T2>
+    std::string& operator()(const T1& v1, const T2& v2) {
+        res = boost::lexical_cast<std::string>(v1) + "+" + boost::lexical_cast<std::string>(v2);
         return res;
     }
 };
@@ -104,6 +132,60 @@ void run()
     boost::apply_visitor(lex_streamer_void(), v1);
     boost::apply_visitor(lex_streamer_void(), v2);
 }
+
+
+struct lex_combine {
+    template <class T1, class T2>
+    std::string operator()(const T1& v1, const T2& v2) const {
+        return boost::lexical_cast<std::string>(v1) + "+" + boost::lexical_cast<std::string>(v2);
+    }
+};
+
+void run2()
+{
+    typedef boost::variant<int, std::string, double> variant_type;
+    variant_type v1(1), v2("10"), v3(100.0);
+
+    BOOST_CHECK(boost::apply_visitor(lex_combine(), v1, v2) == "1+10");
+    BOOST_CHECK(boost::apply_visitor(lex_combine(), v2, v1) == "10+1");
+
+
+    #ifndef BOOST_NO_CXX14_GENERIC_LAMBDAS
+        BOOST_CHECK(
+            boost::apply_visitor(
+                [](auto v1, auto v2) {
+                    return boost::lexical_cast<std::string>(v1) + "+"
+                        + boost::lexical_cast<std::string>(v2);
+                }
+                , v1
+                , v2
+            ) == "1+10"
+        );
+        BOOST_CHECK(
+            boost::apply_visitor(
+                [](auto v1, auto v2) {
+                    return boost::lexical_cast<std::string>(v1) + "+"
+                        + boost::lexical_cast<std::string>(v2);
+                }
+                , v2
+                , v1
+            ) == "10+1"
+        );
+
+        boost::apply_visitor([](auto v1, auto v2) { std::cout << v1 << '+' << v2 << std::endl; }, v1, v2);
+        boost::apply_visitor([](auto v1, auto v2) { std::cout << v1 << '+' << v2 << std::endl; }, v2, v1);
+    #endif
+
+
+    lex_streamer2 visitor_ref;
+    BOOST_CHECK(boost::apply_visitor(visitor_ref, v1, v2) == "1+10");
+    BOOST_CHECK(boost::apply_visitor(visitor_ref, v2, v1) == "10+1");
+    std::string& ref_to_string = boost::apply_visitor(visitor_ref, v1, v2);
+    BOOST_CHECK(ref_to_string == "1+10");
+
+    boost::apply_visitor(lex_streamer_void(), v1);
+    boost::apply_visitor(lex_streamer_void(), v2);
+}
 #endif
 
 
@@ -111,6 +193,7 @@ int test_main(int , char* [])
 {
     run_explicit();
     run();
+    run2();
 
     return 0;
 }
