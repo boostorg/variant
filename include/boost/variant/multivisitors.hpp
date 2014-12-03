@@ -3,7 +3,7 @@
 //
 //  See http://www.boost.org for most recent version, including documentation.
 //
-//  Copyright Antony Polukhin, 2013.
+//  Copyright Antony Polukhin, 2013-2014.
 //
 //  Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
@@ -17,6 +17,114 @@
 #endif
 
 #include <boost/variant.hpp>
+
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
+
+
+#include <utility>
+#include <tuple>
+
+namespace boost { 
+
+namespace detail { namespace variant {
+
+    template <size_t... I, typename Tuple>
+    decltype(auto) tuple_subset(const Tuple& tpl, std::index_sequence<I...>)
+    {
+        return std::make_tuple(std::get<I + 1>(tpl)...);
+    }
+
+    template <typename Head, typename... Tail>
+    std::tuple<Tail...> tuple_tail(const std::tuple<Head, Tail...>& tpl)
+    {
+        return tuple_subset(tpl, std::make_index_sequence<sizeof...(Tail)>());
+    }
+
+    template <typename Visitor, typename... Values, std::size_t Delimiter, typename... Visitables>
+    class values_combiner_and_extractor
+    {
+        Visitor&                        visitor_;
+        std::tuple<Values&...>          values_;
+        std::tuple<Visitables&...>      visitables_;
+
+    public: // structors
+
+        values_combiner_and_extractor(
+                    Visitor& visitor, std::tuple<Values&...> values, std::tuple<Visitables&...> visitables
+                ) BOOST_NOEXCEPT
+            : visitor_(visitor)
+            , values_(values)
+            , visitables_(visitables)
+        {}
+
+    public: // visitor interfaces
+
+        template <typename Value>
+        decltype(auto) operator()(Value& value)
+        {
+            return ::boost::apply_visitor(
+                make_values_combiner_and_extractor(
+                    visitor,
+                    std::tuple_cat(values_, std::tuple<Value&>()),
+                    tuple_tail(visitables_)
+                )
+                , std::get<0>(visitables_)
+            );
+        }
+
+    private:
+        values_combiner_and_extractor& operator=(const values_combiner_and_extractor&);
+    };
+
+    template <typename Visitor, typename... Values, std::size_t Delimiter>
+    class values_combiner_and_extractor
+    {
+        Visitor&                        visitor_;
+        std::tuple<Values&...>          values_;
+    public:
+
+        values_combiner_and_extractor(
+                    Visitor& visitor, std::tuple<Values&...> values, std::tuple<> /*visitables*/
+                ) BOOST_NOEXCEPT
+            : visitor_(visitor)
+            , values_(values)
+        {}
+
+        template <typename Value>
+        decltype(auto) operator()(Value& value)
+        {
+            return do_call(
+                std::tuple_cat(values_, std::tuple<Value&>()),
+                std::make_index_sequence<sizeof...(Values) + 1
+            );
+        }
+
+        template <class Tuple, std::size_t... I>
+        decltype(auto) do_call(Tuple& t, std::index_sequence<I...>) const {
+            return visitor_(std::get<I>(t)...);
+        }
+    };
+
+
+
+    template <class Visitor, class T1, class T2, class T3, class... TN>
+    inline decltype(auto) apply_visitor(const Visitor& visitor, T1& v1, T2& v2, TN&... vn)
+    {
+        return boost::apply_visitor(
+            make_values_combiner_and_extractor(
+                visitor,
+                std::tuple<>(),
+                std::forward_as_tuple(v2, vn...)
+            ),
+            v1
+        );
+    }
+    
+} // namespace boost
+
+
+#else // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
+
 #include <boost/bind.hpp>
 
 #include <boost/preprocessor/repetition.hpp>
@@ -138,6 +246,8 @@ BOOST_PP_REPEAT( BOOST_PP_SUB(BOOST_VARAINT_MAX_MULTIVIZITOR_PARAMS, 2), BOOST_V
 #undef BOOST_VARIANT_VISIT
     
 } // namespace boost
+
+#endif // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 
 #endif // BOOST_VARIANT_MULTIVISITORS_HPP
 
