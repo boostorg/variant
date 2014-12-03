@@ -4,7 +4,7 @@
 //-----------------------------------------------------------------------------
 //
 // Copyright (c) 2002-2003 Eric Friedman, Itay Maman
-// Copyright (c) 2012-2013 Antony Polukhin
+// Copyright (c) 2012-2014 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -2165,6 +2165,30 @@ public: // prevent comparison with foreign types
         BOOST_STATIC_ASSERT( false && sizeof(U) );
     }
 
+    template <typename U>
+    void operator!=(const U&) const
+    {
+        BOOST_STATIC_ASSERT( false && sizeof(U) );
+    }
+
+    template <typename U>
+    void operator>(const U&) const
+    {
+        BOOST_STATIC_ASSERT( false && sizeof(U) );
+    }
+
+    template <typename U>
+    void operator<=(const U&) const
+    {
+        BOOST_STATIC_ASSERT( false && sizeof(U) );
+    }
+
+    template <typename U>
+    void operator>=(const U&) const
+    {
+        BOOST_STATIC_ASSERT( false && sizeof(U) );
+    }
+
 public: // comparison operators
 
     // [MSVC6 requires these operators appear after template operators]
@@ -2193,6 +2217,28 @@ public: // comparison operators
               variant, detail::variant::less_comp
             > visitor(*this);
         return rhs.apply_visitor(visitor);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // comparison operators != > <= >=
+    inline bool operator!=(const variant& rhs) const
+    {
+        return !(*this == rhs);
+    }
+
+    inline bool operator>(const variant& rhs) const
+    {
+        return rhs < *this;
+    }
+
+    inline bool operator<=(const variant& rhs) const
+    {
+        return !(*this > rhs);
+    }
+
+    inline bool operator>=(const variant& rhs) const
+    {
+        return !(*this < rhs);
     }
 
 // helpers, for visitation support (below) -- private when possible
@@ -2302,6 +2348,7 @@ public: // metafunction result
         > type;
 
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // function template swap
