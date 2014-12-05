@@ -13,6 +13,7 @@
 #include "boost/config.hpp"
 #define BOOST_VARAINT_MAX_MULTIVIZITOR_PARAMS 5
 #include "boost/variant/multivisitors.hpp"
+#include "boost/variant.hpp"
 
 #include "boost/test/minimal.hpp"
 

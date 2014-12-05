@@ -138,13 +138,20 @@ void run()
 {
     typedef boost::variant<int, std::string, double> variant_type;
     variant_type v1(1), v2("10"), v3(100.0);
+    lex_streamer lex_streamer_visitor;
 
     BOOST_CHECK(boost::apply_visitor(lex_streamer(), v1) == "1");
+    BOOST_CHECK(boost::apply_visitor(lex_streamer_visitor)(v1) == "1");
     BOOST_CHECK(boost::apply_visitor(lex_streamer(), v2) == "10");
+    BOOST_CHECK(boost::apply_visitor(lex_streamer_visitor)(v2) == "10");
 
     #ifndef BOOST_NO_CXX14_GENERIC_LAMBDAS
         BOOST_CHECK(boost::apply_visitor([](auto v) { return boost::lexical_cast<std::string>(v); }, v1) == "1");
         BOOST_CHECK(boost::apply_visitor([](auto v) { return boost::lexical_cast<std::string>(v); }, v2) == "10");
+
+        // Retun type must be the same in all instances, so this code does not compile
+        //boost::variant<int, short, unsigned> v_diff_types(1);
+        //BOOST_CHECK(boost::apply_visitor([](auto v) { return v; }, v_diff_types) == 1);
 
         boost::apply_visitor([](auto v) { std::cout << v << std::endl; }, v1);
         boost::apply_visitor([](auto v) { std::cout << v << std::endl; }, v2);
@@ -156,8 +163,10 @@ void run()
     std::string& ref_to_string = boost::apply_visitor(visitor_ref, v1);
     BOOST_CHECK(ref_to_string == "1");
 
+    lex_streamer_void lex_streamer_void_visitor;
     boost::apply_visitor(lex_streamer_void(), v1);
     boost::apply_visitor(lex_streamer_void(), v2);
+    boost::apply_visitor(lex_streamer_void_visitor)(v2);
 }
 
 
@@ -180,9 +189,11 @@ void run2()
 {
     typedef boost::variant<int, std::string, double> variant_type;
     variant_type v1(1), v2("10"), v3(100.0);
+    lex_combine lex_combine_visitor;
 
     BOOST_CHECK(boost::apply_visitor(lex_combine(), v1, v2) == "1+10");
     BOOST_CHECK(boost::apply_visitor(lex_combine(), v2, v1) == "10+1");
+    BOOST_CHECK(boost::apply_visitor(lex_combine_visitor)(v2, v1) == "10+1");
 
 
     #ifndef BOOST_NO_CXX14_GENERIC_LAMBDAS
@@ -215,7 +226,7 @@ void run2()
     lex_streamer2 visitor_ref;
     BOOST_CHECK(boost::apply_visitor(visitor_ref, v1, v2) == "1+10");
     BOOST_CHECK(boost::apply_visitor(visitor_ref, v2, v1) == "10+1");
-    std::string& ref_to_string = boost::apply_visitor(visitor_ref, v1, v2);
+    std::string& ref_to_string = boost::apply_visitor(visitor_ref)(v1, v2);
     BOOST_CHECK(ref_to_string == "1+10");
 
     boost::apply_visitor(lex_streamer_void(), v1, v2);
@@ -224,11 +235,14 @@ void run2()
 
 void run3()
 {
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
     typedef boost::variant<int, std::string, double> variant_type;
     variant_type v1(1), v2("10"), v3(100);
+    lex_combine lex_combine_visitor;
 
     BOOST_CHECK(boost::apply_visitor(lex_combine(), v1, v2, v3) == "1+10+100");
     BOOST_CHECK(boost::apply_visitor(lex_combine(), v2, v1, v3) == "10+1+100");
+    BOOST_CHECK(boost::apply_visitor(lex_combine_visitor)(v2, v1, v3) == "10+1+100");
 
 
     #ifndef BOOST_NO_CXX14_GENERIC_LAMBDAS
@@ -270,12 +284,15 @@ void run3()
 
     lex_streamer2 visitor_ref;
     BOOST_CHECK(boost::apply_visitor(visitor_ref, v1, v2) == "1+10");
-    BOOST_CHECK(boost::apply_visitor(visitor_ref, v2, v1) == "10+1");
+    BOOST_CHECK(boost::apply_visitor(visitor_ref)(v2, v1) == "10+1");
     std::string& ref_to_string = boost::apply_visitor(visitor_ref, v1, v2);
     BOOST_CHECK(ref_to_string == "1+10");
 
+    lex_streamer_void lex_streamer_void_visitor;
     boost::apply_visitor(lex_streamer_void(), v1, v2, v1);
     boost::apply_visitor(lex_streamer_void(), v2, v1, v1);
+    boost::apply_visitor(lex_streamer_void_visitor)(v2, v1, v1);
+#endif // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
 }
 #endif
 

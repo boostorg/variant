@@ -16,13 +16,12 @@
 # pragma once
 #endif
 
-#include <boost/variant.hpp>
+#include <boost/variant/detail/apply_visitor_unary.hpp>
 
 #if defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) || defined(BOOST_NO_CXX11_HDR_TUPLE)
 #   error "This file requires <tuple> and variadic templates support"
 #endif
 
-#include <utility>
 #include <tuple>
 
 namespace boost { 

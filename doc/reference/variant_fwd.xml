@@ -42,7 +42,8 @@
         Users may define this macro to make 
         <code><macroname>BOOST_VARIANT_ENUM_PARAMS</macroname></code>
         and <code><macroname>BOOST_VARIANT_ENUM_SHIFTED_PARAMS</macroname></code> expand
-        to a comma-separated sequence instead of variadic templates.
+        to a comma-separated sequence instead of variadic templates. Define this macro if
+        your compiler has problems with compilation of variadic templates.
       </simpara>
     </purpose>
   </macro>

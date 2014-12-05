@@ -409,7 +409,8 @@ assert(
 
   <para>Finally, we must note that multi visitation does not support 
     &quot;delayed&quot; form of
-    <code><functionname>apply_visitor</functionname></code>.
+    <code><functionname>apply_visitor</functionname> if
+    <macroname>BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES</macroname> is defined</code>.
   </para>
 
 </section>
