@@ -285,6 +285,7 @@ int test_main(int , char* [])
     run_explicit();
     run();
     run2();
+    run3();
 
     return 0;
 }

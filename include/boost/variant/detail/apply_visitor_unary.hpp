@@ -26,6 +26,7 @@
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
 #   include <boost/mpl/distance.hpp>
 #   include <boost/mpl/advance.hpp>
+#   include <boost/mpl/size.hpp>
 #   include "boost/variant/detail/has_result_type.hpp"
 #endif
 
