@@ -40,6 +40,12 @@ namespace detail { namespace variant {
         : index_sequence<I...> 
     {};
 
+    template <class... Types>
+    std::tuple<Types&...> forward_as_tuple_simple(Types&... args) BOOST_NOEXCEPT
+    {
+        return std::tuple<Types&...>(args...);
+    }
+
     // Implementing some of the helper tuple methods
     template <std::size_t... I, typename Tuple>
     std::tuple<typename std::tuple_element<I + 1, Tuple>::type...> 
@@ -149,7 +155,7 @@ namespace detail { namespace variant {
         return ::boost::apply_visitor(
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
-                std::forward_as_tuple(v2, v3, vn...),
+                ::boost::detail::variant::forward_as_tuple_simple(v2, v3, vn...),
                 std::tuple<>()
             ),
             v1
@@ -163,7 +169,7 @@ namespace detail { namespace variant {
         return ::boost::apply_visitor(
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
-                std::forward_as_tuple(v2, v3, vn...),
+                ::boost::detail::variant::forward_as_tuple_simple(v2, v3, vn...),
                 std::tuple<>()
             ),
             v1

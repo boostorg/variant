@@ -112,7 +112,7 @@ namespace detail { namespace variant {
         return boost::apply_visitor(
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer_cpp14(
                 visitor,
-                std::forward_as_tuple(v2, v3, vn...),
+                ::boost::detail::variant::forward_as_tuple_simple(v2, v3, vn...),
                 std::tuple<>()
             ),
             v1
@@ -129,7 +129,7 @@ namespace detail { namespace variant {
         return ::boost::apply_visitor(
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer_cpp14(
                 visitor,
-                std::forward_as_tuple(v2, v3, vn...),
+                ::boost::detail::variant::forward_as_tuple_simple(v2, v3, vn...),
                 std::tuple<>()
             ),
             v1
