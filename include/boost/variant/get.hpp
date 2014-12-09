@@ -20,6 +20,7 @@
 #include "boost/throw_exception.hpp"
 #include "boost/utility/addressof.hpp"
 #include "boost/variant/variant_fwd.hpp"
+#include "boost/variant/detail/element_index.hpp"
 
 #include "boost/type_traits/add_reference.hpp"
 #include "boost/type_traits/add_pointer.hpp"
@@ -103,6 +104,12 @@ get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
 {
+    BOOST_STATIC_ASSERT_MSG(
+        (boost::detail::variant::holds_element<boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >, U >::value),
+        "boost::variant does not contain specified type U, "
+        "call to boost::get<U>(boost::variant<T...>*) will always return NULL"
+    );
+
     typedef typename add_pointer<U>::type U_ptr;
     if (!operand) return static_cast<U_ptr>(0);
 
@@ -118,6 +125,12 @@ get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
 {
+    BOOST_STATIC_ASSERT_MSG(
+        (boost::detail::variant::holds_element<boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >, const U >::value),
+        "boost::variant does not contain specified type U, "
+        "call to boost::get<U>(const boost::variant<T...>*) will always return NULL"
+    );
+
     typedef typename add_pointer<const U>::type U_ptr;
     if (!operand) return static_cast<U_ptr>(0);
 
@@ -133,6 +146,12 @@ get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
+    BOOST_STATIC_ASSERT_MSG(
+        (boost::detail::variant::holds_element<boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >, U >::value),
+        "boost::variant does not contain specified type U, "
+        "call to boost::get<U>(boost::variant<T...>&) will always throw boost::bad_get exception"
+    );
+
     typedef typename add_pointer<U>::type U_ptr;
     U_ptr result = get<U>(&operand);
 
@@ -149,6 +168,12 @@ get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
+    BOOST_STATIC_ASSERT_MSG(
+        (boost::detail::variant::holds_element<boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >, const U >::value),
+        "boost::variant does not contain specified type U, "
+        "call to boost::get<U>(const boost::variant<T...>&) will always throw boost::bad_get exception"
+    );
+
     typedef typename add_pointer<const U>::type U_ptr;
     U_ptr result = get<const U>(&operand);
 
