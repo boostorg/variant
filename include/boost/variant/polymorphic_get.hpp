@@ -54,6 +54,33 @@ public: // std::exception implementation
 
 namespace detail { namespace variant {
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// polymorphic metafunctions to detect index of a value
+//
+
+template <class Types, class T>
+struct element_polymorphic_iterator_impl :
+    boost::mpl::find_if<
+        Types,
+        boost::mpl::or_<
+            variant_element_functor<boost::mpl::_1, T>,
+            variant_element_functor<boost::mpl::_1, typename boost::remove_cv<T>::type >,
+            boost::is_base_of<boost::mpl::_1, T>
+        >
+    >
+{};
+
+template <class Variant, class T>
+struct holds_element_polymorphic :
+    boost::mpl::not_<
+        boost::is_same<
+            typename boost::mpl::end<typename Variant::types>::type,
+            typename element_polymorphic_iterator_impl<typename Variant::types, T>::type
+        >
+    >
+{};
+
 // (detail) class template get_polymorphic_visitor
 //
 // Generic static visitor that: if the value is of the specified
@@ -64,8 +91,9 @@ template <typename Base>
 struct get_polymorphic_visitor
 {
 private: // private typedefs
-    typedef typename add_pointer<Base>::type pointer;
-    typedef typename add_reference<Base>::type reference;
+    typedef get_polymorphic_visitor<Base>       this_type;
+    typedef typename add_pointer<Base>::type    pointer;
+    typedef typename add_reference<Base>::type  reference;
 
     pointer get(reference operand, boost::true_type) const BOOST_NOEXCEPT
     {
@@ -86,9 +114,14 @@ public: // visitor interfaces
     {
         typedef boost::integral_constant<
             bool,
-            boost::is_base_of<Base, U>::value || boost::is_same<Base, U>::value
+            boost::mpl::or_<
+                boost::is_base_of<Base, U>,
+                boost::is_same<Base, U>,
+                boost::is_same<typename boost::remove_cv<Base>::type, U >
+            >::value
         > tag_t;
-        return get(operand, tag_t());
+
+        return this_type::get(operand, tag_t());
     }
 };
 

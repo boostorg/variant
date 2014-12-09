@@ -55,6 +55,7 @@ struct holds_element :
     >
 {};
 
+
 }}} // namespace boost::detail::variant
 
 #endif // BOOST_VARIANT_DETAIL_ELEMENT_INDEX_HPP

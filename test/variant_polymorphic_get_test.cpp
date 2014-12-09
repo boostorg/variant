@@ -31,18 +31,23 @@ int test_main(int , char* [])
 
     var_t var1;
     BOOST_CHECK(!boost::polymorphic_get<base>(&var1));
+    BOOST_CHECK(!boost::polymorphic_get<const base>(&var1));
 
     var1 = derived1();
     BOOST_CHECK(boost::polymorphic_get<base>(&var1));
+    BOOST_CHECK(boost::polymorphic_get<const base>(&var1));
 
     derived2 d;
     d.trash = 777;
     var_t var2 = d;
     BOOST_CHECK(boost::polymorphic_get<base>(var2).trash == 777);
+    BOOST_CHECK(boost::polymorphic_get<const base>(var2).trash == 777);
 
     var2 = 777;
     BOOST_CHECK(!boost::polymorphic_get<base>(&var2));
+    BOOST_CHECK(!boost::polymorphic_get<const base>(&var2));
     BOOST_CHECK(boost::polymorphic_get<int>(var2) == 777);
+    BOOST_CHECK(boost::polymorphic_get<const int>(var2) == 777);
 
     typedef boost::variant<int, vbase, vderived1, vderived2, vderived3> vvar_t;
 
@@ -50,9 +55,12 @@ int test_main(int , char* [])
     boost::polymorphic_get<vderived3>(v).trash = 777;
     const vvar_t& cv = v;
     BOOST_CHECK(boost::polymorphic_get<vbase>(cv).trash == 777);
+    BOOST_CHECK(boost::polymorphic_get<const vbase>(cv).trash == 777);
 
     BOOST_CHECK(boost::polymorphic_get<vbase>(cv).foo() == 3);
     BOOST_CHECK(boost::polymorphic_get<vbase>(v).foo() == 3);
+    BOOST_CHECK(boost::polymorphic_get<const vbase>(cv).foo() == 3);
+    BOOST_CHECK(boost::polymorphic_get<const vbase>(v).foo() == 3);
 
     return boost::exit_success;
 }

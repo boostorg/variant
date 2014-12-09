@@ -33,65 +33,57 @@ typedef boost::variant<
 > var_req_t;
 struct recursive_structure { var_req_t var; };
 
-template <class T, class V>
-void check_get_on_types_impl(V* v) 
+template <class T, class V, class TestType>
+inline void check_get_on_types_impl_single_type(V* v)
 {
-    if (!!boost::is_same<T, int>::value) {
-        BOOST_CHECK(boost::get<int>(v));
-        BOOST_CHECK(boost::get<const int>(v));
+    if (!!boost::is_same<T, TestType>::value) {
+        BOOST_CHECK(boost::get<TestType>(v));
+        BOOST_CHECK(boost::get<const TestType>(v));
+        BOOST_CHECK(boost::safe_get<TestType>(v));
+        BOOST_CHECK(boost::safe_get<const TestType>(v));
+        BOOST_CHECK(boost::unsafe_get<TestType>(v));
+        BOOST_CHECK(boost::unsafe_get<const TestType>(v));
     } else {
-        BOOST_CHECK(!boost::get<int>(v));
-        BOOST_CHECK(!boost::get<const int>(v));
+        BOOST_CHECK(!boost::get<TestType>(v));
+        BOOST_CHECK(!boost::get<const TestType>(v));
+        BOOST_CHECK(!boost::safe_get<TestType>(v));
+        BOOST_CHECK(!boost::safe_get<const TestType>(v));
+        BOOST_CHECK(!boost::unsafe_get<TestType>(v));
+        BOOST_CHECK(!boost::unsafe_get<const TestType>(v));
     }
-
-    if (!!boost::is_same<T, base>::value) {
-        BOOST_CHECK(boost::get<base>(v));
-        BOOST_CHECK(boost::get<const base>(v));
-    } else {
-        BOOST_CHECK(!boost::get<base>(v));
-        BOOST_CHECK(!boost::get<const base>(v));
-    }
-
-    if (!!boost::is_same<T, derived1>::value) {
-        BOOST_CHECK(boost::get<derived1>(v));
-        BOOST_CHECK(boost::get<const derived1>(v));
-    } else {
-        BOOST_CHECK(!boost::get<derived1>(v));
-        BOOST_CHECK(!boost::get<const derived1>(v));
-    }
-
-    if (!!boost::is_same<T, derived2>::value) {
-        BOOST_CHECK(boost::get<derived2>(v));
-        BOOST_CHECK(boost::get<const derived2>(v));
-    } else {
-        BOOST_CHECK(!boost::get<derived2>(v));
-        BOOST_CHECK(!boost::get<const derived2>(v));
-    }
-
-    if (!!boost::is_same<T, std::string>::value) {
-        BOOST_CHECK(boost::get<std::string>(v));
-        BOOST_CHECK(boost::get<const std::string>(v));
-    } else {
-        BOOST_CHECK(!boost::get<std::string>(v));
-        BOOST_CHECK(!boost::get<const std::string>(v));
-    }
-    
-    // Never exist in here
-    //BOOST_CHECK(!boost::get<short>(v));
-    //BOOST_CHECK(!boost::get<const short>(v));
-
-    boost::get<T>(*v); // Must compile
-    boost::get<const T>(*v); // Must compile
 }
 
 template <class T, class V>
-void check_get_on_types(V* v) 
+inline void check_get_on_types_impl(V* v)
+{
+    check_get_on_types_impl_single_type<T, V, int>(v);
+    check_get_on_types_impl_single_type<T, V, base>(v);
+    check_get_on_types_impl_single_type<T, V, derived1>(v);
+    check_get_on_types_impl_single_type<T, V, derived2>(v);
+    check_get_on_types_impl_single_type<T, V, std::string>(v);
+
+    // Never exist in here
+    BOOST_CHECK(!boost::unsafe_get<short>(v));
+    BOOST_CHECK(!boost::unsafe_get<const short>(v));
+    BOOST_CHECK(!boost::unsafe_get<char>(v));
+    BOOST_CHECK(!boost::unsafe_get<char*>(v));
+    BOOST_CHECK(!boost::unsafe_get<bool>(v));
+    BOOST_CHECK(!boost::unsafe_get<const bool>(v));
+
+    boost::get<T>(*v);              // Must compile
+    boost::get<const T>(*v);        // Must compile
+    boost::safe_get<T>(*v);         // Must compile
+    boost::safe_get<const T>(*v);   // Must compile
+}
+
+template <class T, class V>
+inline void check_get_on_types(V* v)
 {
     check_get_on_types_impl<T, V>(v);
     check_get_on_types_impl<T, const V>(v);
 }
 
-void get_test()
+inline void get_test()
 {
     var_t v;
     check_get_on_types<int>(&v);
@@ -109,7 +101,7 @@ void get_test()
     check_get_on_types<std::string>(&v);
 }
 
-void get_ref_test()
+inline void get_ref_test()
 {
     int i = 0;
     var_ref_t v(i);
@@ -133,7 +125,7 @@ void get_ref_test()
 }
 
 
-void get_cref_test()
+inline void get_cref_test()
 {
     int i = 0;
     var_cref_t v(i);
@@ -152,7 +144,7 @@ void get_cref_test()
     BOOST_CHECK(!boost::get<const int>(&v4));
 }
 
-void get_recursive_test()
+inline void get_recursive_test()
 {
     var_req_t v;
     check_get_on_types<int>(&v);
@@ -174,12 +166,48 @@ void get_recursive_test()
     check_get_on_types<recursive_structure>(&v);
 }
 
+template <class T>
+inline void check_that_does_not_exist_impl()
+{
+    using namespace boost::detail::variant;
+
+    BOOST_CHECK((holds_element<T, const int>::value));
+    BOOST_CHECK((!holds_element<T, short>::value));
+    BOOST_CHECK((!holds_element<T, short>::value));
+    BOOST_CHECK((!holds_element<T, const short>::value));
+    BOOST_CHECK((!holds_element<T, char*>::value));
+    BOOST_CHECK((!holds_element<T, const char*>::value));
+    BOOST_CHECK((!holds_element<T, char[]>::value));
+    BOOST_CHECK((!holds_element<T, const char[]>::value));
+    BOOST_CHECK((!holds_element<T, bool>::value));
+    BOOST_CHECK((!holds_element<T, const bool>::value));
+
+    BOOST_CHECK((!holds_element<T, boost::recursive_wrapper<int> >::value));
+    BOOST_CHECK((!holds_element<T, boost::recursive_wrapper<short> >::value));
+    BOOST_CHECK((!holds_element<T, boost::detail::reference_content<short> >::value));
+}
+
+inline void check_that_does_not_exist()
+{
+    using namespace boost::detail::variant;
+
+    BOOST_CHECK((holds_element<var_t, int>::value));
+    BOOST_CHECK((holds_element<var_ref_t, int>::value));
+    BOOST_CHECK((!holds_element<var_cref_t, int>::value));
+
+    check_that_does_not_exist_impl<var_t>();
+    check_that_does_not_exist_impl<var_ref_t>();
+    check_that_does_not_exist_impl<var_cref_t>();
+    check_that_does_not_exist_impl<var_req_t>();
+}
+
 int test_main(int , char* [])
 {
     get_test();
     get_ref_test();
     get_cref_test();
     get_recursive_test();
+    check_that_does_not_exist();
 
     return boost::exit_success;
 }
