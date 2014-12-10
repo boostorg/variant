@@ -94,7 +94,7 @@
       <purpose>
         <simpara>Retrieves a value of a specified type from a given
           <code><classname>variant</classname></code>. </simpara>
-        <simpara>Unlike <functionname>safe_get</functionname> does not do a compile time check
+        <simpara>Unlike <functionname>safe_get</functionname> does not assert at compile time
         that type <code>U</code> is one of the types that can be stored in variant.</simpara>
       </purpose>
 
@@ -105,7 +105,8 @@
           only if the content is of the specified type <code>U</code>, with
           failure indicated as described below.</simpara>
         <simpara><emphasis role="bold">Recomendation</emphasis>: Use
-          <functionname>safe_get</functionname> in new code. <functionname>safe_get</functionname>
+          <functionname>get</functionname> or <functionname>safe_get</functionname> in new code.
+          <functionname>safe_get</functionname>
           provides more compile time checks and it's behavior is closer to <code>std::get</code>
           from C++ Standard Library.</simpara>
         <simpara><emphasis role="bold">Warning</emphasis>: After either
@@ -301,8 +302,15 @@
       </purpose>
 
       <description>
-        <simpara>Evaluates to <functionname>unsafe_get</functionname> or
-            <functionname>safe_get</functionname>.</simpara>
+        <simpara>Evaluates to <functionname>safe_get</functionname> if <code>BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT</code>
+          is not defined. If <code>BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT</code>
+          is defined then evaluates to <functionname>safe_get</functionname>. </simpara>
+
+        <simpara><emphasis role="bold">Recomendation</emphasis>: Use
+          <functionname>get</functionname> in new code without defining
+          <code>BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT</code>. In that way <functionname>get</functionname>
+          provides more compile time checks and it's behavior is closer to <code>std::get</code>
+          from C++ Standard Library.</simpara>
       </description>
     </overloaded-function>
 

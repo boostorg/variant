@@ -11,6 +11,7 @@
 
 #include "boost/variant/variant.hpp"
 #include "boost/variant/get.hpp"
+#include "boost/variant/polymorphic_get.hpp"
 #include "boost/variant/recursive_wrapper.hpp"
 #include "boost/test/minimal.hpp"
 
@@ -24,6 +25,7 @@ struct vderived2 : virtual vbase{ virtual int foo() const { return 3; } };
 struct vderived3 : vderived1, vderived2 { virtual int foo() const { return 3; } };
 
 typedef boost::variant<int, base, derived1, derived2, std::string> var_t;
+typedef boost::variant<int, derived1, derived2, std::string> var_t_shortened;
 typedef boost::variant<int&, base&, derived1&, derived2&, std::string&> var_ref_t;
 typedef boost::variant<const int&, const base&, const derived1&, const derived2&, const std::string&> var_cref_t;
 
@@ -32,6 +34,26 @@ typedef boost::variant<
     int, base, derived1, derived2, std::string, boost::recursive_wrapper<recursive_structure>
 > var_req_t;
 struct recursive_structure { var_req_t var; };
+
+template <class T, class V, class TestType>
+inline void check_polymorphic_get_on_types_impl_single_type(V* v)
+{
+    if (!!boost::is_same<T, TestType>::value) {
+        BOOST_CHECK(boost::polymorphic_get<TestType>(v));
+        BOOST_CHECK(boost::polymorphic_get<const TestType>(v));
+        BOOST_CHECK(boost::polymorphic_safe_get<TestType>(v));
+        BOOST_CHECK(boost::polymorphic_safe_get<const TestType>(v));
+        BOOST_CHECK(boost::polymorphic_unsafe_get<TestType>(v));
+        BOOST_CHECK(boost::polymorphic_unsafe_get<const TestType>(v));
+    } else {
+        BOOST_CHECK(!boost::polymorphic_get<TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_get<const TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_safe_get<TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_safe_get<const TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_unsafe_get<TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_unsafe_get<const TestType>(v));
+    }
+}
 
 template <class T, class V, class TestType>
 inline void check_get_on_types_impl_single_type(V* v)
@@ -57,10 +79,18 @@ template <class T, class V>
 inline void check_get_on_types_impl(V* v)
 {
     check_get_on_types_impl_single_type<T, V, int>(v);
+    check_polymorphic_get_on_types_impl_single_type<T, V, int>(v);
+
     check_get_on_types_impl_single_type<T, V, base>(v);
+
     check_get_on_types_impl_single_type<T, V, derived1>(v);
+    check_polymorphic_get_on_types_impl_single_type<T, V, derived1>(v);
+
     check_get_on_types_impl_single_type<T, V, derived2>(v);
+    check_polymorphic_get_on_types_impl_single_type<T, V, derived2>(v);
+
     check_get_on_types_impl_single_type<T, V, std::string>(v);
+    check_polymorphic_get_on_types_impl_single_type<T, V, std::string>(v);
 
     // Never exist in here
     BOOST_CHECK(!boost::unsafe_get<short>(v));
@@ -70,10 +100,22 @@ inline void check_get_on_types_impl(V* v)
     BOOST_CHECK(!boost::unsafe_get<bool>(v));
     BOOST_CHECK(!boost::unsafe_get<const bool>(v));
 
+    BOOST_CHECK(!boost::polymorphic_unsafe_get<short>(v));
+    BOOST_CHECK(!boost::polymorphic_unsafe_get<const short>(v));
+    BOOST_CHECK(!boost::polymorphic_unsafe_get<char>(v));
+    BOOST_CHECK(!boost::polymorphic_unsafe_get<char*>(v));
+    BOOST_CHECK(!boost::polymorphic_unsafe_get<bool>(v));
+    BOOST_CHECK(!boost::polymorphic_unsafe_get<const bool>(v));
+
     boost::get<T>(*v);              // Must compile
     boost::get<const T>(*v);        // Must compile
     boost::safe_get<T>(*v);         // Must compile
     boost::safe_get<const T>(*v);   // Must compile
+
+    boost::polymorphic_get<T>(*v);              // Must compile
+    boost::polymorphic_get<const T>(*v);        // Must compile
+    boost::polymorphic_safe_get<T>(*v);         // Must compile
+    boost::polymorphic_safe_get<const T>(*v);   // Must compile
 }
 
 template <class T, class V>
@@ -99,6 +141,20 @@ inline void get_test()
 
     var_t(std::string("Hello")).swap(v);
     check_get_on_types<std::string>(&v);
+
+    var_t_shortened vs = derived2();
+    check_polymorphic_get_on_types_impl_single_type<derived2, var_t_shortened, int>(&vs);
+    check_polymorphic_get_on_types_impl_single_type<derived2, const var_t_shortened, int>(&vs);
+    // Checking that Base is really determinated
+    check_polymorphic_get_on_types_impl_single_type<base, var_t_shortened, base>(&vs);
+    check_polymorphic_get_on_types_impl_single_type<base, const var_t_shortened, base>(&vs);
+
+    vs = derived1();
+    check_polymorphic_get_on_types_impl_single_type<derived2, var_t_shortened, int>(&vs);
+    check_polymorphic_get_on_types_impl_single_type<derived2, const var_t_shortened, int>(&vs);
+    // Checking that Base is really determinated
+    check_polymorphic_get_on_types_impl_single_type<base, var_t_shortened, base>(&vs);
+    check_polymorphic_get_on_types_impl_single_type<base, const var_t_shortened, base>(&vs);
 }
 
 inline void get_ref_test()
@@ -185,6 +241,22 @@ inline void check_that_does_not_exist_impl()
     BOOST_CHECK((!holds_element<T, boost::recursive_wrapper<int> >::value));
     BOOST_CHECK((!holds_element<T, boost::recursive_wrapper<short> >::value));
     BOOST_CHECK((!holds_element<T, boost::detail::reference_content<short> >::value));
+
+
+    BOOST_CHECK((holds_element_polymorphic<T, const int>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, short>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, short>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, const short>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, char*>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, const char*>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, char[]>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, const char[]>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, bool>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, const bool>::value));
+
+    BOOST_CHECK((!holds_element_polymorphic<T, boost::recursive_wrapper<int> >::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, boost::recursive_wrapper<short> >::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, boost::detail::reference_content<short> >::value));
 }
 
 inline void check_that_does_not_exist()
