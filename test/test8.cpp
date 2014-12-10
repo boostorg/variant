@@ -58,11 +58,11 @@ T& check_pass(Variant& v, T value)
 template <typename T, typename Variant>
 void check_fail(Variant& v)
 {
-    BOOST_CHECK(!unsafe_get<T>(&v));
+    BOOST_CHECK(!relaxed_get<T>(&v));
 
     try
     {
-        T& r = unsafe_get<T>(v);
+        T& r = relaxed_get<T>(v);
         (void)r; // suppress warning about r not being used
         BOOST_CHECK(false && &r); // should never reach
     }

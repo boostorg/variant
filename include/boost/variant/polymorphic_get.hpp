@@ -137,13 +137,13 @@ public: // visitor interfaces
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// polymorphic_unsafe_get
+// polymorphic_relaxed_get
 //
 
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<U>::type
-polymorphic_unsafe_get(
+polymorphic_relaxed_get(
       boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
@@ -158,7 +158,7 @@ polymorphic_unsafe_get(
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<const U>::type
-polymorphic_unsafe_get(
+polymorphic_relaxed_get(
       const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
@@ -173,13 +173,13 @@ polymorphic_unsafe_get(
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<U>::type
-polymorphic_unsafe_get(
+polymorphic_relaxed_get(
       boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
     typedef typename add_pointer<U>::type U_ptr;
-    U_ptr result = polymorphic_unsafe_get<U>(&operand);
+    U_ptr result = polymorphic_relaxed_get<U>(&operand);
 
     if (!result)
         boost::throw_exception(bad_polymorphic_get());
@@ -189,13 +189,13 @@ polymorphic_unsafe_get(
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<const U>::type
-polymorphic_unsafe_get(
+polymorphic_relaxed_get(
       const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
     typedef typename add_pointer<const U>::type U_ptr;
-    U_ptr result = polymorphic_unsafe_get<const U>(&operand);
+    U_ptr result = polymorphic_relaxed_get<const U>(&operand);
 
     if (!result)
         boost::throw_exception(bad_polymorphic_get());
@@ -203,13 +203,13 @@ polymorphic_unsafe_get(
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// polymorphic_safe_get
+// polymorphic_strict_get
 //
 
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<U>::type
-polymorphic_safe_get(
+polymorphic_strict_get(
       boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
@@ -220,13 +220,13 @@ polymorphic_safe_get(
         "call to boost::polymorphic_get<U>(boost::variant<T...>*) will always return NULL"
     );
 
-    return polymorphic_unsafe_get<U>(operand);
+    return polymorphic_relaxed_get<U>(operand);
 }
 
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<const U>::type
-polymorphic_safe_get(
+polymorphic_strict_get(
       const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
@@ -237,13 +237,13 @@ polymorphic_safe_get(
         "call to boost::polymorphic_get<U>(const boost::variant<T...>*) will always return NULL"
     );
 
-    return polymorphic_unsafe_get<U>(operand);
+    return polymorphic_relaxed_get<U>(operand);
 }
 
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<U>::type
-polymorphic_safe_get(
+polymorphic_strict_get(
       boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
@@ -254,13 +254,13 @@ polymorphic_safe_get(
         "call to boost::polymorphic_get<U>(boost::variant<T...>&) will always throw boost::bad_polymorphic_get exception"
     );
 
-    return polymorphic_unsafe_get<U>(operand);
+    return polymorphic_relaxed_get<U>(operand);
 }
 
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<const U>::type
-polymorphic_safe_get(
+polymorphic_strict_get(
       const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
@@ -271,7 +271,7 @@ polymorphic_safe_get(
         "call to boost::polymorphic_get<U>(const boost::variant<T...>&) will always throw boost::bad_polymorphic_get exception"
     );
 
-    return polymorphic_unsafe_get<U>(operand);
+    return polymorphic_relaxed_get<U>(operand);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -286,10 +286,10 @@ polymorphic_get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
 {
-#ifdef BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT
-    return polymorphic_unsafe_get<U>(operand);
+#ifdef BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+    return polymorphic_relaxed_get<U>(operand);
 #else
-    return polymorphic_safe_get<U>(operand);
+    return polymorphic_strict_get<U>(operand);
 #endif
 
 }
@@ -302,10 +302,10 @@ polymorphic_get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
 {
-#ifdef BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT
-    return polymorphic_unsafe_get<U>(operand);
+#ifdef BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+    return polymorphic_relaxed_get<U>(operand);
 #else
-    return polymorphic_safe_get<U>(operand);
+    return polymorphic_strict_get<U>(operand);
 #endif
 }
 
@@ -317,10 +317,10 @@ polymorphic_get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
-#ifdef BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT
-    return polymorphic_unsafe_get<U>(operand);
+#ifdef BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+    return polymorphic_relaxed_get<U>(operand);
 #else
-    return polymorphic_safe_get<U>(operand);
+    return polymorphic_strict_get<U>(operand);
 #endif
 }
 
@@ -332,10 +332,10 @@ polymorphic_get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
-#ifdef BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT
-    return polymorphic_unsafe_get<U>(operand);
+#ifdef BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+    return polymorphic_relaxed_get<U>(operand);
 #else
-    return polymorphic_safe_get<U>(operand);
+    return polymorphic_strict_get<U>(operand);
 #endif
 }
 } // namespace boost

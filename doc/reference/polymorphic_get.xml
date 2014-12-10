@@ -26,7 +26,7 @@
       </method>
     </class>
 
-    <overloaded-function name="polymorphic_unsafe_get">
+    <overloaded-function name="polymorphic_relaxed_get">
       <signature>
         <template>
           <template-type-parameter name="U"/>
@@ -94,7 +94,7 @@
       <purpose>
         <simpara>Retrieves a value of a specified type from a given
           <code><classname>variant</classname></code>.</simpara>
-        <simpara>Unlike <functionname>polymorphic_safe_get</functionname> does not assert at compile time
+        <simpara>Unlike <functionname>polymorphic_strict_get</functionname> does not assert at compile time
         that type <code>U</code> is one of the types that can be stored in variant.</simpara>
       </purpose>
 
@@ -106,9 +106,9 @@
           derived from type <code>U</code>, with
           failure indicated as described below.</simpara>
         <simpara><emphasis role="bold">Recomendation</emphasis>: Use
-          <functionname>polymorphic_get</functionname> or <functionname>polymorphic_safe_get</functionname>
+          <functionname>polymorphic_get</functionname> or <functionname>polymorphic_strict_get</functionname>
           in new code.
-          <functionname>polymorphic_safe_get</functionname>
+          <functionname>polymorphic_strict_get</functionname>
           provides more compile time checks and it's behavior is closer to <code>std::get</code>
           from C++ Standard Library.</simpara>
         <simpara><emphasis role="bold">Warning</emphasis>: After either
@@ -162,7 +162,7 @@
 
 
 
-    <overloaded-function name="polymorphic_safe_get">
+    <overloaded-function name="polymorphic_strict_get">
       <signature>
         <template>
           <template-type-parameter name="U"/>
@@ -233,7 +233,7 @@
       </purpose>
 
       <description>
-        <simpara>Acts exactly like <functionname>polymorphic_unsafe_get</functionname> but does a compile time check
+        <simpara>Acts exactly like <functionname>polymorphic_relaxed_get</functionname> but does a compile time check
         that type <code>U</code> is one of the types that can be stored in variant.</simpara>
       </description>
     </overloaded-function>
@@ -309,14 +309,14 @@
       </purpose>
 
       <description>
-        <simpara>Evaluates to <functionname>polymorphic_safe_get</functionname>
-          if <code>BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT</code>
-          is not defined. If <code>BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT</code>
-          is defined then evaluates to <functionname>polymorphic_safe_get</functionname>. </simpara>
+        <simpara>Evaluates to <functionname>polymorphic_strict_get</functionname>
+          if <code>BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT</code>
+          is not defined. If <code>BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT</code>
+          is defined then evaluates to <functionname>polymorphic_strict_get</functionname>. </simpara>
 
         <simpara><emphasis role="bold">Recomendation</emphasis>: Use
           <functionname>polymorphic_get</functionname> in new code without defining
-          <code>BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT</code>. In that way
+          <code>BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT</code>. In that way
           <functionname>polymorphic_get</functionname>
           provides more compile time checks and it's behavior is closer to <code>std::get</code>
           from C++ Standard Library.</simpara>

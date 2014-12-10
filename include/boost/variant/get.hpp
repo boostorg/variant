@@ -97,12 +97,12 @@ public: // visitor interfaces
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// unsafe_get<U>(variant) methods
+// relaxed_get<U>(variant) methods
 //
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<U>::type
-unsafe_get(
+relaxed_get(
       boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
@@ -117,7 +117,7 @@ unsafe_get(
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<const U>::type
-unsafe_get(
+relaxed_get(
       const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
@@ -132,13 +132,13 @@ unsafe_get(
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<U>::type
-unsafe_get(
+relaxed_get(
       boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
     typedef typename add_pointer<U>::type U_ptr;
-    U_ptr result = unsafe_get<U>(&operand);
+    U_ptr result = relaxed_get<U>(&operand);
 
     if (!result)
         boost::throw_exception(bad_get());
@@ -148,13 +148,13 @@ unsafe_get(
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<const U>::type
-unsafe_get(
+relaxed_get(
       const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
     typedef typename add_pointer<const U>::type U_ptr;
-    U_ptr result = unsafe_get<const U>(&operand);
+    U_ptr result = relaxed_get<const U>(&operand);
 
     if (!result)
         boost::throw_exception(bad_get());
@@ -164,12 +164,12 @@ unsafe_get(
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// safe_get<U>(variant) methods
+// strict_get<U>(variant) methods
 //
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<U>::type
-safe_get(
+strict_get(
       boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
@@ -180,13 +180,13 @@ safe_get(
         "call to boost::get<U>(boost::variant<T...>*) will always return NULL"
     );
 
-    return unsafe_get<U>(operand);
+    return relaxed_get<U>(operand);
 }
 
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<const U>::type
-safe_get(
+strict_get(
       const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
@@ -197,13 +197,13 @@ safe_get(
         "call to boost::get<U>(const boost::variant<T...>*) will always return NULL"
     );
 
-    return unsafe_get<U>(operand);
+    return relaxed_get<U>(operand);
 }
 
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<U>::type
-safe_get(
+strict_get(
       boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
@@ -214,13 +214,13 @@ safe_get(
         "call to boost::get<U>(boost::variant<T...>&) will always throw boost::bad_get exception"
     );
 
-    return unsafe_get<U>(operand);
+    return relaxed_get<U>(operand);
 }
 
 template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<const U>::type
-safe_get(
+strict_get(
       const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
@@ -231,7 +231,7 @@ safe_get(
         "call to boost::get<U>(const boost::variant<T...>&) will always throw boost::bad_get exception"
     );
 
-    return unsafe_get<U>(operand);
+    return relaxed_get<U>(operand);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,10 +246,10 @@ get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
 {
-#ifdef BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT
-    return unsafe_get<U>(operand);
+#ifdef BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+    return relaxed_get<U>(operand);
 #else
-    return safe_get<U>(operand);
+    return strict_get<U>(operand);
 #endif
 
 }
@@ -262,10 +262,10 @@ get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     ) BOOST_NOEXCEPT
 {
-#ifdef BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT
-    return unsafe_get<U>(operand);
+#ifdef BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+    return relaxed_get<U>(operand);
 #else
-    return safe_get<U>(operand);
+    return strict_get<U>(operand);
 #endif
 }
 
@@ -277,10 +277,10 @@ get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
-#ifdef BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT
-    return unsafe_get<U>(operand);
+#ifdef BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+    return relaxed_get<U>(operand);
 #else
-    return safe_get<U>(operand);
+    return strict_get<U>(operand);
 #endif
 }
 
@@ -292,10 +292,10 @@ get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
-#ifdef BOOST_VARIANT_USE_UNSAFE_GET_BY_DEFAULT
-    return unsafe_get<U>(operand);
+#ifdef BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+    return relaxed_get<U>(operand);
 #else
-    return safe_get<U>(operand);
+    return strict_get<U>(operand);
 #endif
 }
 

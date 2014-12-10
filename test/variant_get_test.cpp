@@ -41,17 +41,17 @@ inline void check_polymorphic_get_on_types_impl_single_type(V* v)
     if (!!boost::is_same<T, TestType>::value) {
         BOOST_CHECK(boost::polymorphic_get<TestType>(v));
         BOOST_CHECK(boost::polymorphic_get<const TestType>(v));
-        BOOST_CHECK(boost::polymorphic_safe_get<TestType>(v));
-        BOOST_CHECK(boost::polymorphic_safe_get<const TestType>(v));
-        BOOST_CHECK(boost::polymorphic_unsafe_get<TestType>(v));
-        BOOST_CHECK(boost::polymorphic_unsafe_get<const TestType>(v));
+        BOOST_CHECK(boost::polymorphic_strict_get<TestType>(v));
+        BOOST_CHECK(boost::polymorphic_strict_get<const TestType>(v));
+        BOOST_CHECK(boost::polymorphic_relaxed_get<TestType>(v));
+        BOOST_CHECK(boost::polymorphic_relaxed_get<const TestType>(v));
     } else {
         BOOST_CHECK(!boost::polymorphic_get<TestType>(v));
         BOOST_CHECK(!boost::polymorphic_get<const TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_safe_get<TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_safe_get<const TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_unsafe_get<TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_unsafe_get<const TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_strict_get<TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_strict_get<const TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_relaxed_get<TestType>(v));
+        BOOST_CHECK(!boost::polymorphic_relaxed_get<const TestType>(v));
     }
 }
 
@@ -61,17 +61,17 @@ inline void check_get_on_types_impl_single_type(V* v)
     if (!!boost::is_same<T, TestType>::value) {
         BOOST_CHECK(boost::get<TestType>(v));
         BOOST_CHECK(boost::get<const TestType>(v));
-        BOOST_CHECK(boost::safe_get<TestType>(v));
-        BOOST_CHECK(boost::safe_get<const TestType>(v));
-        BOOST_CHECK(boost::unsafe_get<TestType>(v));
-        BOOST_CHECK(boost::unsafe_get<const TestType>(v));
+        BOOST_CHECK(boost::strict_get<TestType>(v));
+        BOOST_CHECK(boost::strict_get<const TestType>(v));
+        BOOST_CHECK(boost::relaxed_get<TestType>(v));
+        BOOST_CHECK(boost::relaxed_get<const TestType>(v));
     } else {
         BOOST_CHECK(!boost::get<TestType>(v));
         BOOST_CHECK(!boost::get<const TestType>(v));
-        BOOST_CHECK(!boost::safe_get<TestType>(v));
-        BOOST_CHECK(!boost::safe_get<const TestType>(v));
-        BOOST_CHECK(!boost::unsafe_get<TestType>(v));
-        BOOST_CHECK(!boost::unsafe_get<const TestType>(v));
+        BOOST_CHECK(!boost::strict_get<TestType>(v));
+        BOOST_CHECK(!boost::strict_get<const TestType>(v));
+        BOOST_CHECK(!boost::relaxed_get<TestType>(v));
+        BOOST_CHECK(!boost::relaxed_get<const TestType>(v));
     }
 }
 
@@ -93,29 +93,29 @@ inline void check_get_on_types_impl(V* v)
     check_polymorphic_get_on_types_impl_single_type<T, V, std::string>(v);
 
     // Never exist in here
-    BOOST_CHECK(!boost::unsafe_get<short>(v));
-    BOOST_CHECK(!boost::unsafe_get<const short>(v));
-    BOOST_CHECK(!boost::unsafe_get<char>(v));
-    BOOST_CHECK(!boost::unsafe_get<char*>(v));
-    BOOST_CHECK(!boost::unsafe_get<bool>(v));
-    BOOST_CHECK(!boost::unsafe_get<const bool>(v));
+    BOOST_CHECK(!boost::relaxed_get<short>(v));
+    BOOST_CHECK(!boost::relaxed_get<const short>(v));
+    BOOST_CHECK(!boost::relaxed_get<char>(v));
+    BOOST_CHECK(!boost::relaxed_get<char*>(v));
+    BOOST_CHECK(!boost::relaxed_get<bool>(v));
+    BOOST_CHECK(!boost::relaxed_get<const bool>(v));
 
-    BOOST_CHECK(!boost::polymorphic_unsafe_get<short>(v));
-    BOOST_CHECK(!boost::polymorphic_unsafe_get<const short>(v));
-    BOOST_CHECK(!boost::polymorphic_unsafe_get<char>(v));
-    BOOST_CHECK(!boost::polymorphic_unsafe_get<char*>(v));
-    BOOST_CHECK(!boost::polymorphic_unsafe_get<bool>(v));
-    BOOST_CHECK(!boost::polymorphic_unsafe_get<const bool>(v));
+    BOOST_CHECK(!boost::polymorphic_relaxed_get<short>(v));
+    BOOST_CHECK(!boost::polymorphic_relaxed_get<const short>(v));
+    BOOST_CHECK(!boost::polymorphic_relaxed_get<char>(v));
+    BOOST_CHECK(!boost::polymorphic_relaxed_get<char*>(v));
+    BOOST_CHECK(!boost::polymorphic_relaxed_get<bool>(v));
+    BOOST_CHECK(!boost::polymorphic_relaxed_get<const bool>(v));
 
     boost::get<T>(*v);              // Must compile
     boost::get<const T>(*v);        // Must compile
-    boost::safe_get<T>(*v);         // Must compile
-    boost::safe_get<const T>(*v);   // Must compile
+    boost::strict_get<T>(*v);         // Must compile
+    boost::strict_get<const T>(*v);   // Must compile
 
     boost::polymorphic_get<T>(*v);              // Must compile
     boost::polymorphic_get<const T>(*v);        // Must compile
-    boost::polymorphic_safe_get<T>(*v);         // Must compile
-    boost::polymorphic_safe_get<const T>(*v);   // Must compile
+    boost::polymorphic_strict_get<T>(*v);         // Must compile
+    boost::polymorphic_strict_get<const T>(*v);   // Must compile
 }
 
 template <class T, class V>
