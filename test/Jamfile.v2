@@ -33,6 +33,7 @@ test-suite variant
     [ run variant_multivisit_test.cpp ]
     [ run hash_variant_test.cpp ]
     [ run rvalue_test.cpp ]
+    [ run variant_nonempty_check.cpp ]
     [ run recursive_variant_test.cpp : : : <define>BOOST_NO_EXCEPTIONS
       <toolset>gcc-4.3:<cxxflags>-fno-exceptions
       <toolset>gcc-4.4:<cxxflags>-fno-exceptions
