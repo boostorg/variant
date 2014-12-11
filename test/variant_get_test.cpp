@@ -15,7 +15,21 @@
 #include "boost/variant/recursive_wrapper.hpp"
 #include "boost/test/minimal.hpp"
 
-struct base {int trash;};
+struct base {
+    int trash;
+
+    base() : trash(123) {}
+    base(const base& b) : trash(b.trash) { int i = 100; (void)i; }
+    const base& operator=(const base& b) {
+        trash = b.trash;
+        int i = 100; (void)i;
+
+        return *this;
+    }
+
+    virtual ~base(){}
+};
+
 struct derived1 : base{};
 struct derived2 : base{};
 
@@ -26,6 +40,7 @@ struct vderived3 : vderived1, vderived2 { virtual int foo() const { return 3; } 
 
 typedef boost::variant<int, base, derived1, derived2, std::string> var_t;
 typedef boost::variant<int, derived1, derived2, std::string> var_t_shortened;
+typedef boost::variant<base, derived1, derived2> var_t_no_fallback;
 typedef boost::variant<int&, base&, derived1&, derived2&, std::string&> var_ref_t;
 typedef boost::variant<const int&, const base&, const derived1&, const derived2&, const std::string&> var_cref_t;
 
@@ -157,6 +172,28 @@ inline void get_test()
     check_polymorphic_get_on_types_impl_single_type<base, const var_t_shortened, base>(&vs);
 }
 
+inline void get_test_no_fallback()
+{
+    var_t_no_fallback v;
+    var_t_no_fallback(base()).swap(v);
+    check_polymorphic_get_on_types_impl_single_type<base, var_t_no_fallback, base>(&v);
+    check_polymorphic_get_on_types_impl_single_type<base, const var_t_no_fallback, base>(&v);
+    check_get_on_types_impl_single_type<base, var_t_no_fallback, base>(&v);
+    check_get_on_types_impl_single_type<base, const var_t_no_fallback, base>(&v);
+
+    var_t_no_fallback(derived1()).swap(v);
+    check_polymorphic_get_on_types_impl_single_type<base, var_t_no_fallback, base>(&v);
+    check_polymorphic_get_on_types_impl_single_type<base, const var_t_no_fallback, base>(&v);
+    check_get_on_types_impl_single_type<derived1, var_t_no_fallback, derived1>(&v);
+    check_get_on_types_impl_single_type<derived1, const var_t_no_fallback, derived1>(&v);
+
+    var_t_no_fallback(derived2()).swap(v);
+    check_polymorphic_get_on_types_impl_single_type<base, var_t_no_fallback, base>(&v);
+    check_polymorphic_get_on_types_impl_single_type<base, const var_t_no_fallback, base>(&v);
+    check_get_on_types_impl_single_type<derived2, var_t_no_fallback, derived2>(&v);
+    check_get_on_types_impl_single_type<derived2, const var_t_no_fallback, derived2>(&v);
+}
+
 inline void get_ref_test()
 {
     int i = 0;
@@ -233,8 +270,8 @@ inline void check_that_does_not_exist_impl()
     BOOST_CHECK((!holds_element<T, const short>::value));
     BOOST_CHECK((!holds_element<T, char*>::value));
     BOOST_CHECK((!holds_element<T, const char*>::value));
-    BOOST_CHECK((!holds_element<T, char[]>::value));
-    BOOST_CHECK((!holds_element<T, const char[]>::value));
+    BOOST_CHECK((!holds_element<T, char[5]>::value));
+    BOOST_CHECK((!holds_element<T, const char[5]>::value));
     BOOST_CHECK((!holds_element<T, bool>::value));
     BOOST_CHECK((!holds_element<T, const bool>::value));
 
@@ -249,8 +286,8 @@ inline void check_that_does_not_exist_impl()
     BOOST_CHECK((!holds_element_polymorphic<T, const short>::value));
     BOOST_CHECK((!holds_element_polymorphic<T, char*>::value));
     BOOST_CHECK((!holds_element_polymorphic<T, const char*>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, char[]>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, const char[]>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, char[5]>::value));
+    BOOST_CHECK((!holds_element_polymorphic<T, const char[5]>::value));
     BOOST_CHECK((!holds_element_polymorphic<T, bool>::value));
     BOOST_CHECK((!holds_element_polymorphic<T, const bool>::value));
 
@@ -276,6 +313,7 @@ inline void check_that_does_not_exist()
 int test_main(int , char* [])
 {
     get_test();
+    get_test_no_fallback();
     get_ref_test();
     get_cref_test();
     get_recursive_test();

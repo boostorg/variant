@@ -8,6 +8,9 @@ Boost.Variant, part of collection of the [Boost C++ Libraries](http://github.com
 Develop branch: | [![Build Status](https://travis-ci.org/apolukhin/variant.svg?branch=develop)](https://travis-ci.org/apolukhin/variant)  | [![Coverage Status](https://coveralls.io/repos/apolukhin/variant/badge.png?branch=develop)](https://coveralls.io/r/apolukhin/variant?branch=develop) | [details...](http://www.boost.org/development/tests/develop/developer/variant.html)
 Master branch:  | [![Build Status](https://travis-ci.org/apolukhin/variant.svg?branch=master)](https://travis-ci.org/apolukhin/variant)  | [![Coverage Status](https://coveralls.io/repos/apolukhin/variant/badge.png?branch=master)](https://coveralls.io/r/apolukhin/variant?branch=master) | [details...](http://www.boost.org/development/tests/master/developer/variant.html)
 
+
+[Open Issues](https://svn.boost.org/trac/boost/query?status=!closed&component=variant)
+
 ### License
 
 Distributed under the [Boost Software License, Version 1.0](http://boost.org/LICENSE_1_0.txt).

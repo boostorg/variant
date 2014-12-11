@@ -66,9 +66,9 @@ void check_fail(Variant& v)
         (void)r; // suppress warning about r not being used
         BOOST_CHECK(false && &r); // should never reach
     }
-    catch(boost::bad_get&)
+    catch(const boost::bad_get& e)
     {
-        // (do nothing here)
+        BOOST_CHECK(!!e.what()); // make sure that what() is const qualified and returnes something
     }
 }
 
