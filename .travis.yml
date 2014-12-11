@@ -15,8 +15,9 @@ before_install:
     # Set this to the name of your Boost library
     # Autodetect library name by using the following code: - PROJECT_TO_TEST=`git rev-parse --show-toplevel`
     - PROJECT_TO_TEST=variant
-    # Autodetect branch by using the following code: - BRANCH_TO_TEST=`git rev-parse --abbrev-ref HEAD`
-    - BRANCH_TO_TEST=develop
+    # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=`git rev-parse --abbrev-ref HEAD`
+    # or by - BRANCH_TO_TEST=$TRAVIS_BRANCH or just directly specify it
+    - BRANCH_TO_TEST=$TRAVIS_BRANCH
 
     # From this point and below code is same for all the Boost libs
     # Cloning Boost libraries (fast nondeep cloning)
