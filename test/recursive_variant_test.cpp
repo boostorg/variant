@@ -159,6 +159,13 @@ void test_recursive_variant()
     std::cout << "result1++2: " << result1 << '\n';
     BOOST_CHECK(result1 == "( 3 5 7 ) ");
 
+    vec1_copy[2].swap(vec1_copy[2]);
+    result1 = printer()(
+        var1_t(vec1_copy)
+    );
+    std::cout << "result1.2: " << result1 << '\n';
+    BOOST_CHECK(result1 == "( 3 5 ( 3 5 ( 3 5 7 ) 7 ) 7 ) ");
+
     typedef boost::make_recursive_variant<
           boost::variant<int, double>
         , std::vector<boost::recursive_variant_>
