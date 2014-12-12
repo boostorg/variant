@@ -102,6 +102,26 @@ struct nonthrowing_class {
     nonthrowing_class() BOOST_NOEXCEPT_IF(false) : trash(123) {
         prevent_compiler_noexcept_detection();
     }
+
+    nonthrowing_class(const nonthrowing_class&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+    }
+
+    const nonthrowing_class& operator=(const nonthrowing_class&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+        return *this;
+    }
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    nonthrowing_class(nonthrowing_class&&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+    }
+
+    const nonthrowing_class& operator=(nonthrowing_class&&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+        return *this;
+    }
+#endif
 };
 
 inline void check_1(int helper = 1)
@@ -243,6 +263,8 @@ inline void check_5(int helper = 1)
         BOOST_CHECK(boost::get<throwing_class>(&v1));
     }
 
+    boost::get<throwing_class>(v1).trash = throwing_class::do_not_throw;
+    boost::get<throwing_class>(v2).trash = throwing_class::do_not_throw;
     v1 = nonthrowing_class();
     v2 = nonthrowing_class();
     try {
