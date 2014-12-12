@@ -16,6 +16,9 @@
 // assignment attempt. If exception was thrown during move/assignemnt operation we make sure
 // that data in variant is same as before move/assignemnt operation or that a fallback type is
 // stored in variant.
+//
+// Different nonthrowing_class'es are used to tests different variant internal policies:
+// with/without fallback type + throw/nothrow copyable + throw/nothrow movable
 
 
 #include "boost/variant/variant.hpp"
@@ -124,9 +127,74 @@ struct nonthrowing_class {
 #endif
 };
 
-inline void check_1(int helper = 1)
+struct nonthrowing_class2 {
+    int trash;
+
+    nonthrowing_class2() BOOST_NOEXCEPT_IF(false) : trash(123) {
+        prevent_compiler_noexcept_detection();
+    }
+};
+
+struct nonthrowing_class3 {
+    int trash;
+
+    nonthrowing_class3() BOOST_NOEXCEPT_IF(true) : trash(123) {}
+
+    nonthrowing_class3(const nonthrowing_class3&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+    }
+
+    const nonthrowing_class3& operator=(const nonthrowing_class3&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+        return *this;
+    }
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    nonthrowing_class3(nonthrowing_class3&&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+    }
+
+    const nonthrowing_class3& operator=(nonthrowing_class3&&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+        return *this;
+    }
+#endif
+};
+
+struct nonthrowing_class4 {
+    int trash;
+
+    nonthrowing_class4() BOOST_NOEXCEPT_IF(false) : trash(123) {
+        prevent_compiler_noexcept_detection();
+    }
+
+    nonthrowing_class4(const nonthrowing_class4&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+    }
+
+    const nonthrowing_class4& operator=(const nonthrowing_class4&) BOOST_NOEXCEPT_IF(false) {
+        prevent_compiler_noexcept_detection();
+        return *this;
+    }
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    nonthrowing_class4(nonthrowing_class4&&) BOOST_NOEXCEPT_IF(true) {
+    }
+
+    const nonthrowing_class4& operator=(nonthrowing_class4&&) BOOST_NOEXCEPT_IF(true) {
+        return *this;
+    }
+#endif
+};
+
+
+// Tests /////////////////////////////////////////////////////////////////////////////////////
+
+
+template <class Nonthrowing>
+inline void check_1_impl(int helper)
 {
-    boost::variant<throwing_class, nonthrowing_class> v;
+    boost::variant<throwing_class, Nonthrowing> v;
     try {
         v = throwing_class(helper);
         BOOST_CHECK(!v.which());
@@ -147,16 +215,26 @@ inline void check_1(int helper = 1)
     }
 }
 
-inline void check_2(int helper = 1)
+inline void check_1(int helper = 1)
 {
-    boost::variant<nonthrowing_class, throwing_class> v;
+    check_1_impl<nonthrowing_class>(helper);
+    check_1_impl<nonthrowing_class2>(helper);
+    check_1_impl<nonthrowing_class3>(helper);
+    check_1_impl<nonthrowing_class4>(helper);
+    check_1_impl<boost::blank>(helper);
+}
+
+template <class Nonthrowing>
+inline void check_2_impl(int helper)
+{
+    boost::variant<Nonthrowing, throwing_class> v;
     try {
         v = throwing_class(helper);
         BOOST_CHECK(v.which() == 1);
         BOOST_CHECK(boost::get<throwing_class>(&v));
     } catch (const exception_on_assignment& /*e*/) {
         BOOST_CHECK(!v.which());
-        BOOST_CHECK(boost::get<nonthrowing_class>(&v));
+        BOOST_CHECK(boost::get<Nonthrowing>(&v));
     }
 
     try {
@@ -166,14 +244,23 @@ inline void check_2(int helper = 1)
         BOOST_CHECK(boost::get<throwing_class>(&v));
     } catch (const exception_on_assignment& /*e*/) {
         BOOST_CHECK(!v.which());
-        BOOST_CHECK(boost::get<nonthrowing_class>(&v));
+        BOOST_CHECK(boost::get<Nonthrowing>(&v));
     }
 }
 
-inline void check_3(int helper = 1)
+inline void check_2(int helper = 1)
 {
+    check_2_impl<nonthrowing_class>(helper);
+    check_2_impl<nonthrowing_class2>(helper);
+    check_2_impl<nonthrowing_class3>(helper);
+    check_2_impl<nonthrowing_class4>(helper);
+    check_2_impl<boost::blank>(helper);
+}
 
-    boost::variant<nonthrowing_class, throwing_class> v1, v2;
+template <class Nonthrowing>
+inline void check_3_impl(int helper)
+{
+    boost::variant<Nonthrowing, throwing_class> v1, v2;
 
     swap(v1, v2);
     try {
@@ -182,7 +269,7 @@ inline void check_3(int helper = 1)
         BOOST_CHECK(boost::get<throwing_class>(&v1));
     } catch (const exception_on_assignment& /*e*/) {
         BOOST_CHECK(!v1.which());
-        BOOST_CHECK(boost::get<nonthrowing_class>(&v1));
+        BOOST_CHECK(boost::get<Nonthrowing>(&v1));
     }
 
 
@@ -192,19 +279,28 @@ inline void check_3(int helper = 1)
         BOOST_CHECK(boost::get<throwing_class>(&v2));
     } catch (const exception_on_assignment& /*e*/) {
         BOOST_CHECK(!v2.which());
-        BOOST_CHECK(boost::get<nonthrowing_class>(&v2));
+        BOOST_CHECK(boost::get<Nonthrowing>(&v2));
     }
 
 
     if (!v1.which() && !v2.which()) {
         swap(v1, v2); // Make sure that two backup holders swap well
         BOOST_CHECK(!v1.which());
-        BOOST_CHECK(boost::get<nonthrowing_class>(&v1));
+        BOOST_CHECK(boost::get<Nonthrowing>(&v1));
         BOOST_CHECK(!v2.which());
-        BOOST_CHECK(boost::get<nonthrowing_class>(&v2));
+        BOOST_CHECK(boost::get<Nonthrowing>(&v2));
 
         v1 = v2;
     }
+}
+
+inline void check_3(int helper = 1)
+{
+    check_3_impl<nonthrowing_class>(helper);
+    check_3_impl<nonthrowing_class2>(helper);
+    check_3_impl<nonthrowing_class3>(helper);
+    check_3_impl<nonthrowing_class4>(helper);
+    check_3_impl<boost::blank>(helper);
 }
 
 inline void check_4(int helper = 1)
@@ -243,9 +339,10 @@ inline void check_4(int helper = 1)
     }
 }
 
-inline void check_5(int helper = 1)
+template <class Nonthrowing>
+inline void check_5_impl(int helper)
 {
-    boost::variant<nonthrowing_class, throwing_class> v1, v2;
+    boost::variant<Nonthrowing, throwing_class> v1, v2;
     throwing_class throw_not_now;
     throw_not_now.trash = throwing_class::do_not_throw;
     v1 = throw_not_now;
@@ -265,15 +362,15 @@ inline void check_5(int helper = 1)
 
     boost::get<throwing_class>(v1).trash = throwing_class::do_not_throw;
     boost::get<throwing_class>(v2).trash = throwing_class::do_not_throw;
-    v1 = nonthrowing_class();
-    v2 = nonthrowing_class();
+    v1 = Nonthrowing();
+    v2 = Nonthrowing();
     try {
         v1 = throwing_class(helper);
         BOOST_CHECK(v1.which() == 1);
         BOOST_CHECK(boost::get<throwing_class>(&v1));
     } catch (const exception_on_assignment& /*e*/) {
         BOOST_CHECK(v1.which() == 0);
-        BOOST_CHECK(boost::get<nonthrowing_class>(&v1));
+        BOOST_CHECK(boost::get<Nonthrowing>(&v1));
     }
 
     int v1_type = v1.which();
@@ -288,9 +385,20 @@ inline void check_5(int helper = 1)
     }
 }
 
-inline void check_6(int helper = 1)
+
+inline void check_5(int helper = 1)
 {
-    boost::variant<nonthrowing_class, throwing_class> v1, v2;
+    check_5_impl<nonthrowing_class>(helper);
+    check_5_impl<nonthrowing_class2>(helper);
+    check_5_impl<nonthrowing_class3>(helper);
+    check_5_impl<nonthrowing_class4>(helper);
+    check_5_impl<boost::blank>(helper);
+}
+
+template <class Nonthrowing>
+inline void check_6_impl(int helper)
+{
+    boost::variant<Nonthrowing, throwing_class> v1, v2;
     throwing_class throw_not_now;
     throw_not_now.trash = throwing_class::do_not_throw;
     v1 = throw_not_now;
@@ -305,7 +413,7 @@ inline void check_6(int helper = 1)
     v1 = throwing_class(throw_not_now);
     v2 = v1;
 
-    v1 = nonthrowing_class();
+    v1 = Nonthrowing();
     try {
         throwing_class tc;
         tc.trash = helper;
@@ -316,7 +424,7 @@ inline void check_6(int helper = 1)
         BOOST_CHECK(v1.which() == 0);
     }
 
-    v2 = nonthrowing_class();
+    v2 = Nonthrowing();
     try {
         v2 = 2;
         BOOST_CHECK(false);
@@ -335,6 +443,16 @@ inline void check_6(int helper = 1)
         BOOST_CHECK(v2.which() == 0);
         BOOST_CHECK(boost::get<throwing_class>(v1).trash == helper);
     }
+}
+
+
+inline void check_6(int helper = 1)
+{
+    check_6_impl<nonthrowing_class>(helper);
+    check_6_impl<nonthrowing_class2>(helper);
+    check_6_impl<nonthrowing_class3>(helper);
+    check_6_impl<nonthrowing_class4>(helper);
+    check_6_impl<boost::blank>(helper);
 }
 
 int test_main(int , char* [])
