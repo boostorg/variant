@@ -48,6 +48,7 @@
 #include "boost/type_traits/add_const.hpp"
 #include "boost/type_traits/has_nothrow_constructor.hpp"
 #include "boost/type_traits/has_nothrow_copy.hpp"
+#include "boost/type_traits/is_nothrow_move_assignable.hpp"
 #include "boost/type_traits/is_nothrow_move_constructible.hpp"
 #include "boost/type_traits/is_const.hpp"
 #include "boost/type_traits/is_same.hpp"
