@@ -3,13 +3,14 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2013-2014 Antony Polukhin
+// Copyright (c) 2013-2015 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "boost/config.hpp"
+#include "boost/noncopyable.hpp"
 #define BOOST_VARAINT_MAX_MULTIVIZITOR_PARAMS 5
 #include "boost/variant/multivisitors.hpp"
 #include "boost/variant.hpp"
