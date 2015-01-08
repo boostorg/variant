@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2013 Antony Polukhin
+// Copyright (c) 2013-2015 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -16,6 +16,7 @@
 
 #include "boost/config.hpp"
 #include "boost/detail/workaround.hpp"
+#include "boost/static_assert.hpp"
 #include "boost/throw_exception.hpp"
 #include "boost/utility/addressof.hpp"
 #include "boost/variant/variant_fwd.hpp"

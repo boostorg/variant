@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2014 Antony Polukhin
+// Copyright (c) 2014-2015 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -15,7 +15,6 @@
 #include "boost/config.hpp"
 #include "boost/variant/recursive_wrapper_fwd.hpp"
 #include "boost/variant/variant_fwd.hpp"
-#include "boost/detail/reference_content.hpp"
 
 #include "boost/mpl/find_if.hpp"
 
