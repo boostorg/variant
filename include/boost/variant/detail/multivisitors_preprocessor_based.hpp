@@ -39,7 +39,7 @@ namespace detail { namespace variant {
         Visitable1T&    visitable1_;
         Visitable2T&    visitable2_;
 
-        // required to supress warnings and enshure that we do not copy 
+        // required to suppress warnings and ensure that we do not copy
         // this visitor
         two_variables_holder& operator=(const two_variables_holder&);
 
