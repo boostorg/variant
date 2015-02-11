@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2014 Antony Polukhin
+// Copyright (c) 2014-2015 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -134,6 +134,12 @@ struct lex_streamer2 {
     }
 };
 
+#ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
+#   define BOOST_CHECK_IF_HAS_VARIADIC(x) BOOST_CHECK(x)
+#else
+#   define BOOST_CHECK_IF_HAS_VARIADIC(x) /**/
+#endif
+
 void run()
 {
     typedef boost::variant<int, std::string, double> variant_type;
@@ -141,9 +147,9 @@ void run()
     lex_streamer lex_streamer_visitor;
 
     BOOST_CHECK(boost::apply_visitor(lex_streamer(), v1) == "1");
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_visitor)(v1) == "1");
+    BOOST_CHECK_IF_HAS_VARIADIC(boost::apply_visitor(lex_streamer_visitor)(v1) == "1");
     BOOST_CHECK(boost::apply_visitor(lex_streamer(), v2) == "10");
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_visitor)(v2) == "10");
+    BOOST_CHECK_IF_HAS_VARIADIC(boost::apply_visitor(lex_streamer_visitor)(v2) == "10");
 
     #ifndef BOOST_NO_CXX14_GENERIC_LAMBDAS
         BOOST_CHECK(boost::apply_visitor([](auto v) { return boost::lexical_cast<std::string>(v); }, v1) == "1");
@@ -160,13 +166,16 @@ void run()
     lex_streamer2 visitor_ref;
     BOOST_CHECK(boost::apply_visitor(visitor_ref, v1) == "1");
     BOOST_CHECK(boost::apply_visitor(visitor_ref, v2) == "10");
+#ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
     std::string& ref_to_string = boost::apply_visitor(visitor_ref, v1);
     BOOST_CHECK(ref_to_string == "1");
-
+#endif
     lex_streamer_void lex_streamer_void_visitor;
     boost::apply_visitor(lex_streamer_void(), v1);
     boost::apply_visitor(lex_streamer_void(), v2);
+#ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
     boost::apply_visitor(lex_streamer_void_visitor)(v2);
+#endif
 }
 
 
@@ -193,7 +202,7 @@ void run2()
 
     BOOST_CHECK(boost::apply_visitor(lex_combine(), v1, v2) == "1+10");
     BOOST_CHECK(boost::apply_visitor(lex_combine(), v2, v1) == "10+1");
-    BOOST_CHECK(boost::apply_visitor(lex_combine_visitor)(v2, v1) == "10+1");
+    BOOST_CHECK_IF_HAS_VARIADIC(boost::apply_visitor(lex_combine_visitor)(v2, v1) == "10+1");
 
 
     #ifndef BOOST_NO_CXX14_GENERIC_LAMBDAS
@@ -226,12 +235,16 @@ void run2()
     lex_streamer2 visitor_ref;
     BOOST_CHECK(boost::apply_visitor(visitor_ref, v1, v2) == "1+10");
     BOOST_CHECK(boost::apply_visitor(visitor_ref, v2, v1) == "10+1");
+#ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
     std::string& ref_to_string = boost::apply_visitor(visitor_ref)(v1, v2);
     BOOST_CHECK(ref_to_string == "1+10");
+#endif
 
     boost::apply_visitor(lex_streamer_void(), v1, v2);
     boost::apply_visitor(lex_streamer_void(), v2, v1);
 }
+
+#undef BOOST_CHECK_IF_HAS_VARIADIC
 
 void run3()
 {
