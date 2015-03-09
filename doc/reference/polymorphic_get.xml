@@ -312,7 +312,7 @@
         <simpara>Evaluates to <functionname>polymorphic_strict_get</functionname>
           if <code>BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT</code>
           is not defined. If <code>BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT</code>
-          is defined then evaluates to <functionname>polymorphic_strict_get</functionname>. </simpara>
+          is defined then evaluates to <functionname>polymorphic_relaxed_get</functionname>. </simpara>
 
         <simpara><emphasis role="bold">Recomendation</emphasis>: Use
           <functionname>polymorphic_get</functionname> in new code without defining
