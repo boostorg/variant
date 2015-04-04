@@ -22,8 +22,6 @@
 #include "boost/variant/lambda_visitor.hpp"
 #include "boost/variant/multivisitors.hpp"
 
-#include "class_a.h"
-#include "jobs.h"
 
 #include <iostream>
 #include <string>

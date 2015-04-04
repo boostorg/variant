@@ -21,8 +21,6 @@
 #include "boost/variant.hpp"
 #include "boost/variant/lambda_visitor.hpp"
 
-#include "class_a.h"
-#include "jobs.h"
 
 #include <iostream>
 #include <string>
@@ -97,15 +95,15 @@ void run()
    static_assert(boost::is_same<typename decltype(ts2)::return_type, string>::value, "Return type is incorrect");
 
    v1 = 3.124;
-   BOOST_CHECK(apply_visitor(ts, v1) == std::to_string(3.124));
+   BOOST_CHECK(apply_visitor(ts2, v1) == std::to_string(3.124));
 
 
    v1 = "C3P0";
-   BOOST_CHECK(apply_visitor(ts, v1) == "C3PO");
+   BOOST_CHECK(apply_visitor(ts2, v1) == "C3PO");
 
 
    v1 = 'C';
-   BOOST_CHECK(apply_visitor(ts, v1) != "C");
+   BOOST_CHECK(apply_visitor(ts2, v1) != "C");
 
 
 }

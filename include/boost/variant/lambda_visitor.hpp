@@ -22,11 +22,11 @@ namespace boost { //namespace variant {
 
 
 template<typename ...Lambdas>
-detail::variant::lambda_visitor<Lambdas...> make_lambda_visitor(Lambdas && ...args) {return lambda_visitor<Lambdas...>(detail::variant::forward<Lambdas>(args)...);}
+detail::variant::lambda_visitor<Lambdas...> make_lambda_visitor(Lambdas && ...args) {return detail::variant::lambda_visitor<Lambdas...>(detail::variant::forward<Lambdas>(args)...);}
 
 
 template<typename Variant, typename ...Lambdas>
-auto apply_lambdas(Variant & var, Lambdas ... lambdas) -> detail::variant::lambda_visitor<Lambdas>::return_type
+auto apply_lambdas(Variant & var, Lambdas ... lambdas) -> typename detail::variant::lambda_visitor<Lambdas>::return_type
 {
 	auto vis = make_lambda_visitor(lambdas...);
 	var.apply_visitor(vis);
