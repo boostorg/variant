@@ -40,27 +40,70 @@ void run4()
    using std::endl;
    using std::nullptr_t;
 
-   typedef variant< int, double > t_var;
+   typedef variant< int, double > t_var1;
+   typedef variant<int, double, unsigned, char> t_var2;
 
 
-   t_var v;
-
-
-
+   t_var1 v1;
 
    //test the function for void and not void
 
    double d = 0;
-   v = 3.124;
+   v1 = 3.124;
 
-   boost::apply_lambdas(v, [&](double din) {d = din;}, [&](int in){});
+   boost::apply_lambdas(v1, [&](double din) {d = din;}, [&](int in){});
    BOOST_CHECK(d == 3.124);
 
-   v = 42;
-   int i = boost::apply_lambdas(v, [&](double din)->int {return din;}, [&](int in){return in;});
+   v1 = 42;
+   int i = boost::apply_lambdas(v1, [&](double din)->int {return din;}, [&](int in){return in;});
    BOOST_CHECK(i == 42);
 
 
+   //check the generic lambda
+
+    auto gen_vis = make_lambda_visitor<string>(
+ 		   	   [](auto val){return to_string(val);});
+
+    t_var2 v2;
+
+    v2 = 'a';
+    BOOST_CHECK(apply_visitor(gen_vis, v2) == to_string('a'));
+
+    v2 = 42u;
+    BOOST_CHECK(apply_visitor(gen_vis, v2) == to_string(42u));
+
+    v2 = 3.12;
+    BOOST_CHECK(apply_visitor(gen_vis, v2) == to_string(3.12));
+
+    v2 = -10;
+    BOOST_CHECK(apply_visitor(gen_vis, v2) == to_string(-10));
+
+
+    //look if the generic lambda is overloadable
+
+    v2 = 42u;
+
+    bool called_auto = false;
+    bool called_unsigned = false;
+    apply_lambdas<void>(v2, [&](auto v2){called_auto = true;}, [&](unsigned u){called_unsigned = true;});
+
+    BOOST_CHECK(!called_auto);
+    BOOST_CHECK(called_unsigned);
+
+
+    enum tp
+    {
+ 	   is_auto, is_double
+    };
+
+    v2 = 3.4;
+
+    BOOST_CHECK(apply_lambdas<tp>(v2, [](double ){return is_double;}, [](auto) {return is_auto;}) == is_double);
+
+
+    v2 = 42;
+
+    BOOST_CHECK(apply_lambdas<tp>(v2, [](double ){return is_double;}, [](auto) {return is_auto;}) == is_auto);
 
 }
 
