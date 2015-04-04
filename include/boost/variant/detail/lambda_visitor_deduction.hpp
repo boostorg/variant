@@ -102,7 +102,7 @@ public:
 
 	template<typename L, typename ... l_Args>
 	lambda_visitor_helper(L && lambda, l_Args && ...ls) :
-			lambda_visitor_helper<Args...>(forward<l_Args>(ls)...), father(forward<Lambda>(lambda)) {};
+			lambda_visitor_helper<Args...>(forward<l_Args>(ls)...), father(forward<L>(lambda)) {};
 };
 
 template<typename ...Args>
@@ -113,6 +113,49 @@ struct lambda_visitor : public lambda_visitor_helper<Args...>, public boost::sta
 	lambda_visitor(Args&&...args) : lambda_visitor_helper<Args...>(forward<Args>(args)...) {};
 };
 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//  explicit lambda visitor
+//
+template<typename ... Args>
+class lambda_visitor_helper_exp
+{
+	void operator()();
+};
+
+
+
+template<typename Lambda>
+class lambda_visitor_helper_exp<Lambda> : public Lambda
+{
+	using father = Lambda;
+public:
+	using father::operator();
+	template<typename L>
+	lambda_visitor_helper_exp(L &&lambda) : father(forward<L>(lambda)) {};
+};
+
+template<typename Lambda, typename ... Args>
+class lambda_visitor_helper_exp<Lambda, Args...> : public lambda_visitor_helper_exp<Args...>, public Lambda
+{
+	using father = Lambda;
+public:
+	using lambda_visitor_helper_exp<Args...>::operator();
+	using father::operator();
+
+	template<typename L, typename ... l_Args>
+	lambda_visitor_helper_exp(L && lambda, l_Args && ...ls) :
+		lambda_visitor_helper_exp<l_Args...>(forward<l_Args>(ls)...), father(forward<L>(lambda)) {};
+};
+
+template<typename ReturnType, typename ...Args>
+struct lambda_visitor_exp : public lambda_visitor_helper_exp<Args...>, public boost::static_visitor<ReturnType>
+{
+	using return_type = ReturnType;
+	using lambda_visitor_helper_exp<Args...>::operator();
+	lambda_visitor_exp(Args&&...args) : lambda_visitor_helper_exp<Args...>(forward<Args>(args)...) {};
+};
 
 }}}
 

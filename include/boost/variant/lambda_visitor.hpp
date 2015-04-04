@@ -15,8 +15,6 @@
 #include "boost/variant/static_visitor.hpp"
 #include "boost/variant/detail/lambda_visitor_deduction.hpp"
 
-#include <type_traits>
-
 namespace boost {
 
 
@@ -32,6 +30,22 @@ auto apply_lambdas(Variant & var, Lambdas ... lambdas) -> typename detail::varia
 	auto vis = make_lambda_visitor(detail::variant::forward<Lambdas>(lambdas)...);
 	return Ret(var.apply_visitor(vis));//type
 };
+
+///explicit version
+
+template<typename ReturnType, typename ...Lambdas>
+detail::variant::lambda_visitor_exp<ReturnType, Lambdas...> make_lambda_visitor(Lambdas && ...args) {return detail::variant::lambda_visitor_exp<ReturnType, Lambdas...>(detail::variant::forward<Lambdas>(args)...);}
+
+
+template<typename ReturnType, typename Variant, typename ...Lambdas>
+auto apply_lambdas(Variant & var, Lambdas ... lambdas) -> ReturnType
+{
+//	using Ret = typename detail::variant::lambda_visitor<Lambdas...>::return_type;
+	auto vis = make_lambda_visitor<ReturnType>(detail::variant::forward<Lambdas>(lambdas)...);
+	return ReturnType(var.apply_visitor(vis));//type
+};
+
+
 
 }
 
