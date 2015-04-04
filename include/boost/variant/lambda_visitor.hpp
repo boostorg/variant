@@ -17,7 +17,7 @@
 
 #include <type_traits>
 
-namespace boost { //namespace variant {
+namespace boost {
 
 
 
@@ -26,13 +26,14 @@ detail::variant::lambda_visitor<Lambdas...> make_lambda_visitor(Lambdas && ...ar
 
 
 template<typename Variant, typename ...Lambdas>
-auto apply_lambdas(Variant & var, Lambdas ... lambdas) -> typename detail::variant::lambda_visitor<Lambdas>::return_type
+auto apply_lambdas(Variant & var, Lambdas ... lambdas) -> typename detail::variant::lambda_visitor<Lambdas...>::return_type
 {
-	auto vis = make_lambda_visitor(lambdas...);
-	var.apply_visitor(vis);
-}
+	using Ret = typename detail::variant::lambda_visitor<Lambdas...>::return_type;
+	auto vis = make_lambda_visitor(detail::variant::forward<Lambdas>(lambdas)...);
+	return Ret(var.apply_visitor(vis));//type
+};
 
-}//}
+}
 
 
 

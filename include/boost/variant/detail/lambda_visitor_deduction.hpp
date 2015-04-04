@@ -23,12 +23,12 @@ namespace detail { namespace variant {
 
 //cause i don't wanna include utility; doesn't really make sense, since i already use c++14
 template< class T >
-constexpr T& forward( typename remove_reference<T>::type& t )
+constexpr T&& forward( typename remove_reference<T>::type& t ) noexcept
 {
-	return t;
+	return static_cast<T&&>(t);
 }
 template< class T >
-constexpr T&& forward( typename remove_reference<T>::type&& t )
+constexpr T&& forward( typename remove_reference<T>::type&& t )noexcept
 {
 	return static_cast<T&&>(t);
 }
@@ -47,93 +47,13 @@ struct lambda_parameter_deduction
 {
 };
 //the ... comes from possible mutli visitors.
-template<typename lambda, typename Ret, typename Arg0>
-struct lambda_parameter_deduction<Ret(lambda::*)(Arg0) const>
+template<typename lambda, typename Ret, typename ...Args>
+struct lambda_parameter_deduction<Ret(lambda::*)(Args...) const>
 {
-	typedef Arg0 type0;
-	static constexpr size_t arg_cout = 1;
+//	typedef Arg0 type0;
+	static constexpr size_t arg_cout = sizeof...(Args);
 	typedef Ret return_type;
 };
-
-template<typename lambda, typename Ret, typename Arg0, typename Arg1>
-struct lambda_parameter_deduction<Ret(lambda::*)(Arg0, Arg1) const>
-{
-	typedef Arg0 type0;
-	typedef Arg1 type1;
-
-	static constexpr size_t arg_cout = 2;
-	typedef Ret return_type;
-};
-
-template<typename lambda, typename Ret, typename Arg0, typename Arg1, typename Arg2, typename Arg3, typename Arg4,
-										typename Arg5, typename Arg6>
-struct lambda_parameter_deduction<Ret(lambda::*)(Arg0, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) const>
-{
-	typedef Arg0 type0;
-	typedef Arg1 type1;
-	typedef Arg2 type2;
-	typedef Arg3 type3;
-	typedef Arg4 type4;
-	typedef Arg5 type5;
-	typedef Arg6 type6;
-	static constexpr size_t arg_cout = 7;
-	typedef Ret return_type;
-};
-
-template<typename lambda, typename Ret, typename Arg0, typename Arg1, typename Arg2, typename Arg3, typename Arg4,
-										typename Arg5, typename Arg6, typename Arg7>
-struct lambda_parameter_deduction<Ret(lambda::*)(Arg0, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) const>
-{
-	typedef Arg0 type0;
-	typedef Arg1 type1;
-	typedef Arg2 type2;
-	typedef Arg3 type3;
-	typedef Arg4 type4;
-	typedef Arg5 type5;
-	typedef Arg6 type6;
-	typedef Arg7 type7;
-
-	static constexpr size_t arg_cout = 8;
-	typedef Ret return_type;
-};
-
-template<typename lambda, typename Ret, typename Arg0, typename Arg1, typename Arg2, typename Arg3, typename Arg4,
-										typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-struct lambda_parameter_deduction<Ret(lambda::*)(Arg0, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) const>
-{
-	typedef Arg0 type0;
-	typedef Arg1 type1;
-	typedef Arg2 type2;
-	typedef Arg3 type3;
-	typedef Arg4 type4;
-	typedef Arg5 type5;
-	typedef Arg6 type6;
-	typedef Arg7 type7;
-	typedef Arg8 type8;
-
-	static constexpr size_t arg_cout = 9;
-	typedef Ret return_type;
-};
-
-template<typename lambda, typename Ret, typename Arg0, typename Arg1, typename Arg2, typename Arg3, typename Arg4,
-										typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-struct lambda_parameter_deduction<Ret(lambda::*)(Arg0, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) const>
-{
-	typedef Arg0 type0;
-	typedef Arg1 type1;
-	typedef Arg2 type2;
-	typedef Arg3 type3;
-	typedef Arg4 type4;
-	typedef Arg5 type5;
-	typedef Arg6 type6;
-	typedef Arg7 type7;
-	typedef Arg8 type8;
-	typedef Arg9 type9;
-
-	static constexpr size_t arg_cout = 10;
-	typedef Ret return_type;
-};
-
 
 
 
@@ -143,53 +63,9 @@ struct lambda_parameter_deduction<Ret(lambda::*)(Arg0, Arg1, Arg2, Arg3, Arg4, A
 template<typename Lambda>
 struct lambda_deduct_parameter
 {
-	using types		  = typename lambda_parameter_deduction<decltype(&Lambda::operator())>::types;
+	//using types		  = typename lambda_parameter_deduction<decltype(&Lambda::operator())>::types;
 	using return_type = typename lambda_parameter_deduction<decltype(&Lambda::operator())>::return_type;
 };
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// the void helper is used to allow a possible handling of a void lambda, by using a specialization
-//
-template<typename Return_Type, typename Lambda>
-class lambda_void_helper
-{
-	Lambda _lambda;
-public:
-	template<size_t Index, typename ...Args>
-	using arg = lambda_arg_type<Index, Args>;
-
-	template<typename L>
-	lambda_void_helper(L &&lambda) : _lambda(forward<L>(lambda)) {};
-	using types			= typename lambda_deduct_parameter<Lambda>::types;
-	using return_type	= typename lambda_deduct_parameter<Lambda>::return_type;
-
-	return_type operator()(arg<0, types>) const
-	{
-		return _lambda(forward<Args>(args)...);
-	}
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  used if the lambda returns void.
-//
-template<typename Lambda>
-class lambda_void_helper<void, Lambda>
-{
-	Lambda _lambda;
-public:
-	template<typename L>
-	lambda_void_helper(L &&lambda) : _lambda(forward<L>(lambda)) {};
-	using types 		= typename lambda_deduct_parameter<Lambda>::types;
-	using return_type	= typename lambda_deduct_parameter<Lambda>::return_type;
-
-
-	template<typename ... Args>
-	typename enable_if<lambda_fit_types<types, Args...>::value>::type operator()(Args&&... args) const
-	{
-		_lambda(forward<Args>(args)...);
-	}
-};
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  declaration of the actual visitor, i.e. this one is partial and gets inherited
@@ -201,11 +77,11 @@ class lambda_visitor_helper
 };
 
 template<typename Lambda>
-class lambda_visitor_helper<Lambda> : public lambda_void_helper<typename lambda_deduct_parameter<Lambda>::return_type, Lambda>
+class lambda_visitor_helper<Lambda> : public Lambda
 {
-	using father = lambda_void_helper<typename lambda_deduct_parameter<Lambda>::return_type, Lambda>;
+	using father = Lambda;
 public:
-	using return_type = typename father::return_type;
+	using return_type = typename lambda_deduct_parameter<Lambda>::return_type;
 	using father::operator();
 
 	template<typename L>
@@ -213,14 +89,16 @@ public:
 };
 
 template<typename Lambda, typename ... Args>
-class lambda_visitor_helper<Lambda, Args...> : public lambda_visitor_helper<Args...>, public lambda_void_helper<typename lambda_deduct_parameter<Lambda>::return_type, Lambda>
+class lambda_visitor_helper<Lambda, Args...> : public lambda_visitor_helper<Args...>, Lambda
 {
-	using father = lambda_void_helper<typename lambda_deduct_parameter<Lambda>::return_type, Lambda>;
-	static_assert(boost::is_same<typename father::return_type, typename lambda_visitor_helper<Args...>::return_type>::value, "return types must have the same type");
+	using father = Lambda;
 public:
 	using lambda_visitor_helper<Args...>::operator();
-	using return_type = typename father::return_type;
+	using return_type = typename lambda_deduct_parameter<Lambda>::return_type;
 	using father::operator();
+
+	static_assert(boost::is_same<return_type, typename lambda_visitor_helper<Args...>::return_type>::value, "return types must have the same type");
+
 
 	template<typename L, typename ... l_Args>
 	lambda_visitor_helper(L && lambda, l_Args && ...ls) :

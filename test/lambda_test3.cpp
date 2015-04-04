@@ -1,6 +1,6 @@
 
 //-----------------------------------------------------------------------------
-// boost-libs variant/test/lambda_test2.cpp source file
+// boost-libs variant/test/lambda_test3.cpp source file
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
@@ -94,22 +94,22 @@ void run()
    static_assert(boost::is_same<typename decltype(ts)::return_type, types_t>::value, "Return type is incorrect");
 
 
-   v1 = 0 ; v2 = 0 ; v3 = 0 ; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == iiii);
-   v1 = 0 ; v2 = 0 ; v3 = 0 ; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == iiid);
-   v1 = 0 ; v2 = 0 ; v3 = 0.; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == iidi);
-   v1 = 0 ; v2 = 0 ; v3 = 0.; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == iidd);
-   v1 = 0 ; v2 = 0.; v3 = 0 ; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == idii);
-   v1 = 0 ; v2 = 0.; v3 = 0 ; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == idid);
-   v1 = 0 ; v2 = 0.; v3 = 0.; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == iddi);
-   v1 = 0 ; v2 = 0.; v3 = 0.; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == iddd);
-   v1 = 0.; v2 = 0 ; v3 = 0 ; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == diii);
-   v1 = 0.; v2 = 0 ; v3 = 0 ; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == diid);
-   v1 = 0.; v2 = 0 ; v3 = 0.; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == didi);
-   v1 = 0.; v2 = 0 ; v3 = 0.; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == didd);
-   v1 = 0.; v2 = 0.; v3 = 0 ; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == ddii);
-   v1 = 0.; v2 = 0.; v3 = 0 ; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == ddid);
-   v1 = 0.; v2 = 0.; v3 = 0.; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == dddi);
-   v1 = 0.; v2 = 0.; v3 = 0.; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v3) == dddd);
+   v1 = 0 ; v2 = 0 ; v3 = 0 ; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == iiii);
+   v1 = 0 ; v2 = 0 ; v3 = 0 ; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == iiid);
+   v1 = 0 ; v2 = 0 ; v3 = 0.; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == iidi);
+   v1 = 0 ; v2 = 0 ; v3 = 0.; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == iidd);
+   v1 = 0 ; v2 = 0.; v3 = 0 ; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == idii);
+   v1 = 0 ; v2 = 0.; v3 = 0 ; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == idid);
+   v1 = 0 ; v2 = 0.; v3 = 0.; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == iddi);
+   v1 = 0 ; v2 = 0.; v3 = 0.; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == iddd);
+   v1 = 0.; v2 = 0 ; v3 = 0 ; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == diii);
+   v1 = 0.; v2 = 0 ; v3 = 0 ; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == diid);
+   v1 = 0.; v2 = 0 ; v3 = 0.; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == didi);
+   v1 = 0.; v2 = 0 ; v3 = 0.; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == didd);
+   v1 = 0.; v2 = 0.; v3 = 0 ; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == ddii);
+   v1 = 0.; v2 = 0.; v3 = 0 ; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == ddid);
+   v1 = 0.; v2 = 0.; v3 = 0.; v4 = 0 ;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == dddi);
+   v1 = 0.; v2 = 0.; v3 = 0.; v4 = 0.;    BOOST_CHECK(apply_visitor(ts, v1, v2, v3, v4) == dddd);
 
 }
 

@@ -54,8 +54,8 @@ void run()
 
    auto ts = boost::make_lambda_visitor(
 		   [&](string & st){v1c = st;},
-   	   	   [&](char c)	  {v1b = c;},
-		   [&](const double & db) {v1c = db;}
+   	   	   [&](int c)	  {v1b = c;},
+		   [&](const double & db) {v1a = db;}
    	   	   );
 
    static_assert(boost::is_same<typename decltype(ts)::return_type, void>::value, "Return type is incorrect");
@@ -88,7 +88,7 @@ void run()
    ///ok, now with a return value
    auto ts2 = boost::make_lambda_visitor(
 		   [&](string  st)  -> string {return st;},
-   	   	   [&](char c)	   -> string {return {c};},
+   	   	   [&](int i)	   -> string  {return std::to_string(i);},
 		   [&](double  db)  -> string {return std::to_string(db);}
    	   	   );
 
@@ -99,11 +99,11 @@ void run()
 
 
    v1 = "C3P0";
-   BOOST_CHECK(apply_visitor(ts2, v1) == "C3PO");
+   BOOST_CHECK(apply_visitor(ts2, v1) == "C3P0");
 
 
-   v1 = 'C';
-   BOOST_CHECK(apply_visitor(ts2, v1) != "C");
+   v1 = 42;
+   BOOST_CHECK(apply_visitor(ts2, v1) == std::to_string(42));
 
 
 }
