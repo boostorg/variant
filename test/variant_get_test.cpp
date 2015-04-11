@@ -9,6 +9,10 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4127) // conditional expression is constant
+#endif
+
 #include "boost/variant/get.hpp"
 #include "boost/variant/variant.hpp"
 #include "boost/variant/polymorphic_get.hpp"
@@ -362,12 +366,12 @@ public:
     MoveonlyType() {}
     ~MoveonlyType() {}
 
-    MoveonlyType(MoveonlyType&& other) {}
-    void operator=(MoveonlyType&& other) {}
+    MoveonlyType(MoveonlyType&&) {}
+    void operator=(MoveonlyType&&) {}
 
 private:
     MoveonlyType(const MoveonlyType&);
-    void operator=(const MoveonlyType& other);
+    void operator=(const MoveonlyType&);
 };
 
 const boost::variant<int, std::string> foo1() { return ""; }

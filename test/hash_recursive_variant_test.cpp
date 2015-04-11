@@ -36,7 +36,7 @@ using set_t = basic_set_t<value_t>;
 
 struct hash
 {
-    size_t operator()(const value_t& value) const
+    size_t operator()(const value_t&) const
     {
       return 0;
     }
