@@ -13,6 +13,7 @@
 #define BOOST_VARIANT_DETAIL_ELEMENT_INDEX_HPP
 
 #include "boost/config.hpp"
+#include "boost/type_traits.hpp"
 #include "boost/variant/recursive_wrapper_fwd.hpp"
 #include "boost/variant/variant_fwd.hpp"
 
@@ -42,7 +43,7 @@ struct element_iterator_impl :
 
 template <class Variant, class T>
 struct element_iterator :
-    element_iterator_impl< typename Variant::types, T>
+    element_iterator_impl< typename Variant::types, typename boost::remove_reference<T>::type >
 {};
 
 template <class Variant, class T>
