@@ -17,6 +17,7 @@
 #include "boost/variant/variant_fwd.hpp"
 
 #include "boost/mpl/find_if.hpp"
+#include "boost/type_traits/remove_cv.hpp"
 
 namespace boost { namespace detail { namespace variant {
 
