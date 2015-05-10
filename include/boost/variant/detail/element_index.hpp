@@ -16,6 +16,7 @@
 #include "boost/variant/recursive_wrapper_fwd.hpp"
 #include "boost/variant/variant_fwd.hpp"
 
+#include "boost/type_traits/remove_cv.hpp"
 #include "boost/mpl/find_if.hpp"
 
 namespace boost { namespace detail { namespace variant {

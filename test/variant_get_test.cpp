@@ -3,14 +3,14 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2014 Antony Polukhin
+// Copyright (c) 2014-2015 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost/variant/variant.hpp"
 #include "boost/variant/get.hpp"
+#include "boost/variant/variant.hpp"
 #include "boost/variant/polymorphic_get.hpp"
 #include "boost/variant/recursive_wrapper.hpp"
 #include "boost/test/minimal.hpp"
