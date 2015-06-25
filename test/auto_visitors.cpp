@@ -17,6 +17,7 @@
 #include "boost/lexical_cast.hpp"
 
 #include <boost/noncopyable.hpp>
+#include <boost/core/ignore_unused.hpp>
 
 namespace has_result_type_tests {
     template <class T>
@@ -200,8 +201,8 @@ void run()
     lex_streamer lex_streamer_visitor;
 
     BOOST_CHECK(boost::apply_visitor(lex_streamer(), v1) == "1");
-    BOOST_CHECK_IF_HAS_VARIADIC(boost::apply_visitor(lex_streamer())(v1) == "1");
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_visitor, v2) == "10");
+    BOOST_CHECK_IF_HAS_VARIADIC(boost::apply_visitor(lex_streamer_visitor)(v1) == "1");
+    BOOST_CHECK(boost::apply_visitor(lex_streamer(), v2) == "10");
     BOOST_CHECK_IF_HAS_VARIADIC(boost::apply_visitor(lex_streamer_visitor)(v2) == "10");
 
     #ifndef BOOST_NO_CXX14_GENERIC_LAMBDAS
@@ -225,10 +226,12 @@ void run()
 #endif
     lex_streamer_void lex_streamer_void_visitor;
     boost::apply_visitor(lex_streamer_void(), v1);
-    boost::apply_visitor(lex_streamer_void_visitor, v2);
+    boost::apply_visitor(lex_streamer_void(), v2);
 #ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
     boost::apply_visitor(lex_streamer_void_visitor)(v2);
 #endif
+
+    boost::ignore_unused(lex_streamer_visitor, visitor_ref, lex_streamer_void_visitor);
 }
 
 
@@ -254,7 +257,7 @@ void run2()
     lex_combine lex_combine_visitor;
 
     BOOST_CHECK(boost::apply_visitor(lex_combine(), v1, v2) == "1+10");
-    BOOST_CHECK(boost::apply_visitor(lex_combine_visitor, v2, v1) == "10+1");
+    BOOST_CHECK(boost::apply_visitor(lex_combine(), v2, v1) == "10+1");
     BOOST_CHECK_IF_HAS_VARIADIC(boost::apply_visitor(lex_combine_visitor)(v2, v1) == "10+1");
 
 
@@ -295,6 +298,8 @@ void run2()
 
     boost::apply_visitor(lex_streamer_void(), v1, v2);
     boost::apply_visitor(lex_streamer_void(), v2, v1);
+
+    boost::ignore_unused(lex_combine_visitor, visitor_ref);
 }
 
 #undef BOOST_CHECK_IF_HAS_VARIADIC
