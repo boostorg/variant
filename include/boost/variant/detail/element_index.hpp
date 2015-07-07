@@ -13,6 +13,7 @@
 #define BOOST_VARIANT_DETAIL_ELEMENT_INDEX_HPP
 
 #include "boost/config.hpp"
+#include "boost/type_traits.hpp"
 #include "boost/variant/recursive_wrapper_fwd.hpp"
 #include "boost/variant/variant_fwd.hpp"
 
