@@ -9,6 +9,7 @@
 # and how it can be used with Boost libraries.
 #
 
+language: cpp
 os:
     - linux
 
