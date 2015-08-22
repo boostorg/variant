@@ -2,7 +2,7 @@
 # subject to the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Copyright Antony Polukhin 2014.
+# Copyright Antony Polukhin 2014-2015.
 
 #
 # See https://svn.boost.org/trac/boost/wiki/TravisCoverals for description of this file
@@ -56,7 +56,7 @@ script:
     - if [ "$CCFLAGS" != "" ]; then FLAGS="cxxflags=\"$CCFLAGS\" linkflags=\"$LINKFLAGS\""; else FLAGS=""; fi
     - cd $BOOST/libs/$PROJECT_TO_TEST/test/
     # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage"
+    - ../../../b2 testing.launcher=valgrind cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage"
 
 after_success:
     # Copying Coveralls data to a separate folder
