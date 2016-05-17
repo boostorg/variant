@@ -2146,7 +2146,7 @@ public: // modifiers
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     variant& operator=(variant&& rhs) 
-#if !defined(__GNUC__) || (__GNUC__ != 4) || (__GNUC_MINOR__ > 6)
+#if !defined(__GNUC__) || (__GNUC__ != 4) || (__GNUC_MINOR__ > 6) || defined(__clang__)
         BOOST_NOEXCEPT_IF(variant_move_noexcept_constructible::type::value && variant_move_noexcept_assignable::type::value)
 #endif
     {
