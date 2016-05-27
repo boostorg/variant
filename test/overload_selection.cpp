@@ -69,7 +69,7 @@ struct convertible {
 };
 
 void test_implicit_conversion_operator() {
-    // https://svn.boost.org/trac/boost/ticket/11602
+    // https://svn.boost.org/trac/boost/ticket/8555
     my_variant y = convertible();
     BOOST_CHECK(y.which() == 0);
 }
