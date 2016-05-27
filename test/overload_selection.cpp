@@ -59,10 +59,26 @@ void test_overload_selection_variant_assignment() {
     BOOST_CHECK(which1 == 0);
 }
 
+
+typedef boost::variant<int> my_variant;
+
+struct convertible {
+    operator my_variant() const {
+        return my_variant();
+    }
+};
+
+void test_implicit_conversion_operator() {
+    // https://svn.boost.org/trac/boost/ticket/11602
+    my_variant y = convertible();
+    BOOST_CHECK(y.which() == 0);
+}
+
 int test_main(int , char* [])
 {
     test_overload_selection_variant_constructor();
     test_overload_selection_variant_assignment();
+    test_implicit_conversion_operator();
 
     return boost::exit_success;
 }
