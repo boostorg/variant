@@ -227,6 +227,15 @@ void run_move_only()
     vi2 = static_cast<move_only_structure&&>(mo);
     BOOST_CHECK(vi.which() == 1);
 
+    boost::variant<move_only_structure, int > rvi (1);
+    BOOST_CHECK(rvi.which() == 1);
+    rvi = static_cast<move_only_structure&&>(mo);
+    BOOST_CHECK(rvi.which() == 0);
+    rvi = 1;
+    BOOST_CHECK(rvi.which() == 1);
+    rvi = static_cast<boost::variant<int, move_only_structure >&&>(vi2);
+    BOOST_CHECK(rvi.which() == 0);
+
     move_only_structure from_visitor = boost::apply_visitor(visitor_returning_move_only_type(), vi);
     (void)from_visitor;
 }

@@ -53,6 +53,7 @@
 #include "boost/type_traits/is_const.hpp"
 #include "boost/type_traits/is_same.hpp"
 #include "boost/type_traits/is_rvalue_reference.hpp"
+#include "boost/type_traits/is_constructible.hpp"
 #include "boost/utility/enable_if.hpp"
 #include "boost/utility/declval.hpp"
 #include "boost/variant/recursive_wrapper_fwd.hpp"
@@ -252,6 +253,72 @@ struct is_variant_move_noexcept_assignable {
     >::type type;
 };
 #endif // BOOST_NO_CXX11_NOEXCEPT
+
+///////////////////////////////////////////////////////////////////////////////
+// (detail) metafunction is_variant_constructible_from
+//
+// Derives from true_type if at least one variant's type is constructible from T.
+//
+template <class T1, class T2>
+struct is_constructible_ext:
+    boost::mpl::or_<
+        boost::is_constructible<
+            T1,
+            T2
+        >,
+        boost::is_constructible<
+            T1,
+            typename boost::add_lvalue_reference<T2>::type
+        >
+    >
+{};
+
+template <class T, class Types>
+struct is_variant_constructible_from:
+    boost::mpl::not_< boost::is_same<
+        typename boost::mpl::find_if<
+            Types,
+            is_constructible_ext<boost::mpl::_1, T>
+        >::type,
+        typename boost::mpl::end<Types>::type
+    > >
+{};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
+struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >:
+    boost::is_same<
+        typename boost::mpl::find_if<
+            typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::types,
+            mpl::not_< is_variant_constructible_from< boost::mpl::_1, Types> >
+        >::type,
+        typename boost::mpl::end< typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::types >::type
+    >
+{};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
+struct is_variant_constructible_from< const boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>& , Types >:
+    is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >
+{};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
+struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>& , Types >:
+    is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >
+{};
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
+struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>&& , Types >:
+    is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >
+{};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
+struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const && , Types >:
+    is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >
+{};
+
+#endif // #ifndef BOOST_NO_CXX11_RVALUE_REFERENCE
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // (detail) metafunction make_storage
@@ -1681,13 +1748,22 @@ public: // structors, cont.
 #if !defined(BOOST_VARIANT_AUX_BROKEN_CONSTRUCTOR_TEMPLATE_ORDERING)
 
     template <typename T>
-    variant(const T& operand)
+    variant(const T& operand,
+        typename boost::enable_if<mpl::or_<
+            boost::is_same<T, variant>,
+            boost::detail::variant::is_variant_constructible_from<const T&, internal_types>
+        > >::type* = 0)
     {
         convert_construct(operand, 1L);
     }
 
     template <typename T>
-    variant(T& operand)
+    variant(T& operand,
+        typename boost::enable_if<mpl::or_<
+            boost::is_same<T, variant>,
+            boost::is_same<T, const variant>,
+            boost::detail::variant::is_variant_constructible_from<T&, internal_types>
+        > >::type* = 0)
     {
         convert_construct(operand, 1L);
     }
@@ -1698,7 +1774,11 @@ public: // structors, cont.
     // template constructors, but do fully support SFINAE, we can workaround:
 
     template <typename T>
-    variant(const T& operand)
+    variant(const T& operand,
+        typename boost::enable_if<mpl::or_<
+            boost::is_same<T, variant>,
+            boost::detail::variant::is_variant_constructible_from<const T&, internal_types>
+        > >::type* = 0)
     {
         convert_construct(operand, 1L);
     }
@@ -1708,8 +1788,12 @@ public: // structors, cont.
           T& operand
         , typename enable_if<
               mpl::not_< is_const<T> >
-            , void
             >::type* = 0
+        , typename boost::enable_if<mpl::or_<
+            boost::is_same<T, variant>,
+            boost::is_same<T, const variant>,
+            boost::detail::variant::is_variant_constructible_from<T&, internal_types>
+        > >::type* = 0
         )
     {
         convert_construct(operand, 1L);
@@ -1721,16 +1805,27 @@ public: // structors, cont.
     // template constructors, and do NOT support SFINAE, we can't workaround:
 
     template <typename T>
-    variant(const T& operand)
+    variant(const T& operand,
+        typename boost::enable_if<mpl::or_<
+            boost::is_same<T, variant>,
+            boost::detail::variant::is_variant_constructible_from<const T&, internal_types>
+        > >::type* = 0)
     {
         convert_construct(operand, 1L);
     }
 #endif // BOOST_VARIANT_AUX_BROKEN_CONSTRUCTOR_TEMPLATE_ORDERING workarounds
-    
+
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     template <class T>
-    variant(T&& operand, typename boost::enable_if<boost::is_rvalue_reference<T&&> >::type* = 0, 
-        typename boost::disable_if<boost::is_const<T> >::type* = 0)
+    variant(T&& operand,
+        typename boost::enable_if<mpl::and_<
+            boost::is_rvalue_reference<T&&>,
+            mpl::not_< boost::is_const<T> >,
+            mpl::or_<
+                boost::is_same<T, variant>,
+                boost::detail::variant::is_variant_constructible_from<T&&, internal_types>
+            >
+        > >::type* = 0)
     {
         convert_construct( detail::variant::move(operand), 1L);
     }
@@ -2122,8 +2217,14 @@ public: // modifiers
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     template <class T>
-    typename boost::enable_if_c<boost::is_rvalue_reference<T&&>::value && !boost::is_const<T>::value, variant& >::type 
-        operator=(T&& rhs) 
+    typename boost::enable_if<
+        boost::mpl::and_<
+            boost::is_rvalue_reference<T&&>,
+            mpl::not_< boost::is_const<T> >,
+            boost::detail::variant::is_variant_constructible_from<T&&, internal_types>
+        >,
+        variant&
+    >::type operator=(T&& rhs) 
     {
         move_assign( detail::variant::move(rhs) );
         return *this;
@@ -2131,7 +2232,13 @@ public: // modifiers
 #endif // BOOST_NO_CXX11_RVALUE_REFERENCES
 
     template <typename T>
-    variant& operator=(const T& rhs)
+    typename boost::enable_if<
+        mpl::or_<
+            boost::is_same<T, variant>,
+            boost::detail::variant::is_variant_constructible_from<const T&, internal_types>
+        >,
+        variant&
+    >::type operator=(const T& rhs)
     {
         assign(rhs);
         return *this;
