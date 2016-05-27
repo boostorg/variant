@@ -966,10 +966,10 @@ public: // structors
 public: // visitor interfaces
 
     template <typename T>
-    bool operator()(const T& rhs_content) const
+    bool operator()(T& rhs_content) const
     {
         // Since the precondition ensures lhs and rhs types are same, get T...
-        known_get<const T> getter;
+        known_get<T> getter;
         const T& lhs_content = lhs_.apply_visitor(getter);
 
         // ...and compare lhs and rhs contents:
