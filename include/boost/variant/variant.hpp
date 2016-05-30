@@ -1716,7 +1716,10 @@ private: // helpers, for structors, below
 #endif
 
     template <BOOST_VARIANT_ENUM_PARAMS(typename U)>
-    void convert_construct(
+    typename boost::enable_if<mpl::or_<
+        boost::is_same<boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>, variant>,
+        boost::detail::variant::is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>&, internal_types>
+    > >::type convert_construct(
           boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>& operand
         , long
         )
@@ -1725,7 +1728,10 @@ private: // helpers, for structors, below
     }
 
     template <BOOST_VARIANT_ENUM_PARAMS(typename U)>
-    void convert_construct(
+    typename boost::enable_if<mpl::or_<
+        boost::is_same<boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>, variant>,
+        boost::detail::variant::is_variant_constructible_from<const boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>&, internal_types>
+    > >::type convert_construct(
           const boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>& operand
         , long
         )
@@ -1735,7 +1741,10 @@ private: // helpers, for structors, below
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     template <BOOST_VARIANT_ENUM_PARAMS(typename U)>
-    void convert_construct(
+    typename boost::enable_if<mpl::or_<
+        boost::is_same<boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>, variant>,
+        boost::detail::variant::is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>&&, internal_types>
+    > >::type convert_construct(
           boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>&& operand
         , long
         )
