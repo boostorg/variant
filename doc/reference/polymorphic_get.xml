@@ -17,12 +17,12 @@
 
       <purpose>
         <simpara>The exception thrown in the event of a failed application of
-        <code><functionname>boost::polymorphic_get</functionname></code> on	the given
+        <code><functionname>boost::polymorphic_get</functionname></code> on the given
         operand value.</simpara>
       </purpose>
 
-      <method	name="what"	specifiers="virtual" cv="const">
-        <type>const	char *</type>
+      <method name="what" specifiers="virtual" cv="const">
+        <type>const char *</type>
       </method>
     </class>
 
