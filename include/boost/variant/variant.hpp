@@ -4,7 +4,7 @@
 //-----------------------------------------------------------------------------
 //
 // Copyright (c) 2002-2003 Eric Friedman, Itay Maman
-// Copyright (c) 2012-2014 Antony Polukhin
+// Copyright (c) 2012-2016 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -1755,38 +1755,10 @@ private: // helpers, for structors, below
 
 public: // structors, cont.
 
-#if !defined(BOOST_VARIANT_AUX_BROKEN_CONSTRUCTOR_TEMPLATE_ORDERING)
-
     template <typename T>
     variant(const T& operand,
-        typename boost::enable_if<mpl::or_<
-            boost::is_same<T, variant>,
-            boost::detail::variant::is_variant_constructible_from<const T&, internal_types>
-        > >::type* = 0)
-    {
-        convert_construct(operand, 1L);
-    }
-
-    template <typename T>
-    variant(T& operand,
-        typename boost::enable_if<mpl::or_<
-            boost::is_same<T, variant>,
-            boost::is_same<T, const variant>,
-            boost::detail::variant::is_variant_constructible_from<T&, internal_types>
-        > >::type* = 0)
-    {
-        convert_construct(operand, 1L);
-    }
-
-#elif defined(BOOST_VARIANT_AUX_HAS_CONSTRUCTOR_TEMPLATE_ORDERING_SFINAE_WKND)
-
-    // For compilers that cannot distinguish between T& and const T& in
-    // template constructors, but do fully support SFINAE, we can workaround:
-
-    template <typename T>
-    variant(const T& operand,
-        typename boost::enable_if<mpl::or_<
-            boost::is_same<T, variant>,
+        typename boost::enable_if<mpl::and_<
+            mpl::not_< boost::is_same<T, variant> >,
             boost::detail::variant::is_variant_constructible_from<const T&, internal_types>
         > >::type* = 0)
     {
@@ -1796,12 +1768,9 @@ public: // structors, cont.
     template <typename T>
     variant(
           T& operand
-        , typename enable_if<
-              mpl::not_< is_const<T> >
-            >::type* = 0
-        , typename boost::enable_if<mpl::or_<
-            boost::is_same<T, variant>,
-            boost::is_same<T, const variant>,
+        , typename boost::enable_if<mpl::and_<
+            mpl::not_< is_const<T> >,
+            mpl::not_< boost::is_same<T, variant> >,
             boost::detail::variant::is_variant_constructible_from<T&, internal_types>
         > >::type* = 0
         )
@@ -1809,32 +1778,14 @@ public: // structors, cont.
         convert_construct(operand, 1L);
     }
 
-#else // !defined(BOOST_VARIANT_AUX_HAS_CONSTRUCTOR_TEMPLATE_ORDERING_SFINAE_WKND)
-
-    // For compilers that cannot distinguish between T& and const T& in
-    // template constructors, and do NOT support SFINAE, we can't workaround:
-
-    template <typename T>
-    variant(const T& operand,
-        typename boost::enable_if<mpl::or_<
-            boost::is_same<T, variant>,
-            boost::detail::variant::is_variant_constructible_from<const T&, internal_types>
-        > >::type* = 0)
-    {
-        convert_construct(operand, 1L);
-    }
-#endif // BOOST_VARIANT_AUX_BROKEN_CONSTRUCTOR_TEMPLATE_ORDERING workarounds
-
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     template <class T>
     variant(T&& operand,
         typename boost::enable_if<mpl::and_<
             boost::is_rvalue_reference<T&&>,
             mpl::not_< boost::is_const<T> >,
-            mpl::or_<
-                boost::is_same<T, variant>,
-                boost::detail::variant::is_variant_constructible_from<T&&, internal_types>
-            >
+            mpl::not_< boost::is_same<T, variant> >,
+            boost::detail::variant::is_variant_constructible_from<T&&, internal_types>
         > >::type* = 0)
     {
         convert_construct( detail::variant::move(operand), 1L);
@@ -1853,7 +1804,7 @@ public: // structors, cont.
         // ...and activate the *this's primary storage on success:
         indicate_which(operand.which());
     }
-    
+
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     variant(variant&& operand) BOOST_NOEXCEPT_IF(variant_move_noexcept_constructible::type::value)
     {
@@ -2308,10 +2259,6 @@ public: // queries
     }
 
 public: // prevent comparison with foreign types
-
-// Obsolete. Remove.
-#   define BOOST_VARIANT_AUX_FAIL_COMPARISON_RETURN_TYPE \
-    void
 
     template <typename U>
     void operator==(const U&) const

@@ -111,7 +111,7 @@ struct make_initializer_node
                 return BOOST_MPL_AUX_VALUE_WKND(index)::value; // which
             }
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES            
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
             static int initialize(void* dest, param2_T operand)
             {
                 // This assert must newer trigger, because all the reference contents are

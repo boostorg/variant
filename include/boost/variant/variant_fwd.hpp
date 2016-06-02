@@ -4,7 +4,7 @@
 //-----------------------------------------------------------------------------
 //
 // Copyright (c) 2003 Eric Friedman, Itay Maman
-// Copyright (c) 2013 Antony Polukhin
+// Copyright (c) 2013-2016 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -24,17 +24,6 @@
 #include "boost/preprocessor/enum_params.hpp"
 #include "boost/preprocessor/enum_shifted_params.hpp"
 #include "boost/preprocessor/repeat.hpp"
-
-///////////////////////////////////////////////////////////////////////////////
-// macro BOOST_VARIANT_NO_REFERENCE_SUPPORT
-//
-// Defined if variant does not support references as bounded types. 
-//
-#if defined(BOOST_VARIANT_AUX_BROKEN_CONSTRUCTOR_TEMPLATE_ORDERING) \
- && !defined(BOOST_VARIANT_AUX_HAS_CONSTRUCTOR_TEMPLATE_ORDERING_SFINAE_WKND) \
- && !defined(BOOST_VARIANT_NO_REFERENCE_SUPPORT)
-#   define BOOST_VARIANT_NO_REFERENCE_SUPPORT
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // macro BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT
