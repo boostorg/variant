@@ -104,7 +104,7 @@ void test_derived_from_variant_construction() {
 
     // https://svn.boost.org/trac/boost/ticket/12155
     AB ab;
-    boost::variant<AB, C> ab_c(ab); // member function convert_construct is abiguous
+    boost::variant<AB, C> ab_c(ab);
     BOOST_CHECK(ab_c.which() == 0);
 
     boost::variant<A, B> a_b(ab);
@@ -119,12 +119,46 @@ void test_derived_from_variant_construction() {
 //  BOOST_CHECK(b_c_a.which() == 2);
 }
 
+void test_derived_from_variant_assignment() {
+    // https://svn.boost.org/trac/boost/ticket/7120
+    X x;
+    boost::variant<X> y;
+    y = x;
+    BOOST_CHECK(y.which() == 0);
+
+    // https://svn.boost.org/trac/boost/ticket/10278
+    boost::variant<V1, std::string> v2;
+    v2 = V1();
+    BOOST_CHECK(v2.which() == 0);
+
+    // https://svn.boost.org/trac/boost/ticket/12155
+    AB ab;
+    boost::variant<AB, C> ab_c;
+    ab_c = ab;
+    BOOST_CHECK(ab_c.which() == 0);
+
+    boost::variant<A, B> a_b;
+    a_b = ab;
+    BOOST_CHECK(a_b.which() == 0);
+
+    boost::variant<B, C, A> b_c_a1;
+    b_c_a1 = static_cast<boost::variant<A, B>& >(ab);
+    BOOST_CHECK(b_c_a1.which() == 2);
+
+
+//  Following conversion seems harmful as it may lead to slicing:
+//  boost::variant<B, C, A> b_c_a;
+//  b_c_a = ab;
+//  BOOST_CHECK(b_c_a.which() == 2);
+}
+
 int test_main(int , char* [])
 {
     test_overload_selection_variant_constructor();
     test_overload_selection_variant_assignment();
     test_implicit_conversion_operator();
     test_derived_from_variant_construction();
+    test_derived_from_variant_assignment();
 
     return boost::exit_success;
 }
