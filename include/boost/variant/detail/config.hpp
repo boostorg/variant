@@ -13,7 +13,7 @@
 #ifndef BOOST_VARIANT_DETAIL_CONFIG_HPP
 #define BOOST_VARIANT_DETAIL_CONFIG_HPP
 
-#include "boost/config.hpp"
-#include "boost/detail/workaround.hpp"
+#include <boost/config.hpp>
+#include <boost/detail/workaround.hpp>
 
 #endif // BOOST_VARIANT_DETAIL_CONFIG_HPP

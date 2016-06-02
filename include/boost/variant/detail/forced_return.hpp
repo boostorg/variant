@@ -13,9 +13,9 @@
 #ifndef BOOST_VARIANT_DETAIL_FORCED_RETURN_HPP
 #define BOOST_VARIANT_DETAIL_FORCED_RETURN_HPP
 
-#include "boost/config.hpp"
-#include "boost/variant/detail/generic_result_type.hpp"
-#include "boost/assert.hpp"
+#include <boost/config.hpp>
+#include <boost/variant/detail/generic_result_type.hpp>
+#include <boost/assert.hpp>
 
 namespace boost {
 namespace detail { namespace variant {

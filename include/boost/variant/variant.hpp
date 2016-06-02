@@ -18,74 +18,74 @@
 #include <cstddef> // for std::size_t
 #include <new> // for placement new
 
-#include "boost/type_index.hpp"
+#include <boost/type_index.hpp>
 
-#include "boost/variant/detail/config.hpp"
-#include "boost/mpl/aux_/value_wknd.hpp"
+#include <boost/variant/detail/config.hpp>
+#include <boost/mpl/aux_/value_wknd.hpp>
 
-#include "boost/variant/variant_fwd.hpp"
-#include "boost/variant/detail/backup_holder.hpp"
-#include "boost/variant/detail/enable_recursive_fwd.hpp"
-#include "boost/variant/detail/forced_return.hpp"
-#include "boost/variant/detail/initializer.hpp"
-#include "boost/variant/detail/make_variant_list.hpp"
-#include "boost/variant/detail/over_sequence.hpp"
-#include "boost/variant/detail/visitation_impl.hpp"
-#include "boost/variant/detail/hash_variant.hpp"
+#include <boost/variant/variant_fwd.hpp>
+#include <boost/variant/detail/backup_holder.hpp>
+#include <boost/variant/detail/enable_recursive_fwd.hpp>
+#include <boost/variant/detail/forced_return.hpp>
+#include <boost/variant/detail/initializer.hpp>
+#include <boost/variant/detail/make_variant_list.hpp>
+#include <boost/variant/detail/over_sequence.hpp>
+#include <boost/variant/detail/visitation_impl.hpp>
+#include <boost/variant/detail/hash_variant.hpp>
 
-#include "boost/variant/detail/generic_result_type.hpp"
-#include "boost/variant/detail/move.hpp"
+#include <boost/variant/detail/generic_result_type.hpp>
+#include <boost/variant/detail/move.hpp>
 
-#include "boost/detail/no_exceptions_support.hpp"
-#include "boost/detail/reference_content.hpp"
-#include "boost/aligned_storage.hpp"
-#include "boost/blank.hpp"
-#include "boost/math/common_factor_ct.hpp"
-#include "boost/static_assert.hpp"
-#include "boost/preprocessor/cat.hpp"
-#include "boost/preprocessor/repeat.hpp"
-#include "boost/type_traits/alignment_of.hpp"
-#include "boost/type_traits/add_const.hpp"
-#include "boost/type_traits/has_nothrow_constructor.hpp"
-#include "boost/type_traits/has_nothrow_copy.hpp"
-#include "boost/type_traits/is_nothrow_move_assignable.hpp"
-#include "boost/type_traits/is_nothrow_move_constructible.hpp"
-#include "boost/type_traits/is_const.hpp"
-#include "boost/type_traits/is_same.hpp"
-#include "boost/type_traits/is_rvalue_reference.hpp"
-#include "boost/type_traits/is_constructible.hpp"
-#include "boost/type_traits/add_lvalue_reference.hpp"
-#include "boost/utility/enable_if.hpp"
-#include "boost/utility/declval.hpp"
-#include "boost/variant/recursive_wrapper_fwd.hpp"
-#include "boost/variant/static_visitor.hpp"
+#include <boost/detail/no_exceptions_support.hpp>
+#include <boost/detail/reference_content.hpp>
+#include <boost/aligned_storage.hpp>
+#include <boost/blank.hpp>
+#include <boost/math/common_factor_ct.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/repeat.hpp>
+#include <boost/type_traits/alignment_of.hpp>
+#include <boost/type_traits/add_const.hpp>
+#include <boost/type_traits/has_nothrow_constructor.hpp>
+#include <boost/type_traits/has_nothrow_copy.hpp>
+#include <boost/type_traits/is_nothrow_move_assignable.hpp>
+#include <boost/type_traits/is_nothrow_move_constructible.hpp>
+#include <boost/type_traits/is_const.hpp>
+#include <boost/type_traits/is_same.hpp>
+#include <boost/type_traits/is_rvalue_reference.hpp>
+#include <boost/type_traits/is_constructible.hpp>
+#include <boost/type_traits/add_lvalue_reference.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/utility/declval.hpp>
+#include <boost/variant/recursive_wrapper_fwd.hpp>
+#include <boost/variant/static_visitor.hpp>
 
-#include "boost/mpl/assert.hpp"
-#include "boost/mpl/begin_end.hpp"
-#include "boost/mpl/bool.hpp"
-#include "boost/mpl/deref.hpp"
-#include "boost/mpl/empty.hpp"
-#include "boost/mpl/eval_if.hpp"
-#include "boost/mpl/find_if.hpp"
-#include "boost/mpl/fold.hpp"
-#include "boost/mpl/front.hpp"
-#include "boost/mpl/identity.hpp"
-#include "boost/mpl/if.hpp"
-#include "boost/mpl/int.hpp"
-#include "boost/mpl/is_sequence.hpp"
-#include "boost/mpl/iterator_range.hpp"
-#include "boost/mpl/iter_fold_if.hpp"
-#include "boost/mpl/logical.hpp"
-#include "boost/mpl/max_element.hpp"
-#include "boost/mpl/next.hpp"
-#include "boost/mpl/not.hpp"
-#include "boost/mpl/pair.hpp"
-#include "boost/mpl/protect.hpp"
-#include "boost/mpl/push_front.hpp"
-#include "boost/mpl/same_as.hpp"
-#include "boost/mpl/size_t.hpp"
-#include "boost/mpl/sizeof.hpp"
-#include "boost/mpl/transform.hpp"
+#include <boost/mpl/assert.hpp>
+#include <boost/mpl/begin_end.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/mpl/deref.hpp>
+#include <boost/mpl/empty.hpp>
+#include <boost/mpl/eval_if.hpp>
+#include <boost/mpl/find_if.hpp>
+#include <boost/mpl/fold.hpp>
+#include <boost/mpl/front.hpp>
+#include <boost/mpl/identity.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/int.hpp>
+#include <boost/mpl/is_sequence.hpp>
+#include <boost/mpl/iterator_range.hpp>
+#include <boost/mpl/iter_fold_if.hpp>
+#include <boost/mpl/logical.hpp>
+#include <boost/mpl/max_element.hpp>
+#include <boost/mpl/next.hpp>
+#include <boost/mpl/not.hpp>
+#include <boost/mpl/pair.hpp>
+#include <boost/mpl/protect.hpp>
+#include <boost/mpl/push_front.hpp>
+#include <boost/mpl/same_as.hpp>
+#include <boost/mpl/size_t.hpp>
+#include <boost/mpl/sizeof.hpp>
+#include <boost/mpl/transform.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation Macros:
@@ -101,14 +101,14 @@
 
 #if defined(BOOST_VARIANT_MINIMIZE_SIZE)
 #   include <climits> // for SCHAR_MAX
-#   include "boost/mpl/eval_if.hpp"
-#   include "boost/mpl/equal_to.hpp"
-#   include "boost/mpl/identity.hpp"
-#   include "boost/mpl/int.hpp"
-#   include "boost/mpl/if.hpp"
-#   include "boost/mpl/less.hpp"
-#   include "boost/mpl/long.hpp"
-#   include "boost/mpl/O1_size.hpp"
+#   include <boost/mpl/eval_if.hpp>
+#   include <boost/mpl/equal_to.hpp>
+#   include <boost/mpl/identity.hpp>
+#   include <boost/mpl/int.hpp>
+#   include <boost/mpl/if.hpp>
+#   include <boost/mpl/less.hpp>
+#   include <boost/mpl/long.hpp>
+#   include <boost/mpl/O1_size.hpp>
 #endif
 
 
@@ -2476,7 +2476,7 @@ inline void swap(
 // implementation additions
 
 #if !defined(BOOST_NO_IOSTREAM)
-#include "boost/variant/detail/variant_io.hpp"
+#include <boost/variant/detail/variant_io.hpp>
 #endif // BOOST_NO_IOSTREAM
 
 #endif // BOOST_VARIANT_VARIANT_HPP

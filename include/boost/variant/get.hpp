@@ -15,16 +15,16 @@
 
 #include <exception>
 
-#include "boost/config.hpp"
-#include "boost/detail/workaround.hpp"
-#include "boost/static_assert.hpp"
-#include "boost/throw_exception.hpp"
-#include "boost/utility/addressof.hpp"
-#include "boost/variant/variant_fwd.hpp"
-#include "boost/variant/detail/element_index.hpp"
+#include <boost/config.hpp>
+#include <boost/detail/workaround.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/throw_exception.hpp>
+#include <boost/utility/addressof.hpp>
+#include <boost/variant/variant_fwd.hpp>
+#include <boost/variant/detail/element_index.hpp>
 
-#include "boost/type_traits/add_reference.hpp"
-#include "boost/type_traits/add_pointer.hpp"
+#include <boost/type_traits/add_reference.hpp>
+#include <boost/type_traits/add_pointer.hpp>
 
 namespace boost {
 
