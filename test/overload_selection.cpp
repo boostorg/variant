@@ -17,6 +17,9 @@
 #include "boost/variant/variant.hpp"
 #include "boost/test/minimal.hpp"
 
+#include <string>
+#include <list>
+
 struct A{};
 struct B{};
 struct C{};
@@ -152,6 +155,52 @@ void test_derived_from_variant_assignment() {
 //  BOOST_CHECK(b_c_a.which() == 2);
 }
 
+
+// http://thread.gmane.org/gmane.comp.lib.boost.devel/267757
+struct info {
+    struct nil_ {};
+
+    typedef
+        boost::variant<
+            nil_
+          , std::string
+          , boost::recursive_wrapper<info>
+          , boost::recursive_wrapper<std::pair<info, info> >
+          , boost::recursive_wrapper<std::list<info> >
+        >
+    value_type;
+    value_type v;
+
+    inline void test_on_incomplete_types() {
+        info i0;
+        i0.v = "Hello";
+        BOOST_CHECK(i0.v.which() == 1);
+
+        info::value_type v0 = "Hello";
+        BOOST_CHECK(v0.which() == 1);
+
+        info::value_type v1("Hello");
+        BOOST_CHECK(v1.which() == 1);
+
+        info::value_type v2 = i0;
+        BOOST_CHECK(v2.which() == 2);
+
+        info::value_type v3(i0);
+        BOOST_CHECK(v3.which() == 2);
+
+        v0 = v3;
+        BOOST_CHECK(v0.which() == 2);
+
+        v3 = v1;
+        BOOST_CHECK(v3.which() == 1);
+
+        v3 = nil_();
+        BOOST_CHECK(v3.which() == 0);
+    }
+};
+
+
+
 int test_main(int , char* [])
 {
     test_overload_selection_variant_constructor();
@@ -159,6 +208,7 @@ int test_main(int , char* [])
     test_implicit_conversion_operator();
     test_derived_from_variant_construction();
     test_derived_from_variant_assignment();
+    info().test_on_incomplete_types();
 
     return boost::exit_success;
 }
