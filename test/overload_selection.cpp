@@ -15,6 +15,7 @@
 //      https://svn.boost.org/trac/boost/ticket/11602
 
 #include "boost/variant/variant.hpp"
+#include "boost/variant/recursive_variant.hpp"
 #include "boost/test/minimal.hpp"
 
 #include <string>

@@ -3,8 +3,8 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2002
-// Eric Friedman, Itay Maman
+// Copyright (c) 2002 Eric Friedman, Itay Maman
+// Copyright (c) 2016 Antony Polukhin
 //
 // Portions Copyright (C) 2002 David Abrahams
 //
@@ -19,6 +19,7 @@
 #include <boost/mpl/aux_/config/ctps.hpp>
 #include <boost/mpl/aux_/lambda_support.hpp>
 #include <boost/type_traits/integral_constant.hpp>
+#include <boost/type_traits/is_constructible.hpp>
 
 namespace boost {
 
@@ -40,10 +41,25 @@ namespace boost {
 //
 template <typename T> class recursive_wrapper;
 
+
+///////////////////////////////////////////////////////////////////////////////
+// metafunction is_constructible partial specializations.
+//
+// recursive_wrapper<T> is constructible from T and recursive_wrapper<T>.
+//
+template <class T> struct is_constructible<recursive_wrapper<T>, T> : boost::true_type{};
+template <class T> struct is_constructible<recursive_wrapper<T>, const T> : boost::true_type{};
+template <class T> struct is_constructible<recursive_wrapper<T>, T&> : boost::true_type{};
+template <class T> struct is_constructible<recursive_wrapper<T>, const T&> : boost::true_type{};
+template <class T> struct is_constructible<recursive_wrapper<T>, recursive_wrapper<T> > : boost::true_type{};
+template <class T> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<T> > : boost::true_type{};
+template <class T> struct is_constructible<recursive_wrapper<T>, recursive_wrapper<T>& > : boost::true_type{};
+template <class T> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<T>& > : boost::true_type{};
+
 ///////////////////////////////////////////////////////////////////////////////
 // metafunction is_recursive_wrapper (modeled on code by David Abrahams)
 //
-// True iff specified type matches recursive_wrapper<T>.
+// True if specified type matches recursive_wrapper<T>.
 //
 
 namespace detail {

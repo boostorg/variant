@@ -57,7 +57,7 @@
 #include <boost/type_traits/add_lvalue_reference.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/utility/declval.hpp>
-#include <boost/variant/recursive_wrapper.hpp>
+#include <boost/variant/recursive_wrapper_fwd.hpp>
 #include <boost/variant/static_visitor.hpp>
 
 #include <boost/mpl/assert.hpp>
