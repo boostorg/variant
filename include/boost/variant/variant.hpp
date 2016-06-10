@@ -289,10 +289,10 @@ template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
 struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >:
     boost::is_same<
         typename boost::mpl::find_if<
-            typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::types,
+            typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types,
             mpl::not_< is_variant_constructible_from< boost::mpl::_1, Types> >
         >::type,
-        typename boost::mpl::end< typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::types >::type
+        typename boost::mpl::end< typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types >::type
     >
 {};
 
@@ -1188,6 +1188,7 @@ private: // helpers, for typedefs (below)
           ::boost::mpl::not_< mpl::empty<specified_types> >::value
         ));
 
+public: // public typedefs
     typedef typename mpl::eval_if<
           is_recursive_
         , mpl::transform<
@@ -1197,9 +1198,7 @@ private: // helpers, for typedefs (below)
                 >
             >
         , mpl::identity< specified_types >
-        >::type recursive_enabled_types;
-
-public: // public typedefs
+        >::type recursive_enabled_types;    // used by is_variant_constructible_from<> trait
 
     typedef typename mpl::transform<
           recursive_enabled_types

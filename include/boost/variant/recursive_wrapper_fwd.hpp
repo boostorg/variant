@@ -45,18 +45,25 @@ template <typename T> class recursive_wrapper;
 ///////////////////////////////////////////////////////////////////////////////
 // metafunction is_constructible partial specializations.
 //
-// recursive_wrapper<T> is constructible from T and recursive_wrapper<T>.
+// recursive_wrapper<T> is constructible only from T and recursive_wrapper<T>.
 //
-template <class T> struct is_constructible<recursive_wrapper<T>, T> : boost::true_type{};
-template <class T> struct is_constructible<recursive_wrapper<T>, const T> : boost::true_type{};
-template <class T> struct is_constructible<recursive_wrapper<T>, T&> : boost::true_type{};
-template <class T> struct is_constructible<recursive_wrapper<T>, const T&> : boost::true_type{};
-template <class T> struct is_constructible<recursive_wrapper<T>, recursive_wrapper<T> > : boost::true_type{};
-template <class T> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<T> > : boost::true_type{};
-template <class T> struct is_constructible<recursive_wrapper<T>, recursive_wrapper<T>& > : boost::true_type{};
-template <class T> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<T>& > : boost::true_type{};
+template <class T>          struct is_constructible<recursive_wrapper<T>, T>                            : boost::true_type{};
+template <class T>          struct is_constructible<recursive_wrapper<T>, const T>                      : boost::true_type{};
+template <class T>          struct is_constructible<recursive_wrapper<T>, T&>                           : boost::true_type{};
+template <class T>          struct is_constructible<recursive_wrapper<T>, const T&>                     : boost::true_type{};
+template <class T>          struct is_constructible<recursive_wrapper<T>, recursive_wrapper<T> >        : boost::true_type{};
+template <class T>          struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<T> >  : boost::true_type{};
+template <class T>          struct is_constructible<recursive_wrapper<T>, recursive_wrapper<T>& >       : boost::true_type{};
+template <class T>          struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<T>& > : boost::true_type{};
 
-template <class T, class U> struct is_constructible<recursive_wrapper<T>, U > : boost::false_type{};
+template <class T, class U> struct is_constructible<recursive_wrapper<T>, U >                           : boost::false_type{};
+template <class T, class U> struct is_constructible<recursive_wrapper<T>, const U >                     : boost::false_type{};
+template <class T, class U> struct is_constructible<recursive_wrapper<T>, U& >                          : boost::false_type{};
+template <class T, class U> struct is_constructible<recursive_wrapper<T>, const U& >                    : boost::false_type{};
+template <class T, class U> struct is_constructible<recursive_wrapper<T>, recursive_wrapper<U> >        : boost::false_type{};
+template <class T, class U> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<U> >  : boost::false_type{};
+template <class T, class U> struct is_constructible<recursive_wrapper<T>, recursive_wrapper<U>& >       : boost::false_type{};
+template <class T, class U> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<U>& > : boost::false_type{};
 
 
 ///////////////////////////////////////////////////////////////////////////////
