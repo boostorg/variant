@@ -258,7 +258,7 @@ visitation_impl(
     typedef typename is_same< next_type,apply_visitor_unrolled >::type
         is_apply_visitor_unrolled;
 
-    return visitation_impl(
+    return detail::variant::visitation_impl(
           internal_which, logical_which
         , visitor, storage
         , is_apply_visitor_unrolled()
