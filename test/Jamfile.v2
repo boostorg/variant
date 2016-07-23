@@ -25,6 +25,7 @@ test-suite variant
     [ run test6.cpp : : : : variant_test6 ]
     [ run test7.cpp : : : : variant_test7 ]
     [ run test8.cpp : : : : variant_test8 ]
+    [ run test9.cpp : : : : variant_test9 ]
     [ run recursive_variant_test.cpp ]
     [ run variant_reference_test.cpp ]
     [ run variant_comparison_test.cpp ]
