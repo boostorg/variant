@@ -139,7 +139,7 @@ relaxed_get(
     )
 {
     typedef typename add_pointer<U>::type U_ptr;
-    U_ptr result = relaxed_get<U>(&operand);
+    U_ptr result = relaxed_get<U>(boost::addressof(operand));
 
     if (!result)
         boost::throw_exception(bad_get());
@@ -155,7 +155,7 @@ relaxed_get(
     )
 {
     typedef typename add_pointer<const U>::type U_ptr;
-    U_ptr result = relaxed_get<const U>(&operand);
+    U_ptr result = relaxed_get<const U>(boost::addressof(operand));
 
     if (!result)
         boost::throw_exception(bad_get());
