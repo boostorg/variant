@@ -43,7 +43,7 @@ inline T forced_return()
 }
 
 template <>
-inline void forced_return<void>()
+BOOST_NORETURN inline void forced_return<void>()
 {
     // logical error: should never be here! (see above)
     BOOST_ASSERT(false);
