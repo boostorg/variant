@@ -28,6 +28,10 @@
 
 namespace boost {
 
+#if defined(BOOST_CLANG)
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wweak-vtables"
+#endif
 //////////////////////////////////////////////////////////////////////////
 // class bad_get
 //
@@ -45,6 +49,10 @@ public: // std::exception implementation
     }
 
 };
+#if defined(BOOST_CLANG)
+#   pragma clang diagnostic pop
+#endif
+
 
 //////////////////////////////////////////////////////////////////////////
 // function template get<T>
