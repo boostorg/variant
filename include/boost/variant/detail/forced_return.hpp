@@ -47,6 +47,7 @@ BOOST_NORETURN inline void forced_return<void>()
 {
     // logical error: should never be here! (see above)
     BOOST_ASSERT(false);
+    std::terminate();
 }
 
 #elif !defined(BOOST_MSVC)
