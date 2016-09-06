@@ -26,6 +26,12 @@
 
 namespace boost { namespace detail { namespace variant {
 
+BOOST_NORETURN inline void forced_return_no_return() { // fixes `must return a value` warnings
+    using namespace std;
+    abort(); // some implementations have no std::abort
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // (detail) function template forced_return
 //
@@ -33,16 +39,14 @@ namespace boost { namespace detail { namespace variant {
 // compile-time requirement of returning a result value.
 //
 template <typename T>
-inline
+BOOST_NORETURN inline
     BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(T)
 forced_return()
 {
-    using namespace std;
-
     // logical error: should never be here! (see above)
     BOOST_ASSERT(false);
 
-    abort(); // some implementations have no std::abort
+    forced_return_no_return();
 
 #ifdef BOOST_NO_NORETURN
     BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(T) (*dummy)() = 0;
