@@ -2,13 +2,13 @@
 # subject to the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Copyright Antony Polukhin 2014-2015.
+# Copyright Antony Polukhin 2014-2016.
 
 #
 # See https://svn.boost.org/trac/boost/wiki/TravisCoverals for description of this file
 # and how it can be used with Boost libraries.
 #
-# File revision #5
+# File revision #6
 
 sudo: false
 language: cpp
@@ -37,8 +37,12 @@ env:
         - BOOST_REMOVE=$(basename $TRAVIS_BUILD_DIR)
 
     matrix:
-        - CXX_STANDARD=c++98
-        - CXX_STANDARD=c++0x
+        # Note that "--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD" are added automatically lower in code
+        - CXX_FLAGS="-std=c++98" LINK_FLAGS="" TOOLSET=gcc-6
+        - CXX_FLAGS="-std=c++11" LINK_FLAGS="" TOOLSET=gcc-6
+        - CXX_FLAGS="-std=c++1y" LINK_FLAGS="" TOOLSET=gcc-6
+        #- CXX_FLAGS="-std=c++11 -stdlib=libc++" LINK_FLAGS="-stdlib=libc++" TOOLSET=clang
+        #- CXX_FLAGS="-std=c++1y -stdlib=libc++" LINK_FLAGS="-stdlib=libc++" TOOLSET=clang
 
 ###############################################################################################################
 # From this point and below code is same for all the Boost libs
@@ -48,10 +52,17 @@ env:
 # Installing additional tools
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - git-core
     packages:
-    - valgrind
+    - git
     - python-yaml
+    - gcc-6
+    - g++-6
     - lcov
+    - clang
+    - libc++-dev
 
 before_install:
     # Set this to the name of the library
@@ -64,13 +75,9 @@ before_install:
     - git remote add --no-tags -t $BRANCH_TO_TEST origin https://github.com/boostorg/boost.git
     - git fetch --depth=1
     - git checkout $BRANCH_TO_TEST
-    - git submodule update --init --merge
+    - git submodule update --jobs=3 --init --merge
     - git remote set-branches --add origin $BRANCH_TO_TEST
     - git pull --recurse-submodules
-    - git submodule update --init
-    - git checkout $BRANCH_TO_TEST
-    - git submodule foreach "git reset --quiet --hard; git clean -fxd"
-    - git reset --hard; git clean -fxd
     - git status
     - rm -rf $BOOST/libs/$BOOST_REMOVE
     - mv $TRAVIS_BUILD_DIR $BOOST/libs/$PROJECT_TO_TEST
@@ -81,8 +88,8 @@ before_install:
 
 script:
     # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 testing.launcher=valgrind address-model=64 architecture=x86 toolset=$CC cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage"
-
+    - ../../../b2 "testing.launcher=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.3 " address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -fsanitize=address,leak,undefined -DBOOST_TRAVISCI_BUILD $CXX_FLAGS" linkflags="$LINK_FLAGS --coverage -lasan -lubsan"
+    
 after_success:
     # Copying Coveralls data to a separate folder
     - mkdir -p $TRAVIS_BUILD_DIR/coverals
