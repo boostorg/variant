@@ -1,13 +1,23 @@
-// Copyright (c) 2011-2014
-// Antony Polukhin
+// Copyright (c) 2016
+// Mikhail Maximov
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost/config.hpp"
+#include "boost/test/minimal.hpp"
+
+#if !defined(BOOST_NO_CXX11_TEMPLATE_ALIASES) && !defined(BOOST_NO_CXX11_HDR_UNORDERED_SET)
+// Test is based on reported issues:
+// https://svn.boost.org/trac/boost/ticket/12508
+// https://svn.boost.org/trac/boost/ticket/12645
+// Following hash function was not found at compile time,
+// because boost::variant construction from boost::recursive_variant_
+// was forbidden.
+
 #include <unordered_set>
 
-#include "boost/test/minimal.hpp"
 #include "boost/variant.hpp"
 
 struct hash;
@@ -26,13 +36,11 @@ using set_t = basic_set_t<value_t>;
 
 struct hash
 {
-    // since boost 1.62 ... error: no match for call to ‘(const hash) (const boost::recursive_variant_&)’
     size_t operator()(const value_t& value) const
     {
       return 0;
     }
 };
-
 
 void run()
 {
@@ -51,6 +59,11 @@ void run()
       BOOST_CHECK(check_set.find(check_v) != check_set.end());
     }
 }
+
+#else // !defined(BOOST_NO_CXX11_TEMPLATE_ALIASES) && !defined(BOOST_NO_CXX11_HDR_UNORDERED_SET)
+// if no unordered_set and template aliases - does nothing
+void run() {}
+#endif
 
 int test_main(int , char* [])
 {
