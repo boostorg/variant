@@ -20,6 +20,7 @@
 #include <boost/mpl/aux_/lambda_support.hpp>
 #include <boost/type_traits/integral_constant.hpp>
 #include <boost/type_traits/is_constructible.hpp>
+#include <boost/type_traits/is_nothrow_move_constructible.hpp>
 
 namespace boost {
 
@@ -65,6 +66,7 @@ template <class T, class U> struct is_constructible<recursive_wrapper<T>, const 
 template <class T, class U> struct is_constructible<recursive_wrapper<T>, recursive_wrapper<U>& >       : boost::false_type{};
 template <class T, class U> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<U>& > : boost::false_type{};
 
+template <class T> struct is_nothrow_move_constructible<recursive_wrapper<T>> : boost::true_type{};
 
 ///////////////////////////////////////////////////////////////////////////////
 // metafunction is_recursive_wrapper (modeled on code by David Abrahams)
