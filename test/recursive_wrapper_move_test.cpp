@@ -8,11 +8,7 @@
 #include "boost/config.hpp"
 #include "boost/test/minimal.hpp"
 
-#if !defined(BOOST_NO_CXX14_RETURN_TYPE_DEDUCTION)
-// There is no BOOST_NOCXX11_INHERITING_CONSTRUCTORS, but 
-// if compiler supports return type deduction, which is newer feature
-// it supposedly supports constructor inheriting
-
+#ifdef __cpp_inheriting_constructors
 // Test is based on reported issue:
 // https://svn.boost.org/trac/boost/ticket/12680
 // GCC 6 crashed, trying to determine is boost::recursive_wrapper<Node>
@@ -32,7 +28,7 @@ struct Tree : TreeBase {
   using TreeBase::TreeBase;
 
   template <typename Iter>
-  static Tree Create(Iter first, Iter last) { return Leaf{}; }
+  static Tree Create(Iter /*first*/, Iter /*last*/) { return Leaf{}; }
 };
 
 struct Node {
@@ -41,12 +37,12 @@ struct Node {
 
 void run() {
   std::string input{"abracadabra"};
-
   const Tree root = Tree::Create(input.begin(), input.end());
+  (void) root; // prevents unused variable warning
 }
 
-#else // !defined(BOOST_NO_CXX14_RETURN_TYPE_DEDUCTION)
-// if compiler is old - does nothing
+#else // #!ifdef __cpp_inheriting_constructors
+// if compiler does not support inheriting constructors - does nothing
 void run() {}
 #endif
 
