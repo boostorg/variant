@@ -66,7 +66,7 @@ template <class T, class U> struct is_constructible<recursive_wrapper<T>, const 
 template <class T, class U> struct is_constructible<recursive_wrapper<T>, recursive_wrapper<U>& >       : boost::false_type{};
 template <class T, class U> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<U>& > : boost::false_type{};
 
-template <class T> struct is_nothrow_move_constructible<recursive_wrapper<T>> : boost::true_type{};
+template <class T> struct is_nothrow_move_constructible<recursive_wrapper<T> > : boost::true_type{};
 
 ///////////////////////////////////////////////////////////////////////////////
 // metafunction is_recursive_wrapper (modeled on code by David Abrahams)
