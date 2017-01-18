@@ -59,13 +59,13 @@
     GCC before 4.0 had no variadic tempaltes; 
     GCC 4.6 has incomplete implementation of variadic templates.
 
-    MSVC2015 Update 1 has variadic templates without known issues.
+    MSVC2015 Update 1 has variadic templates, but they have issues.
 
     NOTE: Clang compiler defines __GNUC__
 */
 #if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) \
   || (!defined(__clang__) && defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 7)) \
-  || (defined(_MSC_FULL_VER) && _MSC_FULL_VER < 190023506) \
+  || (defined(_MSC_VER) && (_MSC_VER <= 1900)) \
   || defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE) \
   || defined (BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
 
