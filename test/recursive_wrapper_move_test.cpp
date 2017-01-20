@@ -49,7 +49,7 @@ using var_base = boost::variant<int,
 
 template<class Node>
 struct node1_type {
-  std::array<Node, 1> children;
+  boost::array<Node, 1> children;
 };
 
 struct var_type : var_base {
