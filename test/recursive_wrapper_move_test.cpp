@@ -18,6 +18,7 @@
 #include <iterator>
 
 #include <boost/variant.hpp>
+#include <boost/array.hpp>
 
 struct Leaf { };
 struct Node;
@@ -35,10 +36,33 @@ struct Node {
   Tree left, right;
 };
 
+
+// Test from https://svn.boost.org/trac/boost/ticket/7120
+template<class Node>
+struct node1_type;
+
+struct var_type;
+
+using var_base = boost::variant<int,
+  boost::recursive_wrapper<node1_type<var_type>>
+>;
+
+template<class Node>
+struct node1_type {
+  std::array<Node, 1> children;
+};
+
+struct var_type : var_base {
+  using var_base::var_base;
+};
+
 void run() {
   std::string input{"abracadabra"};
   const Tree root = Tree::Create(input.begin(), input.end());
-  (void) root; // prevents unused variable warning
+  (void)root; // prevents unused variable warning
+
+  var_type v1 = 1;
+  (void)v1;
 }
 
 #else // #!ifdef __cpp_inheriting_constructors
