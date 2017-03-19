@@ -86,7 +86,6 @@
 #include <boost/mpl/size_t.hpp>
 #include <boost/mpl/sizeof.hpp>
 #include <boost/mpl/transform.hpp>
-#include <boost/mpl/joint_view.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/copy.hpp>
 
@@ -2455,30 +2454,32 @@ struct make_variant_over
 private: // precondition assertions
 
     BOOST_STATIC_ASSERT(( ::boost::mpl::is_sequence<Types>::value ));
+    typedef typename mpl::copy<Types, boost::mpl::back_inserter<mpl::vector<> > >::type copied_sequence_t;
 
 public: // metafunction result
 
     typedef variant<
-          detail::variant::over_sequence<Types>
+          detail::variant::over_sequence<copied_sequence_t>
         > type;
 
 };
 
-//specialization for joint_view to unpack it's types
-template <typename T1, typename T2>
-struct make_variant_over <boost::mpl::joint_view<T1, T2> >
-{
-private:
-    typedef mpl::vector<> helper;
-    typedef boost::mpl::joint_view<T1, T2> joint_view;
+#ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
 
-public: // metafunction result
+// Optimizing compilation speed by avoiding MPL computations for the most common case
+template <typename... Types>
+struct make_variant_over< mpl::vector<Types...> > {
+  private: // precondition assertions
+  typedef mpl::vector<Types...> sequence_t;
 
-    typedef variant<
-          detail::variant::over_sequence<typename mpl::copy<joint_view, mpl::back_inserter<helper> >::type>
-        > type;
+  public: // metafunction result
+  typedef variant<
+    detail::variant::over_sequence<sequence_t>
+  > type;
 
 };
+
+#endif // #ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
 
 
 ///////////////////////////////////////////////////////////////////////////////
