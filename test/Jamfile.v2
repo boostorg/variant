@@ -46,6 +46,10 @@ test-suite variant
       <toolset>clang:<cxxflags>-fno-exceptions
       : variant_noexcept_test
     ]
+    [ run lambda_test1.cpp : : : <toolset>gcc:<cxxflags>-std=c++1y: lambda_visitor_test1 ]
+    [ run lambda_test2.cpp : : : <toolset>gcc:<cxxflags>-std=c++1y: lambda_visitor_test2 ]
+    [ run lambda_test3.cpp : : : <toolset>gcc:<cxxflags>-std=c++1y: lambda_visitor_test3 ]
+    [ run lambda_test4.cpp : : : <toolset>gcc:<cxxflags>-std=c++1y: lambda_visitor_test3 ]
     [ run recursive_variant_test.cpp : : : <rtti>off <define>BOOST_NO_RTTI <define>BOOST_NO_TYPEID : variant_no_rtti_test ]
     [ run hash_recursive_variant_test.cpp ]
     [ run variant_swap_test.cpp ]
