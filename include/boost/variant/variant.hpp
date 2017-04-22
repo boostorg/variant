@@ -18,7 +18,9 @@
 #include <cstddef> // for std::size_t
 #include <new> // for placement new
 
+#ifndef BOOST_VARIANT_NO_TYPE_INDEX
 #include <boost/type_index.hpp>
+#endif
 
 #include <boost/variant/detail/config.hpp>
 #include <boost/mpl/aux_/value_wknd.hpp>
@@ -930,6 +932,7 @@ private:
 // Generic static visitor that performs a typeid on the value it visits.
 //
 
+#ifndef BOOST_VARIANT_NO_TYPE_INDEX
 class reflect
     : public static_visitor<const boost::typeindex::type_info&>
 {
@@ -942,6 +945,7 @@ public: // visitor interfaces
     }
 
 };
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // (detail) class comparer
@@ -2259,11 +2263,13 @@ public: // queries
         return false;
     }
 
+#ifndef BOOST_VARIANT_NO_TYPE_INDEX
     const boost::typeindex::type_info& type() const
     {
         detail::variant::reflect visitor;
         return this->apply_visitor(visitor);
     }
+#endif
 
 public: // prevent comparison with foreign types
 

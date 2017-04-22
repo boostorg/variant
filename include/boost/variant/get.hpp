@@ -13,7 +13,9 @@
 #ifndef BOOST_VARIANT_GET_HPP
 #define BOOST_VARIANT_GET_HPP
 
+#ifndef BOOST_NO_EXCEPTIONS
 #include <exception>
+#endif
 
 #include <boost/config.hpp>
 #include <boost/detail/workaround.hpp>
