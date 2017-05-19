@@ -1,4 +1,4 @@
-#[Boost.Variant](http://boost.org/libs/variant)
+# [Boost.Variant](http://boost.org/libs/variant)
 Boost.Variant, part of collection of the [Boost C++ Libraries](http://github.com/boostorg). It is a safe, generic, stack-based discriminated union container, offering a simple solution for manipulating an object from a heterogeneous set of types in a uniform manner.
 
 ### Test results
