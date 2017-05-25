@@ -26,6 +26,9 @@
 
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/type_traits/add_pointer.hpp>
+#include <boost/type_traits/is_lvalue_reference.hpp>
+
+#include <boost/mpl/not.hpp>
 
 namespace boost {
 
@@ -185,7 +188,7 @@ relaxed_get(
 
     if (!result)
         boost::throw_exception(bad_get());
-    return detail::variant::move(*result);
+    return static_cast<U&&>(*result);
 }
 #endif
 
@@ -269,6 +272,11 @@ strict_get(
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
+    BOOST_STATIC_ASSERT_MSG(
+        (mpl::not_< boost::is_lvalue_reference<U> >::value),
+        "remove ampersand '&' from template type U in boost::get<U>(boost::variant<T...>&&) "
+    );
+
     BOOST_STATIC_ASSERT_MSG(
         (boost::detail::variant::holds_element<boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >, U >::value),
         "boost::variant does not contain specified type U, "
