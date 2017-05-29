@@ -381,7 +381,7 @@ inline void get_rvref_test()
   boost::variant<MoveonlyType, int> v;
 
   v = MoveonlyType();
-  MoveonlyType&& mt1 = boost::get<MoveonlyType>(boost::move(v));
+  boost::get<MoveonlyType>(boost::move(v));
 
   v = 3;
 
