@@ -28,8 +28,6 @@
 #include <boost/type_traits/add_pointer.hpp>
 #include <boost/type_traits/is_lvalue_reference.hpp>
 
-#include <boost/mpl/not.hpp>
-
 namespace boost {
 
 #if defined(BOOST_CLANG)
@@ -273,7 +271,7 @@ strict_get(
     )
 {
     BOOST_STATIC_ASSERT_MSG(
-        (mpl::not_< boost::is_lvalue_reference<U> >::value),
+        (!boost::is_lvalue_reference<U>::value),
         "remove ampersand '&' from template type U in boost::get<U>(boost::variant<T...>&&) "
     );
 

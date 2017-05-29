@@ -367,19 +367,31 @@ public:
 
 private:
     MoveonlyType(const MoveonlyType&);
-    MoveonlyType(MoveonlyType&&);
+    void operator=(const MoveonlyType& other);
 };
+
+const boost::variant<int, std::string> foo1() { return ""; }
+boost::variant<int, std::string> foo2() { return ""; }
 
 inline void get_rvref_test()
 {
-  boost::variant<int, MoveonlyType> v;
+  boost::get<std::string>(foo1());
+  boost::get<std::string>(foo2());
+
+  boost::variant<MoveonlyType, int> v;
+
   v = MoveonlyType();
-  BOOST_CHECK(boost::get<MoveonlyType>(boost::move(v)));
-  BOOST_CHECK(boost::get<MoveonlyType>(v));
+  MoveonlyType&& mt1 = boost::get<MoveonlyType>(boost::move(v));
 
-  boost::relaxed_get<MoveonlyType&>(boost::variant<int, MoveonlyType>()) // Must compile
+  v = 3;
 
-  MoveonlyType moved_from_variant(boost::get<MoveonlyType>(boost::move(x)));
+  v = MoveonlyType();
+  boost::get<MoveonlyType>(v);
+
+  boost::relaxed_get<MoveonlyType&>(boost::variant<MoveonlyType, int>());
+
+  v = MoveonlyType();
+  MoveonlyType moved_from_variant(boost::get<MoveonlyType>(boost::move(v)));
 }
 #endif  // BOOST_NO_CXX11_RVALUE_REFERENCES
 
