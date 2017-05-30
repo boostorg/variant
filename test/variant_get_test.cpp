@@ -356,6 +356,45 @@ inline void check_that_does_not_exist()
     check_that_does_not_exist_impl<var_req_t>();
 }
 
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+class MoveonlyType {
+public:
+    MoveonlyType() {}
+    ~MoveonlyType() {}
+
+    MoveonlyType(MoveonlyType&& other) {}
+    void operator=(MoveonlyType&& other) {}
+
+private:
+    MoveonlyType(const MoveonlyType&);
+    void operator=(const MoveonlyType& other);
+};
+
+const boost::variant<int, std::string> foo1() { return ""; }
+boost::variant<int, std::string> foo2() { return ""; }
+
+inline void get_rvref_test()
+{
+  boost::get<std::string>(foo1());
+  boost::get<std::string>(foo2());
+
+  boost::variant<MoveonlyType, int> v;
+
+  v = MoveonlyType();
+  boost::get<MoveonlyType>(boost::move(v));
+
+  v = 3;
+
+  v = MoveonlyType();
+  boost::get<MoveonlyType>(v);
+
+  boost::relaxed_get<MoveonlyType&>(boost::variant<MoveonlyType, int>());
+
+  v = MoveonlyType();
+  MoveonlyType moved_from_variant(boost::get<MoveonlyType>(boost::move(v)));
+}
+#endif  // BOOST_NO_CXX11_RVALUE_REFERENCES
+
 int test_main(int , char* [])
 {
     get_test();
@@ -364,6 +403,10 @@ int test_main(int , char* [])
     get_cref_test();
     get_recursive_test();
     check_that_does_not_exist();
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    get_rvref_test();
+#endif
 
     return boost::exit_success;
 }
