@@ -91,6 +91,22 @@
         </parameter>
       </signature>
 
+      <signature>
+        <template>
+          <template-type-parameter name="U"/>
+          <template-type-parameter name="T1"/>
+          <template-type-parameter name="T2"/>
+          <template-varargs/>
+          <template-type-parameter name="TN"/>
+        </template>
+
+        <type>U &amp;&amp;</type>
+
+        <parameter name="operand">
+          <paramtype><classname>variant</classname>&lt;T1, T2, ..., TN&gt; &amp;&amp;</paramtype>
+        </parameter>
+      </signature>
+
       <purpose>
         <simpara>Retrieves a value of a specified type from a given
           <code><classname>variant</classname></code>. </simpara>
@@ -220,6 +236,22 @@
         </parameter>
       </signature>
 
+      <signature>
+        <template>
+          <template-type-parameter name="U"/>
+          <template-type-parameter name="T1"/>
+          <template-type-parameter name="T2"/>
+          <template-varargs/>
+          <template-type-parameter name="TN"/>
+        </template>
+
+        <type>U &amp;&amp;</type>
+
+        <parameter name="operand">
+          <paramtype><classname>variant</classname>&lt;T1, T2, ..., TN&gt; &amp;&amp;</paramtype>
+        </parameter>
+      </signature>
+
       <purpose>
         <simpara>Retrieves a value of a specified type from a given
           <code><classname>variant</classname></code>.</simpara>
@@ -293,6 +325,22 @@
 
         <parameter name="operand">
           <paramtype>const <classname>variant</classname>&lt;T1, T2, ..., TN&gt; &amp;</paramtype>
+        </parameter>
+      </signature>
+
+      <signature>
+        <template>
+          <template-type-parameter name="U"/>
+          <template-type-parameter name="T1"/>
+          <template-type-parameter name="T2"/>
+          <template-varargs/>
+          <template-type-parameter name="TN"/>
+        </template>
+
+        <type>U &amp;&amp;</type>
+
+        <parameter name="operand">
+          <paramtype><classname>variant</classname>&lt;T1, T2, ..., TN&gt; &amp;&amp;</paramtype>
         </parameter>
       </signature>
 
