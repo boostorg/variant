@@ -76,6 +76,7 @@
 #include <boost/mpl/iterator_range.hpp>
 #include <boost/mpl/iter_fold_if.hpp>
 #include <boost/mpl/logical.hpp>
+#include <boost/mpl/list.hpp>
 #include <boost/mpl/max_element.hpp>
 #include <boost/mpl/next.hpp>
 #include <boost/mpl/not.hpp>
@@ -2454,7 +2455,7 @@ struct make_variant_over
 private: // precondition assertions
 
     BOOST_STATIC_ASSERT(( ::boost::mpl::is_sequence<Types>::value ));
-    typedef typename mpl::copy<Types, boost::mpl::back_inserter<mpl::vector<> > >::type copied_sequence_t;
+    typedef typename mpl::copy<Types, boost::mpl::front_inserter<mpl::list<> > >::type copied_sequence_t;
 
 public: // metafunction result
 
@@ -2470,7 +2471,7 @@ public: // metafunction result
 template <typename... Types>
 struct make_variant_over< mpl::vector<Types...> > {
   private: // precondition assertions
-  typedef mpl::vector<Types...> sequence_t;
+  typedef mpl::list<Types...> sequence_t;
 
   public: // metafunction result
   typedef variant<
