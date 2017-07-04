@@ -2465,24 +2465,6 @@ public: // metafunction result
 
 };
 
-#ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
-
-// Optimizing compilation speed by avoiding MPL computations for the most common case
-template <typename... Types>
-struct make_variant_over< mpl::vector<Types...> > {
-  private: // precondition assertions
-  typedef mpl::list<Types...> sequence_t;
-
-  public: // metafunction result
-  typedef variant<
-    detail::variant::over_sequence<sequence_t>
-  > type;
-
-};
-
-#endif // #ifndef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // function template swap
 //
