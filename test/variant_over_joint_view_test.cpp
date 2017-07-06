@@ -23,7 +23,7 @@ void check_exception_on_get(Variant& v) {
     try {
         boost::get<T>(v);
         BOOST_FAIL("Expected exception boost::bad_get, but got nothing.");
-    } catch (boost::bad_get& exc) { //okay it is expected behaviour
+    } catch (boost::bad_get&) { //okay it is expected behaviour
     } catch (...) { BOOST_FAIL("Expected exception boost::bad_get, but got something else."); }
 }
 
@@ -36,8 +36,10 @@ void test_joint_view() {
     v2 b = "2";
     v3 c = a;
     BOOST_CHECK(boost::get<int>(c) == 1);
+    BOOST_CHECK(c.which() == 0);
     v3 d = b;
     BOOST_CHECK(boost::get<std::string>(d) == "2");
+    BOOST_CHECK(d.which() == 1);
     check_exception_on_get<std::string>(c);
     check_exception_on_get<int>(d);
 }

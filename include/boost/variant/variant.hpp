@@ -71,12 +71,13 @@
 #include <boost/mpl/front.hpp>
 #include <boost/mpl/identity.hpp>
 #include <boost/mpl/if.hpp>
+#include <boost/mpl/insert_range.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/is_sequence.hpp>
 #include <boost/mpl/iterator_range.hpp>
 #include <boost/mpl/iter_fold_if.hpp>
-#include <boost/mpl/logical.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/mpl/logical.hpp>
 #include <boost/mpl/max_element.hpp>
 #include <boost/mpl/next.hpp>
 #include <boost/mpl/not.hpp>
@@ -87,8 +88,6 @@
 #include <boost/mpl/size_t.hpp>
 #include <boost/mpl/sizeof.hpp>
 #include <boost/mpl/transform.hpp>
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/copy.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation Macros:
@@ -2455,7 +2454,11 @@ struct make_variant_over
 private: // precondition assertions
 
     BOOST_STATIC_ASSERT(( ::boost::mpl::is_sequence<Types>::value ));
-    typedef typename mpl::copy<Types, boost::mpl::front_inserter<mpl::list<> > >::type copied_sequence_t;
+    typedef typename boost::mpl::insert_range<
+      boost::mpl::list<>
+    , boost::mpl::end< boost::mpl::list<> >::type
+    , Types
+    >::type copied_sequence_t;
 
 public: // metafunction result
 
