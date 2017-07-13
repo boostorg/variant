@@ -388,7 +388,7 @@ public: // visitor interfaces
 
 #if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x0551)) || \
     BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1600))
-        operand; // suppresses warnings
+        (void)operand; // suppresses warnings
 #endif
 
         BOOST_VARIANT_AUX_RETURN_VOID;
