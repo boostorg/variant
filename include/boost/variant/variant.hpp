@@ -114,6 +114,11 @@
 #endif
 
 
+#if defined(BOOST_MSVC)
+# pragma warning(push)
+# pragma warning(disable: 4127) // conditional expression is constant
+#endif
+
 namespace boost {
 
 namespace detail { namespace variant {
@@ -2489,5 +2494,9 @@ inline void swap(
 #if !defined(BOOST_NO_IOSTREAM)
 #include <boost/variant/detail/variant_io.hpp>
 #endif // BOOST_NO_IOSTREAM
+
+#if defined(BOOST_MSVC)
+# pragma warning(pop)
+#endif
 
 #endif // BOOST_VARIANT_VARIANT_HPP
