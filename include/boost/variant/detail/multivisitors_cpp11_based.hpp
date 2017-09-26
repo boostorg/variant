@@ -25,11 +25,6 @@
 
 #include <tuple>
 
-#ifdef BOOST_MSVC
-#  pragma warning(push)
-#  pragma warning(disable: 4100) // unreferenced formal parameter
-#endif
-
 namespace boost { 
 
 namespace detail { namespace variant {
@@ -183,10 +178,6 @@ namespace detail { namespace variant {
     }
 
 } // namespace boost
-
-#ifdef BOOST_MSVC
-#  pragma warning(pop)
-#endif
 
 #endif // BOOST_VARIANT_DETAIL_MULTIVISITORS_CPP11_BASED_HPP
 
