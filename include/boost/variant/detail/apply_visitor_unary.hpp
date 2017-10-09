@@ -62,10 +62,20 @@ namespace boost {
 
 #endif // EDG-based compilers workaround
 
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#   define USE_UNIVERSAL_REF
+#endif
+
 template <typename Visitor, typename Visitable>
 inline
     BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(Visitor)
-apply_visitor(Visitor& visitor, Visitable& visitable)
+apply_visitor(Visitor& visitor,
+#ifdef USE_UNIVERSAL_REF
+        Visitable&& visitable
+#else
+        Visitable& visitable
+#endif
+        )
 {
     return visitable.apply_visitor(visitor);
 }
@@ -79,10 +89,18 @@ apply_visitor(Visitor& visitor, Visitable& visitable)
 template <typename Visitor, typename Visitable>
 inline
     BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
-apply_visitor(const Visitor& visitor, Visitable& visitable)
+apply_visitor(const Visitor& visitor,
+#ifdef USE_UNIVERSAL_REF
+        Visitable&& visitable
+#else
+        Visitable& visitable
+#endif
+        )
 {
     return visitable.apply_visitor(visitor);
 }
+
+#undef USE_UNIVERSAL_REF
 
 
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
@@ -158,6 +176,26 @@ inline decltype(auto) apply_visitor(Visitor& visitor, Visitable& visitable,
 
 template <typename Visitor, typename Visitable>
 inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable& visitable,
+    typename boost::disable_if<
+        boost::detail::variant::has_result_type<Visitor>
+    >::type* = 0)
+{
+    boost::detail::variant::result_wrapper1<const Visitor, Visitable> cpp14_vis(visitor);
+    return visitable.apply_visitor(cpp14_vis);
+}
+
+template <typename Visitor, typename Visitable>
+inline decltype(auto) apply_visitor(Visitor& visitor, Visitable&& visitable,
+    typename boost::disable_if<
+        boost::detail::variant::has_result_type<Visitor>
+    >::type* = 0)
+{
+    boost::detail::variant::result_wrapper1<Visitor, Visitable> cpp14_vis(visitor);
+    return visitable.apply_visitor(cpp14_vis);
+}
+
+template <typename Visitor, typename Visitable>
+inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable&& visitable,
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)

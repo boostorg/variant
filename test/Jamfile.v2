@@ -53,6 +53,7 @@ test-suite variant
     [ run overload_selection.cpp ]
     [ run recursive_wrapper_move_test.cpp ]
     [ run variant_over_joint_view_test.cpp ]
+    [ run const_ref_apply_visitor.cpp : : : <cxxflags>-std=c++14 ]
    ; 
 
 

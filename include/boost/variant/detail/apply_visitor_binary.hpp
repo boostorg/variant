@@ -30,6 +30,10 @@
 #   include <boost/variant/detail/has_result_type.hpp>
 #endif
 
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#   define USE_UNIVERSAL_REF
+#endif
+
 namespace boost {
 
 //////////////////////////////////////////////////////////////////////////
@@ -144,7 +148,13 @@ inline
     BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(Visitor)
 apply_visitor(
       Visitor& visitor
-    , Visitable1& visitable1, Visitable2& visitable2
+#ifdef USE_UNIVERSAL_REF
+    , Visitable1&& visitable1
+    , Visitable2&& visitable2
+#else
+    , Visitable1& visitable1
+    , Visitable2& visitable2
+#endif
     )
 {
     ::boost::detail::variant::apply_visitor_binary_unwrap<
@@ -167,7 +177,13 @@ inline
         )
 apply_visitor(
       const Visitor& visitor
-    , Visitable1& visitable1, Visitable2& visitable2
+#ifdef USE_UNIVERSAL_REF
+    , Visitable1&& visitable1
+    , Visitable2&& visitable2
+#else
+    , Visitable1& visitable1
+    , Visitable2& visitable2
+#endif
     )
 {
     ::boost::detail::variant::apply_visitor_binary_unwrap<
@@ -273,8 +289,38 @@ inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable1& visitabl
     return boost::apply_visitor(unwrapper, visitable1);
 }
 
+//universal reference visitables
+
+template <typename Visitor, typename Visitable1, typename Visitable2>
+inline decltype(auto) apply_visitor(Visitor& visitor, Visitable1&& visitable1, Visitable2&& visitable2,
+    typename boost::disable_if<
+        boost::detail::variant::has_result_type<Visitor>
+    >::type* = 0)
+{
+    ::boost::detail::variant::apply_visitor_binary_unwrap_cpp14<
+          Visitor, Visitable2
+        > unwrapper(visitor, visitable2);
+
+    return boost::apply_visitor(unwrapper, visitable1);
+}
+
+template <typename Visitor, typename Visitable1, typename Visitable2>
+inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable1&& visitable1, Visitable2&& visitable2,
+    typename boost::disable_if<
+        boost::detail::variant::has_result_type<Visitor>
+    >::type* = 0)
+{
+    ::boost::detail::variant::apply_visitor_binary_unwrap_cpp14<
+          const Visitor, Visitable2
+        > unwrapper(visitor, visitable2);
+
+    return boost::apply_visitor(unwrapper, visitable1);
+}
+
 #endif // !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
 
 } // namespace boost
+
+#undef USE_UNIVERSAL_REF
 
 #endif // BOOST_VARIANT_DETAIL_APPLY_VISITOR_BINARY_HPP
