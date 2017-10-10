@@ -151,7 +151,7 @@ namespace detail { namespace variant {
 
     template <class Visitor, class T1, class T2, class T3, class... TN>
     inline BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
-        apply_visitor(const Visitor& visitor, T1& v1, T2& v2, T3& v3, TN&... vn)
+        apply_visitor(const Visitor& visitor, T1&& v1, T2&& v2, T3&& v3, TN&&... vn)
     {
         return ::boost::apply_visitor(
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
@@ -165,7 +165,7 @@ namespace detail { namespace variant {
     
     template <class Visitor, class T1, class T2, class T3, class... TN>
     inline BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
-        apply_visitor(Visitor& visitor, T1& v1, T2& v2, T3& v3, TN&... vn)
+        apply_visitor(Visitor& visitor, T1&& v1, T2&& v2, T3&& v3, TN&&... vn)
     {
         return ::boost::apply_visitor(
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(

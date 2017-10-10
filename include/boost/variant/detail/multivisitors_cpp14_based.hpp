@@ -104,7 +104,7 @@ namespace detail { namespace variant {
 }} // namespace detail::variant
 
     template <class Visitor, class T1, class T2, class T3, class... TN>
-    inline decltype(auto) apply_visitor(const Visitor& visitor, T1& v1, T2& v2, T3& v3, TN&... vn,
+    inline decltype(auto) apply_visitor(const Visitor& visitor, T1&& v1, T2&& v2, T3&& v3, TN&&... vn,
         typename boost::disable_if<
             boost::detail::variant::has_result_type<Visitor>
         >::type* = 0)
@@ -121,7 +121,7 @@ namespace detail { namespace variant {
     
 
     template <class Visitor, class T1, class T2, class T3, class... TN>
-    inline decltype(auto) apply_visitor(Visitor& visitor, T1& v1, T2& v2, T3& v3, TN&... vn,
+    inline decltype(auto) apply_visitor(Visitor& visitor, T1&& v1, T2&& v2, T3&& v3, TN&&... vn,
         typename boost::disable_if<
             boost::detail::variant::has_result_type<Visitor>
         >::type* = 0)
