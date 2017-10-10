@@ -27,11 +27,13 @@ struct construction_logger
         std::cout << _val << " copy constructed\n";
     }
 
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     construction_logger(construction_logger&& cl) :
         _val(cl._val)
     {
         std::cout << _val << " move constructed\n";
     }
+#endif
 
     friend std::ostream& operator << (std::ostream& os, const construction_logger& cl)
     {

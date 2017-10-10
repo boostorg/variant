@@ -264,7 +264,14 @@ private:
 }} // namespace detail::variant
 
 template <typename Visitor, typename Visitable1, typename Visitable2>
-inline decltype(auto) apply_visitor(Visitor& visitor, Visitable1& visitable1, Visitable2& visitable2,
+inline decltype(auto) apply_visitor(Visitor& visitor,
+#ifdef USE_UNIVERSAL_REF
+        Visitable1&& visitable1,
+        Visitable2&& visitable2,
+#else
+        Visitable1& visitable1,
+        Visitable2& visitable2,
+#endif
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)
@@ -277,7 +284,14 @@ inline decltype(auto) apply_visitor(Visitor& visitor, Visitable1& visitable1, Vi
 }
 
 template <typename Visitor, typename Visitable1, typename Visitable2>
-inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable1& visitable1, Visitable2& visitable2,
+inline decltype(auto) apply_visitor(const Visitor& visitor,
+#ifdef USE_UNIVERSAL_REF
+        Visitable1&& visitable1,
+        Visitable2&& visitable2,
+#else
+        Visitable1& visitable1,
+        Visitable2& visitable2,
+#endif
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)
@@ -289,33 +303,6 @@ inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable1& visitabl
     return boost::apply_visitor(unwrapper, visitable1);
 }
 
-//universal reference visitables
-
-template <typename Visitor, typename Visitable1, typename Visitable2>
-inline decltype(auto) apply_visitor(Visitor& visitor, Visitable1&& visitable1, Visitable2&& visitable2,
-    typename boost::disable_if<
-        boost::detail::variant::has_result_type<Visitor>
-    >::type* = 0)
-{
-    ::boost::detail::variant::apply_visitor_binary_unwrap_cpp14<
-          Visitor, Visitable2
-        > unwrapper(visitor, visitable2);
-
-    return boost::apply_visitor(unwrapper, visitable1);
-}
-
-template <typename Visitor, typename Visitable1, typename Visitable2>
-inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable1&& visitable1, Visitable2&& visitable2,
-    typename boost::disable_if<
-        boost::detail::variant::has_result_type<Visitor>
-    >::type* = 0)
-{
-    ::boost::detail::variant::apply_visitor_binary_unwrap_cpp14<
-          const Visitor, Visitable2
-        > unwrapper(visitor, visitable2);
-
-    return boost::apply_visitor(unwrapper, visitable1);
-}
 
 #endif // !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
 

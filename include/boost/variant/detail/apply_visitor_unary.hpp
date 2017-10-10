@@ -21,6 +21,7 @@
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/not.hpp>
 #include <boost/type_traits/is_const.hpp>
+#include <boost/type_traits/remove_reference.hpp>
 #endif
 
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
@@ -165,44 +166,35 @@ struct result_wrapper1
 }} // namespace detail::variant
 
 template <typename Visitor, typename Visitable>
-inline decltype(auto) apply_visitor(Visitor& visitor, Visitable& visitable,
+inline decltype(auto) apply_visitor(Visitor& visitor,
+#ifdef USE_UNIVERSAL_REF
+        Visitable&& visitable,
+#else
+        Visitable& visitable,
+#endif
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)
 {
-    boost::detail::variant::result_wrapper1<Visitor, Visitable> cpp14_vis(visitor);
+    boost::detail::variant::result_wrapper1<Visitor, typename remove_reference<Visitable>::type> cpp14_vis(visitor);
     return visitable.apply_visitor(cpp14_vis);
 }
 
 template <typename Visitor, typename Visitable>
-inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable& visitable,
+inline decltype(auto) apply_visitor(const Visitor& visitor,
+#ifdef USE_UNIVERSAL_REF
+        Visitable&& visitable,
+#else
+        Visitable& visitable,
+#endif
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)
 {
-    boost::detail::variant::result_wrapper1<const Visitor, Visitable> cpp14_vis(visitor);
+    boost::detail::variant::result_wrapper1<const Visitor, typename remove_reference<Visitable>::type> cpp14_vis(visitor);
     return visitable.apply_visitor(cpp14_vis);
 }
 
-template <typename Visitor, typename Visitable>
-inline decltype(auto) apply_visitor(Visitor& visitor, Visitable&& visitable,
-    typename boost::disable_if<
-        boost::detail::variant::has_result_type<Visitor>
-    >::type* = 0)
-{
-    boost::detail::variant::result_wrapper1<Visitor, Visitable> cpp14_vis(visitor);
-    return visitable.apply_visitor(cpp14_vis);
-}
-
-template <typename Visitor, typename Visitable>
-inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable&& visitable,
-    typename boost::disable_if<
-        boost::detail::variant::has_result_type<Visitor>
-    >::type* = 0)
-{
-    boost::detail::variant::result_wrapper1<const Visitor, Visitable> cpp14_vis(visitor);
-    return visitable.apply_visitor(cpp14_vis);
-}
 
 #endif // !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
 
