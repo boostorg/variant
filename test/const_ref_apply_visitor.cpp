@@ -154,45 +154,46 @@ void test_cpp14_visitor(variant_type&& test_var, variant_type&& test_var2)
 
 #endif
 
-void run()
+void run_const_lvalue_ref_tests()
 {
-    {
         const variant_type v1(1), v2(2), v3(3), v4(4);
         test_const_ref_parameter(v1);
         test_const_ref_parameter2(v1, v2);
         test_const_ref_parameter4(v1, v2, v3, v4);
-    }
+}
 
+void run_rvalue_ref_tests()
+{
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-    {
-        variant_type v1(10), v2(20), v3(30);
-        test_rvalue_parameter(boost::move(v1));
-        test_rvalue_parameter2(boost::move(v2), boost::move(v3));
+    variant_type v1(10), v2(20), v3(30);
+    test_rvalue_parameter(boost::move(v1));
+    test_rvalue_parameter2(boost::move(v2), boost::move(v3));
 
-        variant_type vv1(100), vv2(200), vv3(300), vv4(400);
-        test_rvalue_parameter4(boost::move(vv1), boost::move(vv2), boost::move(vv3), boost::move(vv4));
-    }
+    variant_type vv1(100), vv2(200), vv3(300), vv4(400);
+    test_rvalue_parameter4(boost::move(vv1), boost::move(vv2), boost::move(vv3), boost::move(vv4));
 #endif
+}
 
+void run_cpp14_tests()
+{
 #ifndef BOOST_NO_CXX14_DECLTYPE_AUTO
-    {
-        variant_type v1(10), v2(20), v3(30);
+    variant_type v1(10), v2(20), v3(30);
 
-        test_cpp14_visitor(v1);
-        test_cpp14_visitor(v2, v3);
+    test_cpp14_visitor(v1);
+    test_cpp14_visitor(v2, v3);
 
-        test_cpp14_visitor(boost::move(v1));
-        test_cpp14_visitor(boost::move(v2), boost::move(v3));
+    test_cpp14_visitor(boost::move(v1));
+    test_cpp14_visitor(boost::move(v2), boost::move(v3));
 
-        //lambda visitors doesn't support multivisotors
-    }
+    //lambda visitors doesn't support multivisotors
 #endif
-
 }
 
 int test_main(int , char* [])
 {
-    run();
+    run_const_lvalue_ref_tests();
+    run_rvalue_ref_tests();
+    run_cpp14_tests();
 
     return 0;
 }
