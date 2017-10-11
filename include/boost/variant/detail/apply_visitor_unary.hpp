@@ -78,7 +78,7 @@ apply_visitor(Visitor& visitor,
 #endif
         )
 {
-    return visitable.apply_visitor(visitor);
+    return ::boost::forward<Visitable>(visitable).apply_visitor(visitor);
 }
 
 #undef BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE
@@ -98,7 +98,7 @@ apply_visitor(const Visitor& visitor,
 #endif
         )
 {
-    return visitable.apply_visitor(visitor);
+    return ::boost::forward<Visitable>(visitable).apply_visitor(visitor);
 }
 
 #undef USE_UNIVERSAL_REF

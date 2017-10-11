@@ -68,13 +68,33 @@ struct lex_streamer_explicit : boost::static_visitor<std::string>
     }
 };
 
+struct lvalue_rvalue_detector : boost::static_visitor<std::string>
+{
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    template <class T>
+    std::string operator()(T&&) const
+    {
+        if (std::is_lvalue_reference<T>::value)
+            return "lvalue reference";
+        else
+            return "rvalue reference";
+    }
+#else
+    template <class T>
+    std::string operator()(T&) const
+    {
+        return "lvalue reference";
+    }
+#endif
+};
+
 typedef boost::variant<construction_logger, std::string> variant_type;
 
 void test_const_ref_parameter(const variant_type& test_var)
 {
     std::cout << "Testing const lvalue reference visitable\n";
 
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_explicit(), test_var) == lcs(test_var));
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), test_var) == "lvalue reference");
 }
 
 void test_const_ref_parameter2(const variant_type& test_var, const variant_type& test_var2)
@@ -99,7 +119,7 @@ void test_rvalue_parameter(variant_type&& test_var)
     std::cout << "Testing rvalue visitable\n";
 
     const auto expected_val = lcs(test_var);
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_explicit(), std::move(test_var)) == expected_val);
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), std::move(test_var)) == "rvalue reference");
 }
 
 void test_rvalue_parameter2(variant_type&& test_var, variant_type&& test_var2)
