@@ -79,11 +79,23 @@ struct lvalue_rvalue_detector : boost::static_visitor<std::string>
         else
             return "rvalue reference";
     }
+
+    template <class T, class V>
+    std::string operator()(T&& t, V&& v) const
+    {
+        return operator()(std::forward<T>(t)) + ", " + operator()(std::forward<V>(v));
+    }
 #else
     template <class T>
     std::string operator()(T&) const
     {
         return "lvalue reference";
+    }
+
+    template <class T, class V>
+    std::string operator()(T&, V&) const
+    {
+        return "lvalue reference, lvalue reference";
     }
 #endif
 };
@@ -101,7 +113,7 @@ void test_const_ref_parameter2(const variant_type& test_var, const variant_type&
 {
     std::cout << "Testing const lvalue reference visitable\n";
 
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_explicit(), test_var, test_var2) == lcs(test_var) + '+' + lcs(test_var2));
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), test_var, test_var2) == "lvalue reference, lvalue reference");
 }
 
 void test_const_ref_parameter4(const variant_type& test_var, const variant_type& test_var2, const variant_type& test_var3, const variant_type& test_var4)
@@ -126,8 +138,7 @@ void test_rvalue_parameter2(variant_type&& test_var, variant_type&& test_var2)
 {
     std::cout << "Testing rvalue visitable\n";
 
-    const auto expected_val = lcs(test_var) + '+' + lcs(test_var2);
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_explicit(), std::move(test_var), std::move(test_var2)) == expected_val);
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), std::move(test_var), std::move(test_var2)) == "rvalue reference, rvalue reference");
 }
 
 void test_rvalue_parameter4(variant_type&& test_var, variant_type&& test_var2, variant_type&& test_var3, variant_type&& test_var4)
