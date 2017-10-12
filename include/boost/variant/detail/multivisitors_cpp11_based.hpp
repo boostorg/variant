@@ -18,6 +18,7 @@
 
 #include <boost/variant/detail/apply_visitor_unary.hpp>
 #include <boost/variant/variant_fwd.hpp> // for BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
+#include <boost/move/utility.hpp>
 
 #if defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) || defined(BOOST_NO_CXX11_HDR_TUPLE)
 #   error "This file requires <tuple> and variadic templates support"
@@ -41,10 +42,34 @@ namespace detail { namespace variant {
         : index_sequence<I...> 
     {};
 
-    template <class... Types>
-    std::tuple<Types&...> forward_as_tuple_simple(Types&... args) BOOST_NOEXCEPT
+    template <typename T_, typename MoveSemantics_>
+    struct MoveableWrapper //Just a reference with some metadata
     {
-        return std::tuple<Types&...>(args...);
+        typedef T_ T;
+        typedef MoveSemantics_ MoveSemantics;
+
+        T& v;
+    };
+
+    template <typename Tp, typename MoveSemantics>
+    MoveableWrapper<Tp, MoveSemantics>
+        wrap(Tp& t)
+    {
+        return MoveableWrapper<Tp, MoveSemantics>{t};
+    }
+
+    template <typename Wrapper>
+    typename remove_reference<typename enable_if<typename Wrapper::MoveSemantics, typename Wrapper::T>::type>::type
+        unwrap(Wrapper& w)
+    {
+        return ::boost::move(w.v);
+    }
+
+    template <typename Wrapper>
+    typename disable_if<typename Wrapper::MoveSemantics, typename Wrapper::T>::type &
+        unwrap(Wrapper& w)
+    {
+        return w.v;
     }
 
     // Implementing some of the helper tuple methods
@@ -64,7 +89,6 @@ namespace detail { namespace variant {
     }
 
 
-
     // Forward declaration
     template <typename Visitor, typename Visitables, typename... Values>
     class one_by_one_visitor_and_value_referer;
@@ -72,7 +96,7 @@ namespace detail { namespace variant {
     template <typename Visitor, typename Visitables, typename... Values>
     inline one_by_one_visitor_and_value_referer<Visitor, Visitables, Values... >
         make_one_by_one_visitor_and_value_referer(
-            Visitor& visitor, Visitables visitables, std::tuple<Values&...> values
+            Visitor& visitor, Visitables visitables, std::tuple<Values...> values
         )
     {
         return one_by_one_visitor_and_value_referer<Visitor, Visitables, Values... > (
@@ -84,12 +108,12 @@ namespace detail { namespace variant {
     class one_by_one_visitor_and_value_referer
     {
         Visitor&                        visitor_;
-        std::tuple<Values&...>          values_;
+        std::tuple<Values...>           values_;
         Visitables                      visitables_;
 
     public: // structors
         one_by_one_visitor_and_value_referer(
-                    Visitor& visitor, Visitables visitables, std::tuple<Values&...> values
+                    Visitor& visitor, Visitables visitables, std::tuple<Values...> values
                 ) BOOST_NOEXCEPT
             : visitor_(visitor)
             , values_(values)
@@ -100,15 +124,15 @@ namespace detail { namespace variant {
         typedef typename Visitor::result_type result_type;
 
         template <typename Value>
-        BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type) operator()(Value& value) const
+        BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type) operator()(Value&& value) const
         {
             return ::boost::apply_visitor(
                 make_one_by_one_visitor_and_value_referer(
                     visitor_,
                     tuple_tail(visitables_),
-                    std::tuple_cat(values_, std::tuple<Value&>(value))
+                    std::tuple_cat(values_, std::make_tuple(wrap<Value, ::boost::is_lvalue_reference<Value>>(value)))
                 )
-                , std::get<0>(visitables_) // getting Head element
+                , unwrap(std::get<0>(visitables_)) // getting Head element
             );
         }
 
@@ -120,11 +144,11 @@ namespace detail { namespace variant {
     class one_by_one_visitor_and_value_referer<Visitor, std::tuple<>, Values...>
     {
         Visitor&                        visitor_;
-        std::tuple<Values&...>          values_;
+        std::tuple<Values...>           values_;
 
     public:
         one_by_one_visitor_and_value_referer(
-                    Visitor& visitor, std::tuple<> /*visitables*/, std::tuple<Values&...> values
+                    Visitor& visitor, std::tuple<> /*visitables*/, std::tuple<Values...> values
                 ) BOOST_NOEXCEPT
             : visitor_(visitor)
             , values_(values)
@@ -134,14 +158,14 @@ namespace detail { namespace variant {
 
         template <class Tuple, std::size_t... I>
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type) do_call(Tuple t, index_sequence<I...>) const {
-            return visitor_(std::get<I>(t)...);
+            return visitor_(unwrap(std::get<I>(t))...);
         }
 
         template <typename Value>
-        BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type) operator()(Value& value) const
+        BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type) operator()(Value&& value) const
         {
             return do_call(
-                std::tuple_cat(values_, std::tuple<Value&>(value)),
+                std::tuple_cat(values_, std::make_tuple(wrap<Value, ::boost::is_lvalue_reference<Value>>(value))),
                 make_index_sequence<sizeof...(Values) + 1>()
             );
         }
@@ -156,10 +180,14 @@ namespace detail { namespace variant {
         return ::boost::apply_visitor(
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
-                ::boost::detail::variant::forward_as_tuple_simple(v2, v3, vn...),
+                std::make_tuple(
+                    ::boost::detail::variant::wrap<T2, ::boost::is_lvalue_reference<T2>>(v2),
+                    ::boost::detail::variant::wrap<T3, ::boost::is_lvalue_reference<T3>>(v3),
+                    ::boost::detail::variant::wrap<TN, ::boost::is_lvalue_reference<TN>>(vn)...
+                    ),
                 std::tuple<>()
             ),
-            v1
+            ::boost::forward<T1>(v1)
         );
     }
     
@@ -170,10 +198,14 @@ namespace detail { namespace variant {
         return ::boost::apply_visitor(
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
-                ::boost::detail::variant::forward_as_tuple_simple(v2, v3, vn...),
+                std::make_tuple(
+                    ::boost::detail::variant::wrap<T2, ::boost::is_lvalue_reference<T2>>(v2),
+                    ::boost::detail::variant::wrap<T3, ::boost::is_lvalue_reference<T3>>(v3),
+                    ::boost::detail::variant::wrap<TN, ::boost::is_lvalue_reference<TN>>(vn)...
+                    ),
                 std::tuple<>()
             ),
-            v1
+            ::boost::forward<T1>(v1)
         );
     }
 

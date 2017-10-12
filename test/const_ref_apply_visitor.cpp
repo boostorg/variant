@@ -85,6 +85,12 @@ struct lvalue_rvalue_detector : boost::static_visitor<std::string>
     {
         return operator()(std::forward<T>(t)) + ", " + operator()(std::forward<V>(v));
     }
+
+    template <class T, class V, class P, class S>
+    std::string operator()(T&& t, V&& v, P&& p, S&& s) const
+    {
+        return operator()(std::forward<T>(t), std::forward<V>(v)) + ", " + operator()(std::forward<P>(p), std::forward<S>(s));
+    }
 #else
     template <class T>
     std::string operator()(T&) const
@@ -96,6 +102,12 @@ struct lvalue_rvalue_detector : boost::static_visitor<std::string>
     std::string operator()(T&, V&) const
     {
         return "lvalue reference, lvalue reference";
+    }
+
+    template <class T, class V, class P, class S>
+    std::string operator()(T&, V&, P&, S&) const
+    {
+        return "lvalue reference, lvalue reference, lvalue reference, lvalue reference";
     }
 #endif
 };
@@ -120,8 +132,8 @@ void test_const_ref_parameter4(const variant_type& test_var, const variant_type&
 {
     std::cout << "Testing const lvalue reference visitable with multivisitor\n";
 
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_explicit(), test_var, test_var2, test_var3, test_var4)
-            == lcs(test_var) + '+' + lcs(test_var2) + '+' + lcs(test_var3) + '+' + lcs(test_var4));
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), test_var, test_var2, test_var3, test_var4)
+            == "lvalue reference, lvalue reference, lvalue reference, lvalue reference");
 }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
@@ -145,8 +157,9 @@ void test_rvalue_parameter4(variant_type&& test_var, variant_type&& test_var2, v
 {
     std::cout << "Testing rvalue visitable with multivisitor\n";
 
-    const auto expected_val = lcs(test_var) + '+' + lcs(test_var2) + '+' + lcs(test_var3) + '+' + lcs(test_var4);
-    BOOST_CHECK(boost::apply_visitor(lex_streamer_explicit(), std::move(test_var), std::move(test_var2), std::move(test_var3), std::move(test_var4)) == expected_val);
+    auto result = boost::apply_visitor(lvalue_rvalue_detector(), std::move(test_var), std::move(test_var2), std::move(test_var3), std::move(test_var4));
+    std::cout << "result: " << result << std::endl;
+    BOOST_CHECK(result == "rvalue reference, rvalue reference, rvalue reference, rvalue reference");
 }
 
 #endif
