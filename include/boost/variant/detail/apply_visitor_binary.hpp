@@ -282,7 +282,7 @@ apply_visitor( const Visitor& visitor , Visitable1& visitable1 , Visitable2& vis
 
 namespace detail { namespace variant {
 
-template <typename Visitor, typename Value1>
+template <typename Visitor, typename Value1, typename MoveSemantics>
 class apply_visitor_binary_invoke_cpp14
 {
     Visitor& visitor_;
@@ -299,16 +299,22 @@ public: // structors
 public: // visitor interfaces
 
     template <typename Value2>
-    decltype(auto) operator()(Value2& value2)
+    decltype(auto) operator()(Value2&& value2, typename enable_if<mpl::and_<MoveSemantics, is_same<Value2, Value2>>>::type* = 0)
     {
-        return visitor_(value1_, value2);
+        return visitor_(::boost::move(value1_), ::boost::forward<Value2>(value2));
+    }
+
+    template <typename Value2>
+    decltype(auto) operator()(Value2&& value2, typename disable_if<mpl::and_<MoveSemantics, is_same<Value2, Value2>>>::type* = 0)
+    {
+        return visitor_(value1_, ::boost::forward<Value2>(value2));
     }
 
 private:
     apply_visitor_binary_invoke_cpp14& operator=(const apply_visitor_binary_invoke_cpp14&);
 };
 
-template <typename Visitor, typename Visitable2>
+template <typename Visitor, typename Visitable2, typename MoveSemantics>
 class apply_visitor_binary_unwrap_cpp14
 {
     Visitor& visitor_;
@@ -325,11 +331,24 @@ public: // structors
 public: // visitor interfaces
 
     template <typename Value1>
-    decltype(auto) operator()(Value1& value1)
+    decltype(auto) operator()(Value1&& value1, typename enable_if<mpl::and_<MoveSemantics, is_same<Value1, Value1>>>::type* = 0)
     {
         apply_visitor_binary_invoke_cpp14<
               Visitor
             , Value1
+            , mpl::not_<::boost::is_lvalue_reference<Value1>>
+            > invoker(visitor_, value1);
+
+        return boost::apply_visitor(invoker, ::boost::move(visitable2_));
+    }
+
+    template <typename Value1>
+    decltype(auto) operator()(Value1&& value1, typename disable_if<mpl::and_<MoveSemantics, is_same<Value1, Value1>>>::type* = 0)
+    {
+        apply_visitor_binary_invoke_cpp14<
+              Visitor
+            , Value1
+            , mpl::not_<::boost::is_lvalue_reference<Value1>>
             > invoker(visitor_, value1);
 
         return boost::apply_visitor(invoker, visitable2_);
@@ -342,43 +361,29 @@ private:
 }} // namespace detail::variant
 
 template <typename Visitor, typename Visitable1, typename Visitable2>
-inline decltype(auto) apply_visitor(Visitor& visitor,
-#ifdef USE_UNIVERSAL_REF
-        Visitable1&& visitable1,
-        Visitable2&& visitable2,
-#else
-        Visitable1& visitable1,
-        Visitable2& visitable2,
-#endif
+inline decltype(auto) apply_visitor(Visitor& visitor, Visitable1&& visitable1, Visitable2&& visitable2,
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)
 {
     ::boost::detail::variant::apply_visitor_binary_unwrap_cpp14<
-          Visitor, Visitable2
+          Visitor, Visitable2, mpl::not_<::boost::is_lvalue_reference<Visitable2>>
         > unwrapper(visitor, visitable2);
 
-    return boost::apply_visitor(unwrapper, visitable1);
+    return boost::apply_visitor(unwrapper, ::boost::forward<Visitable1>(visitable1));
 }
 
 template <typename Visitor, typename Visitable1, typename Visitable2>
-inline decltype(auto) apply_visitor(const Visitor& visitor,
-#ifdef USE_UNIVERSAL_REF
-        Visitable1&& visitable1,
-        Visitable2&& visitable2,
-#else
-        Visitable1& visitable1,
-        Visitable2& visitable2,
-#endif
+inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable1&& visitable1, Visitable2&& visitable2,
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)
 {
     ::boost::detail::variant::apply_visitor_binary_unwrap_cpp14<
-          const Visitor, Visitable2
+          const Visitor, Visitable2, mpl::not_<::boost::is_lvalue_reference<Visitable2>>
         > unwrapper(visitor, visitable2);
 
-    return boost::apply_visitor(unwrapper, visitable1);
+    return boost::apply_visitor(unwrapper, ::boost::forward<Visitable1>(visitable1));
 }
 
 
