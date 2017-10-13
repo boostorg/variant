@@ -1,8 +1,3 @@
-//-----------------------------------------------------------------------------
-// boost-libs variant/test/auto_visitors.cpp source file
-// See http://www.boost.org for updates, documentation, and revision history.
-//-----------------------------------------------------------------------------
-
 #include "boost/config.hpp"
 
 #include "boost/test/minimal.hpp"
