@@ -59,7 +59,7 @@ namespace detail { namespace variant {
     }
 
     template <typename Wrapper>
-    typename remove_reference<typename enable_if<typename Wrapper::MoveSemantics, typename Wrapper::T>::type>::type
+    typename enable_if<typename Wrapper::MoveSemantics, typename Wrapper::T>::type
         unwrap(Wrapper& w)
     {
         return ::boost::move(w.v);
@@ -130,7 +130,7 @@ namespace detail { namespace variant {
                 make_one_by_one_visitor_and_value_referer(
                     visitor_,
                     tuple_tail(visitables_),
-                    std::tuple_cat(values_, std::make_tuple(wrap<Value, ::boost::is_lvalue_reference<Value>>(value)))
+                    std::tuple_cat(values_, std::make_tuple(wrap<Value, mpl::not_<::boost::is_lvalue_reference<Value>>>(value)))
                 )
                 , unwrap(std::get<0>(visitables_)) // getting Head element
             );
@@ -165,7 +165,7 @@ namespace detail { namespace variant {
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type) operator()(Value&& value) const
         {
             return do_call(
-                std::tuple_cat(values_, std::make_tuple(wrap<Value, ::boost::is_lvalue_reference<Value>>(value))),
+                std::tuple_cat(values_, std::make_tuple(wrap<Value, mpl::not_<::boost::is_lvalue_reference<Value>>>(value))),
                 make_index_sequence<sizeof...(Values) + 1>()
             );
         }
@@ -177,36 +177,34 @@ namespace detail { namespace variant {
     inline BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
         apply_visitor(const Visitor& visitor, T1&& v1, T2&& v2, T3&& v3, TN&&... vn)
     {
-        return ::boost::apply_visitor(
-            ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
+        return ::boost::apply_visitor(::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
                 std::make_tuple(
-                    ::boost::detail::variant::wrap<T2, ::boost::is_lvalue_reference<T2>>(v2),
-                    ::boost::detail::variant::wrap<T3, ::boost::is_lvalue_reference<T3>>(v3),
-                    ::boost::detail::variant::wrap<TN, ::boost::is_lvalue_reference<TN>>(vn)...
+                    ::boost::detail::variant::wrap<T2, mpl::not_<::boost::is_lvalue_reference<T2>>>(v2),
+                    ::boost::detail::variant::wrap<T3, mpl::not_<::boost::is_lvalue_reference<T3>>>(v3),
+                    ::boost::detail::variant::wrap<TN, mpl::not_<::boost::is_lvalue_reference<TN>>>(vn)...
                     ),
                 std::tuple<>()
-            ),
-            ::boost::forward<T1>(v1)
-        );
+                ),
+                ::boost::forward<T1>(v1)
+            );
     }
     
     template <class Visitor, class T1, class T2, class T3, class... TN>
     inline BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
         apply_visitor(Visitor& visitor, T1&& v1, T2&& v2, T3&& v3, TN&&... vn)
     {
-        return ::boost::apply_visitor(
-            ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
+        return ::boost::apply_visitor(::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
                 std::make_tuple(
-                    ::boost::detail::variant::wrap<T2, ::boost::is_lvalue_reference<T2>>(v2),
-                    ::boost::detail::variant::wrap<T3, ::boost::is_lvalue_reference<T3>>(v3),
-                    ::boost::detail::variant::wrap<TN, ::boost::is_lvalue_reference<TN>>(vn)...
+                    ::boost::detail::variant::wrap<T2, mpl::not_<::boost::is_lvalue_reference<T2>>>(v2),
+                    ::boost::detail::variant::wrap<T3, mpl::not_<::boost::is_lvalue_reference<T3>>>(v3),
+                    ::boost::detail::variant::wrap<TN, mpl::not_<::boost::is_lvalue_reference<TN>>>(vn)...
                     ),
                 std::tuple<>()
-            ),
-            ::boost::forward<T1>(v1)
-        );
+                ),
+                ::boost::forward<T1>(v1)
+            );
     }
 
 } // namespace boost
