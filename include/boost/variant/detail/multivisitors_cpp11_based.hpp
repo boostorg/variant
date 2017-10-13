@@ -19,6 +19,8 @@
 #include <boost/variant/detail/apply_visitor_unary.hpp>
 #include <boost/variant/variant_fwd.hpp> // for BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
 #include <boost/move/utility.hpp>
+#include <boost/type_traits/is_lvalue_reference.hpp>
+#include <boost/core/enable_if.hpp>
 
 #if defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) || defined(BOOST_NO_CXX11_HDR_TUPLE)
 #   error "This file requires <tuple> and variadic templates support"
@@ -177,7 +179,8 @@ namespace detail { namespace variant {
     inline BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
         apply_visitor(const Visitor& visitor, T1&& v1, T2&& v2, T3&& v3, TN&&... vn)
     {
-        return ::boost::apply_visitor(::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
+        return ::boost::apply_visitor(
+            ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
                 std::make_tuple(
                     ::boost::detail::variant::wrap<T2, mpl::not_<::boost::is_lvalue_reference<T2>>>(v2),
@@ -194,7 +197,8 @@ namespace detail { namespace variant {
     inline BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
         apply_visitor(Visitor& visitor, T1&& v1, T2&& v2, T3&& v3, TN&&... vn)
     {
-        return ::boost::apply_visitor(::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
+        return ::boost::apply_visitor(
+            ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
                 std::make_tuple(
                     ::boost::detail::variant::wrap<T2, mpl::not_<::boost::is_lvalue_reference<T2>>>(v2),
