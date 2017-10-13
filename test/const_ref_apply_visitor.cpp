@@ -81,10 +81,16 @@ struct lvalue_rvalue_detector : boost::static_visitor<std::string>
         return operator()(std::forward<T>(t)) + ", " + operator()(std::forward<V>(v));
     }
 
+    template <class T, class V, class P>
+    std::string operator()(T&& t, V&& v, P&& p) const
+    {
+        return operator()(std::forward<T>(t), std::forward<V>(v)) + ", " + operator()(std::forward<P>(p));
+    }
+
     template <class T, class V, class P, class S>
     std::string operator()(T&& t, V&& v, P&& p, S&& s) const
     {
-        return operator()(std::forward<T>(t), std::forward<V>(v)) + ", " + operator()(std::forward<P>(p), std::forward<S>(s));
+        return operator()(std::forward<T>(t), std::forward<V>(v), std::forward<P>(p)) + ", " + operator()(std::forward<S>(s));
     }
 #else
     template <class T>
@@ -178,6 +184,16 @@ void test_cpp14_visitor(const variant_type& test_var, const variant_type& test_v
             == "lvalue reference, lvalue reference");
 }
 
+void test_cpp14_visitor(const variant_type& test_var, const variant_type& test_var2, const variant_type& test_var3)
+{
+    std::cout << "Testing const lvalue visitable for c++14\n";
+
+    auto result = boost::apply_visitor([](auto&& v, auto&& t, auto&& p) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t), FORWARD(p)); },
+                test_var, test_var2, test_var3);
+    std::cout << "result: " << result << std::endl;
+    BOOST_CHECK(result == "lvalue reference, lvalue reference, lvalue reference");
+}
+
 void test_cpp14_visitor(variant_type&& test_var)
 {
     std::cout << "Testing rvalue visitable for c++14\n";
@@ -189,9 +205,18 @@ void test_cpp14_visitor(variant_type&& test_var, variant_type&& test_var2)
 {
     std::cout << "Testing rvalue visitable for c++14\n";
 
-    const auto expected_val = lcs(test_var) + '+' + lcs(test_var2);
     BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& vv) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(vv)); }, std::move(test_var), std::move(test_var2))
             == "rvalue reference, rvalue reference");
+}
+
+void test_cpp14_visitor(variant_type&& test_var, variant_type&& test_var2, variant_type&& test_var3)
+{
+    std::cout << "Testing rvalue visitable for c++14\n";
+
+    auto result = boost::apply_visitor([](auto&& v, auto&& t, auto&& p) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t), FORWARD(p)); },
+                std::move(test_var), std::move(test_var2), std::move(test_var3));
+    std::cout << "result: " << result << std::endl;
+    BOOST_CHECK(result == "rvalue reference, rvalue reference, rvalue reference");
 }
 
 #endif
@@ -223,11 +248,13 @@ void run_cpp14_tests()
 
     test_cpp14_visitor(v1);
     test_cpp14_visitor(v2, v3);
+    test_cpp14_visitor(v1, v2, v3);
 
     test_cpp14_visitor(boost::move(v1));
     test_cpp14_visitor(boost::move(v2), boost::move(v3));
 
-    //lambda visitors doesn't support multivisotors
+    variant_type vv1(100), vv2(200), vv3(300);
+    test_cpp14_visitor(boost::move(vv1), boost::move(vv2), boost::move(vv3));
 #endif
 }
 

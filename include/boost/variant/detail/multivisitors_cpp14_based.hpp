@@ -119,7 +119,7 @@ namespace detail { namespace variant {
                     ),
                 std::tuple<>()
             ),
-            v1
+            ::boost::forward<T1>(v1)
         );
     }
     
