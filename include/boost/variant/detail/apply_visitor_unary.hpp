@@ -167,41 +167,31 @@ struct result_wrapper1
     {}
 
     template <class T>
-    result_type operator()(T& val) const {
-        return visitor_(val);
+    result_type operator()(T&& val) const {
+        return visitor_(::boost::forward<T>(val));
     }
 };
 
 }} // namespace detail::variant
 
 template <typename Visitor, typename Visitable>
-inline decltype(auto) apply_visitor(Visitor& visitor,
-#ifdef USE_UNIVERSAL_REF
-        Visitable&& visitable,
-#else
-        Visitable& visitable,
-#endif
+inline decltype(auto) apply_visitor(Visitor& visitor, Visitable&& visitable,
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)
 {
     boost::detail::variant::result_wrapper1<Visitor, typename remove_reference<Visitable>::type> cpp14_vis(visitor);
-    return visitable.apply_visitor(cpp14_vis);
+    return ::boost::forward<Visitable>(visitable).apply_visitor(cpp14_vis);
 }
 
 template <typename Visitor, typename Visitable>
-inline decltype(auto) apply_visitor(const Visitor& visitor,
-#ifdef USE_UNIVERSAL_REF
-        Visitable&& visitable,
-#else
-        Visitable& visitable,
-#endif
+inline decltype(auto) apply_visitor(const Visitor& visitor, Visitable&& visitable,
     typename boost::disable_if<
         boost::detail::variant::has_result_type<Visitor>
     >::type* = 0)
 {
     boost::detail::variant::result_wrapper1<const Visitor, typename remove_reference<Visitable>::type> cpp14_vis(visitor);
-    return visitable.apply_visitor(cpp14_vis);
+    return ::boost::forward<Visitable>(visitable).apply_visitor(cpp14_vis);
 }
 
 

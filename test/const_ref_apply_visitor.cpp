@@ -161,26 +161,28 @@ void test_rvalue_parameter4(variant_type&& test_var, variant_type&& test_var2, v
 
 #ifndef BOOST_NO_CXX14_DECLTYPE_AUTO
 
+#define FORWARD(x) std::forward<decltype(x)>(x)
+
 void test_cpp14_visitor(const variant_type& test_var)
 {
     std::cout << "Testing const lvalue visitable for c++14\n";
 
-    BOOST_CHECK(boost::apply_visitor([](auto&& v) { return lcs(v); }, test_var) == lcs(test_var));
+    BOOST_CHECK(boost::apply_visitor([](auto&& v) { return lvalue_rvalue_detector()(FORWARD(v)); }, test_var) == "lvalue reference");
 }
 
 void test_cpp14_visitor(const variant_type& test_var, const variant_type& test_var2)
 {
     std::cout << "Testing const lvalue visitable for c++14\n";
 
-    BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& vv) { return lcs(v) + '+' + lcs(vv); }, test_var, test_var2) == lcs(test_var) + '+' + lcs(test_var2));
+    BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& vv) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(vv)); }, test_var, test_var2)
+            == "lvalue reference, lvalue reference");
 }
 
 void test_cpp14_visitor(variant_type&& test_var)
 {
     std::cout << "Testing rvalue visitable for c++14\n";
 
-    const auto expected_val = lcs(test_var);
-    BOOST_CHECK(boost::apply_visitor([](auto&& v) { return lcs(v); }, test_var) == expected_val);
+    BOOST_CHECK(boost::apply_visitor([](auto&& v) { return lvalue_rvalue_detector()(FORWARD(v)); }, std::move(test_var)) == "rvalue reference");
 }
 
 void test_cpp14_visitor(variant_type&& test_var, variant_type&& test_var2)
@@ -188,7 +190,8 @@ void test_cpp14_visitor(variant_type&& test_var, variant_type&& test_var2)
     std::cout << "Testing rvalue visitable for c++14\n";
 
     const auto expected_val = lcs(test_var) + '+' + lcs(test_var2);
-    BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& vv) { return lcs(v) + '+' + lcs(vv); }, std::move(test_var), std::move(test_var2)) == expected_val);
+    BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& vv) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(vv)); }, std::move(test_var), std::move(test_var2))
+            == "rvalue reference, rvalue reference");
 }
 
 #endif
