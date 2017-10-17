@@ -105,6 +105,12 @@ struct lvalue_rvalue_detector : boost::static_visitor<std::string>
         return "lvalue reference, lvalue reference";
     }
 
+    template <class T, class V, class P>
+    std::string operator()(T&, V&, P&) const
+    {
+        return "lvalue reference, lvalue reference, lvalue reference";
+    }
+
     template <class T, class V, class P, class S>
     std::string operator()(T&, V&, P&, S&) const
     {
@@ -131,12 +137,10 @@ void test_const_ref_parameter2(const variant_type& test_var, const variant_type&
 
 void test_const_ref_parameter4(const variant_type& test_var, const variant_type& test_var2, const variant_type& test_var3, const variant_type& test_var4)
 {
-#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
     std::cout << "Testing const lvalue reference visitable with multivisitor\n";
 
     BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), test_var, test_var2, test_var3, test_var4)
             == "lvalue reference, lvalue reference, lvalue reference, lvalue reference");
-#endif
 }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
@@ -231,10 +235,10 @@ void test_cpp14_visitor(variant_type&& test_var, variant_type&& test_var2, varia
 
 void run_const_lvalue_ref_tests()
 {
-        const variant_type v1(1), v2(2), v3(3), v4(4);
-        test_const_ref_parameter(v1);
-        test_const_ref_parameter2(v1, v2);
-        test_const_ref_parameter4(v1, v2, v3, v4);
+    const variant_type v1(1), v2(2), v3(3), v4(4);
+    test_const_ref_parameter(v1);
+    test_const_ref_parameter2(v1, v2);
+    test_const_ref_parameter4(v1, v2, v3, v4);
 }
 
 void run_rvalue_ref_tests()
@@ -246,6 +250,66 @@ void run_rvalue_ref_tests()
 
     variant_type vv1(100), vv2(200), vv3(300), vv4(400);
     test_rvalue_parameter4(boost::move(vv1), boost::move(vv2), boost::move(vv3), boost::move(vv4));
+#endif
+}
+
+void run_mixed_tests()
+{
+    variant_type v1(1), v2(2);
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    std::cout << "Testing lvalue + rvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), v1, variant_type(10)) == "lvalue reference, rvalue reference");
+
+    std::cout << "Testing rvalue + lvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), variant_type(10), v1) == "rvalue reference, lvalue reference");
+
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
+    std::cout << "Testing rvalue + lvalue + rvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), variant_type(10), v1, variant_type(20)) == "rvalue reference, lvalue reference, rvalue reference");
+
+    std::cout << "Testing lvalue + rvalue + lvalue + rvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), v1, variant_type(10), v2, variant_type(20)) == "lvalue reference, rvalue reference, lvalue reference, rvalue reference");
+#endif
+#else
+    std::cout << "Testing lvalue + rvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), v1, static_cast<const variant_type&>(variant_type(10))) == "lvalue reference, lvalue reference");
+
+    std::cout << "Testing rvalue + lvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), static_cast<const variant_type&>(variant_type(10)), v1) == "lvalue reference, lvalue reference");
+
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
+    std::cout << "Testing rvalue + lvalue + rvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), static_cast<const variant_type&>(variant_type(10)), v1, static_cast<const variant_type&>(variant_type(20))) == "lvalue reference, lvalue reference, lvalue reference");
+
+    std::cout << "Testing lvalue + rvalue + lvalue + rvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), v1, static_cast<const variant_type&>(variant_type(10)), v2, static_cast<const variant_type&>(variant_type(20))) == "lvalue reference, lvalue reference, lvalue reference, lvalue reference");
+#endif
+#endif
+}
+
+void run_cpp14_mixed_tests()
+{
+#ifndef BOOST_NO_CXX14_DECLTYPE_AUTO
+    variant_type v1(1), v2(2);
+
+    std::cout << "Testing lvalue + rvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& t) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t)); },
+                v1, variant_type(10)) == "lvalue reference, rvalue reference");
+
+    std::cout << "Testing rvalue + lvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& t) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t)); },
+                variant_type(10), v1) == "rvalue reference, lvalue reference");
+
+    std::cout << "Testing rvalue + lvalue + lvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& t, auto&& p) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t), FORWARD(p)); },
+                variant_type(10), v1, v2) == "rvalue reference, lvalue reference, lvalue reference");
+
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
+    std::cout << "Testing lvalue + rvalue + lvalue visitable\n";
+    BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& t, auto&& p) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t), FORWARD(p)); },
+                v1, variant_type(10), v2) == "lvalue reference, rvalue reference, lvalue reference");
+#endif
 #endif
 }
 
@@ -270,6 +334,8 @@ int test_main(int , char* [])
 {
     run_const_lvalue_ref_tests();
     run_rvalue_ref_tests();
+    run_mixed_tests();
+    run_cpp14_mixed_tests();
     run_cpp14_tests();
 
     return 0;
