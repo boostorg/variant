@@ -301,11 +301,11 @@ void run_cpp14_mixed_tests()
     BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& t) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t)); },
                 variant_type(10), v1) == "rvalue reference, lvalue reference");
 
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
     std::cout << "Testing rvalue + lvalue + lvalue visitable\n";
     BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& t, auto&& p) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t), FORWARD(p)); },
                 variant_type(10), v1, v2) == "rvalue reference, lvalue reference, lvalue reference");
 
-#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
     std::cout << "Testing lvalue + rvalue + lvalue visitable\n";
     BOOST_CHECK(boost::apply_visitor([](auto&& v, auto&& t, auto&& p) { return lvalue_rvalue_detector()(FORWARD(v), FORWARD(t), FORWARD(p)); },
                 v1, variant_type(10), v2) == "lvalue reference, rvalue reference, lvalue reference");
