@@ -44,16 +44,16 @@ namespace detail { namespace variant {
         : index_sequence<I...> 
     {};
 
-    template <typename T_, typename MoveSemantics_>
+    template <typename T_, bool MoveSemantics_>
     struct MoveableWrapper //Just a reference with some metadata
     {
         typedef T_ T;
-        typedef MoveSemantics_ MoveSemantics;
+        static constexpr bool MoveSemantics = MoveSemantics_;
 
         T& v;
     };
 
-    template <typename Tp, typename MoveSemantics>
+    template <typename Tp, bool MoveSemantics>
     MoveableWrapper<Tp, MoveSemantics>
         wrap(Tp& t)
     {
@@ -61,14 +61,14 @@ namespace detail { namespace variant {
     }
 
     template <typename Wrapper>
-    typename enable_if<typename Wrapper::MoveSemantics, typename Wrapper::T>::type
+    typename enable_if_c<Wrapper::MoveSemantics, typename Wrapper::T>::type
         unwrap(Wrapper& w)
     {
         return ::boost::move(w.v);
     }
 
     template <typename Wrapper>
-    typename disable_if<typename Wrapper::MoveSemantics, typename Wrapper::T>::type &
+    typename disable_if_c<Wrapper::MoveSemantics, typename Wrapper::T>::type &
         unwrap(Wrapper& w)
     {
         return w.v;
@@ -132,7 +132,7 @@ namespace detail { namespace variant {
                 make_one_by_one_visitor_and_value_referer(
                     visitor_,
                     tuple_tail(visitables_),
-                    std::tuple_cat(values_, std::make_tuple(wrap<Value, mpl::not_<::boost::is_lvalue_reference<Value>>>(value)))
+                    std::tuple_cat(values_, std::make_tuple(wrap<Value, ! ::boost::is_lvalue_reference<Value>::value>(value)))
                 )
                 , unwrap(std::get<0>(visitables_)) // getting Head element
             );
@@ -167,7 +167,7 @@ namespace detail { namespace variant {
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type) operator()(Value&& value) const
         {
             return do_call(
-                std::tuple_cat(values_, std::make_tuple(wrap<Value, mpl::not_<::boost::is_lvalue_reference<Value>>>(value))),
+                std::tuple_cat(values_, std::make_tuple(wrap<Value, ! ::boost::is_lvalue_reference<Value>::value>(value))),
                 make_index_sequence<sizeof...(Values) + 1>()
             );
         }
@@ -183,9 +183,9 @@ namespace detail { namespace variant {
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
                 std::make_tuple(
-                    ::boost::detail::variant::wrap<T2, mpl::not_<::boost::is_lvalue_reference<T2>>>(v2),
-                    ::boost::detail::variant::wrap<T3, mpl::not_<::boost::is_lvalue_reference<T3>>>(v3),
-                    ::boost::detail::variant::wrap<TN, mpl::not_<::boost::is_lvalue_reference<TN>>>(vn)...
+                    ::boost::detail::variant::wrap<T2, ! ::boost::is_lvalue_reference<T2>::value>(v2),
+                    ::boost::detail::variant::wrap<T3, ! ::boost::is_lvalue_reference<T3>::value>(v3),
+                    ::boost::detail::variant::wrap<TN, ! ::boost::is_lvalue_reference<TN>::value>(vn)...
                     ),
                 std::tuple<>()
                 ),
@@ -201,9 +201,9 @@ namespace detail { namespace variant {
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer(
                 visitor,
                 std::make_tuple(
-                    ::boost::detail::variant::wrap<T2, mpl::not_<::boost::is_lvalue_reference<T2>>>(v2),
-                    ::boost::detail::variant::wrap<T3, mpl::not_<::boost::is_lvalue_reference<T3>>>(v3),
-                    ::boost::detail::variant::wrap<TN, mpl::not_<::boost::is_lvalue_reference<TN>>>(vn)...
+                    ::boost::detail::variant::wrap<T2, ! ::boost::is_lvalue_reference<T2>::value>(v2),
+                    ::boost::detail::variant::wrap<T3, ! ::boost::is_lvalue_reference<T3>::value>(v3),
+                    ::boost::detail::variant::wrap<TN, ! ::boost::is_lvalue_reference<TN>::value>(vn)...
                     ),
                 std::tuple<>()
                 ),

@@ -1019,7 +1019,7 @@ struct less_comp
 //  * for wrappers (e.g., recursive_wrapper), the wrapper's held value.
 //  * for all other values, the value itself.
 //
-template <typename Visitor, typename MoveSemantics>
+template <typename Visitor, bool MoveSemantics>
 class invoke_visitor
 {
 private: // representation
@@ -1046,14 +1046,14 @@ public: // internal visitor interfaces
 
     //using workaround with is_same<T, T> to prenvent compilation error, because we need to use T in enable_if to make SFINAE work
     template <typename T>
-    typename enable_if<mpl::and_<MoveSemantics, is_same<T, T>>, result_type>::type internal_visit(T&& operand, int)
+    typename enable_if_c<MoveSemantics && is_same<T, T>::value, result_type>::type internal_visit(T&& operand, int)
     {
         return visitor_(::boost::move<T>(operand));
     }
 
     //using workaround with is_same<T, T> to prenvent compilation error, because we need to use T in enable_if to make SFINAE work
     template <typename T>
-    typename disable_if<mpl::and_<MoveSemantics, is_same<T, T>>, result_type>::type internal_visit(T&& operand, int)
+    typename disable_if_c<MoveSemantics && is_same<T, T>::value, result_type>::type internal_visit(T&& operand, int)
     {
         return visitor_(operand);
     }
@@ -1084,7 +1084,7 @@ private: // helpers, for internal visitor interfaces (below)
 
     //using workaround with is_same<T, T> to prenvent compilation error, because we need to use T in enable_if to make SFINAE work
     template <typename T>
-        typename enable_if<mpl::and_<MoveSemantics, is_same<T, T>>, BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)>::type
+        typename enable_if<mpl::and_<MoveSemantics && is_same<T, T>::value>, BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)>::type
     visit_impl(T&& operand, mpl::false_)
     {
         return visitor_(::boost::move(operand));
@@ -1092,7 +1092,7 @@ private: // helpers, for internal visitor interfaces (below)
 
     //using workaround with is_same<T, T> to prenvent compilation error, because we need to use T in enable_if to make SFINAE work
     template <typename T>
-        typename enable_if<mpl::and_<MoveSemantics, is_same<T, T>>, BOOST_VARIANT_AUX_RETURN_VOID_TYPE>::type
+        typename enable_if_c<MoveSemantics && is_same<T, T>::value, BOOST_VARIANT_AUX_RETURN_VOID_TYPE>::type
     visit_impl(T&& operand, mpl::true_)
     {
         visitor_(::boost::move(operand));
@@ -1101,7 +1101,7 @@ private: // helpers, for internal visitor interfaces (below)
 
     //using workaround with is_same<T, T> to prenvent compilation error, because we need to use T in enable_if to make SFINAE work
     template <typename T>
-        typename disable_if<mpl::and_<MoveSemantics, is_same<T, T>>, BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)>::type
+        typename disable_if_c<MoveSemantics && is_same<T, T>::value, BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)>::type
     visit_impl(T&& operand, mpl::false_)
     {
         return visitor_(operand);
@@ -1109,7 +1109,7 @@ private: // helpers, for internal visitor interfaces (below)
 
     //using workaround with is_same<T, T> to prenvent compilation error, because we need to use T in enable_if to make SFINAE work
     template <typename T>
-        typename disable_if<mpl::and_<MoveSemantics, is_same<T, T>>, BOOST_VARIANT_AUX_RETURN_VOID_TYPE>::type
+        typename disable_if<MoveSemantics && is_same<T, T>::value, BOOST_VARIANT_AUX_RETURN_VOID_TYPE>::type
     visit_impl(T&& operand, mpl::true_)
     {
         visitor_(operand);
@@ -2489,7 +2489,7 @@ public: // visitation support
             )
     apply_visitor(Visitor& visitor) &&
     {
-        detail::variant::invoke_visitor<Visitor, ::boost::true_type> invoker(visitor);
+        detail::variant::invoke_visitor<Visitor, true> invoker(visitor);
         return this->internal_apply_visitor(invoker);
     }
 
@@ -2499,7 +2499,7 @@ public: // visitation support
             )
     apply_visitor(Visitor& visitor) const&&
     {
-        detail::variant::invoke_visitor<Visitor, ::boost::true_type> invoker(visitor);
+        detail::variant::invoke_visitor<Visitor, true> invoker(visitor);
         return this->internal_apply_visitor(invoker);
     }
 
@@ -2514,7 +2514,7 @@ public: // visitation support
     &
 #endif
     {
-        detail::variant::invoke_visitor<Visitor, ::boost::false_type> invoker(visitor);
+        detail::variant::invoke_visitor<Visitor, false> invoker(visitor);
         return this->internal_apply_visitor(invoker);
     }
 
@@ -2527,7 +2527,7 @@ public: // visitation support
     &
 #endif
     {
-        detail::variant::invoke_visitor<Visitor, ::boost::false_type> invoker(visitor);
+        detail::variant::invoke_visitor<Visitor, false> invoker(visitor);
         return this->internal_apply_visitor(invoker);
     }
 

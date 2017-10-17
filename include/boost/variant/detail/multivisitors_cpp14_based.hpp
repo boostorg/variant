@@ -62,7 +62,7 @@ namespace detail { namespace variant {
                 make_one_by_one_visitor_and_value_referer_cpp14(
                     visitor_,
                     tuple_tail(visitables_),
-                    std::tuple_cat(values_, std::make_tuple(wrap<Value, mpl::not_<::boost::is_lvalue_reference<Value>>>(value)))
+                    std::tuple_cat(values_, std::make_tuple(wrap<Value, ! ::boost::is_lvalue_reference<Value>::value>(value)))
                 )
                 , unwrap(std::get<0>(visitables_)) // getting Head element
             );
@@ -95,7 +95,7 @@ namespace detail { namespace variant {
         decltype(auto) operator()(Value&& value) const
         {
             return do_call(
-                std::tuple_cat(values_, std::make_tuple(wrap<Value, mpl::not_<::boost::is_lvalue_reference<Value>>>(value))),
+                std::tuple_cat(values_, std::make_tuple(wrap<Value, ! ::boost::is_lvalue_reference<Value>::value>(value))),
                 make_index_sequence<sizeof...(Values) + 1>()
             );
         }
@@ -113,9 +113,9 @@ namespace detail { namespace variant {
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer_cpp14(
                 visitor,
                 std::make_tuple(
-                    ::boost::detail::variant::wrap<T2, mpl::not_<::boost::is_lvalue_reference<T2>>>(v2),
-                    ::boost::detail::variant::wrap<T3, mpl::not_<::boost::is_lvalue_reference<T3>>>(v3),
-                    ::boost::detail::variant::wrap<TN, mpl::not_<::boost::is_lvalue_reference<TN>>>(vn)...
+                    ::boost::detail::variant::wrap<T2, ! ::boost::is_lvalue_reference<T2>::value>(v2),
+                    ::boost::detail::variant::wrap<T3, ! ::boost::is_lvalue_reference<T3>::value>(v3),
+                    ::boost::detail::variant::wrap<TN, ! ::boost::is_lvalue_reference<TN>::value>(vn)...
                     ),
                 std::tuple<>()
             ),
@@ -134,9 +134,9 @@ namespace detail { namespace variant {
             ::boost::detail::variant::make_one_by_one_visitor_and_value_referer_cpp14(
                 visitor,
                 std::make_tuple(
-                    ::boost::detail::variant::wrap<T2, mpl::not_<::boost::is_lvalue_reference<T2>>>(v2),
-                    ::boost::detail::variant::wrap<T3, mpl::not_<::boost::is_lvalue_reference<T3>>>(v3),
-                    ::boost::detail::variant::wrap<TN, mpl::not_<::boost::is_lvalue_reference<TN>>>(vn)...
+                    ::boost::detail::variant::wrap<T2, ! ::boost::is_lvalue_reference<T2>::value>(v2),
+                    ::boost::detail::variant::wrap<T3, ! ::boost::is_lvalue_reference<T3>::value>(v3),
+                    ::boost::detail::variant::wrap<TN, ! ::boost::is_lvalue_reference<TN>::value>(vn)...
                     ),
                 std::tuple<>()
             ),

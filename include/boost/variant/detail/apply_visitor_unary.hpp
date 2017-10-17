@@ -65,10 +65,6 @@ namespace boost {
 #endif // EDG-based compilers workaround
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-#   define USE_UNIVERSAL_REF
-#endif
-
-#ifdef USE_UNIVERSAL_REF
 template <typename Visitor, typename Visitable>
 inline
     BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(Visitor)
@@ -92,7 +88,7 @@ apply_visitor(Visitor& visitor, Visitable& visitable)
 // const-visitor version:
 //
 
-#ifdef USE_UNIVERSAL_REF
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 template <typename Visitor, typename Visitable>
 inline
     BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
@@ -109,8 +105,6 @@ apply_visitor(const Visitor& visitor, Visitable& visitable)
     return visitable.apply_visitor(visitor);
 }
 #endif
-
-#undef USE_UNIVERSAL_REF
 
 
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
