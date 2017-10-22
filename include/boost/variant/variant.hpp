@@ -2481,7 +2481,7 @@ public:
 
 public: // visitation support
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_REF_QUALIFIERS
 
     template <typename Visitor>
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(
@@ -2510,7 +2510,7 @@ public: // visitation support
               typename Visitor::result_type
             )
     apply_visitor(Visitor& visitor)
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_REF_QUALIFIERS
     &
 #endif
     {
@@ -2523,7 +2523,7 @@ public: // visitation support
               typename Visitor::result_type
             )
     apply_visitor(Visitor& visitor) const
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_REF_QUALIFIERS
     &
 #endif
     {

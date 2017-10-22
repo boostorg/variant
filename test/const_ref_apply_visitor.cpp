@@ -1,3 +1,9 @@
+// Copyright (c) 2017 
+//
+// Distributed under the Boost Software License, Version 1.0. (See
+// accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
 #include "boost/config.hpp"
 
 #include "boost/test/minimal.hpp"
@@ -143,7 +149,7 @@ void test_const_ref_parameter4(const variant_type& test_var, const variant_type&
             == "lvalue reference, lvalue reference, lvalue reference, lvalue reference");
 }
 
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_NO_CXX11_REF_QUALIFIERS)
 
 void test_rvalue_parameter(variant_type&& test_var)
 {
@@ -243,7 +249,7 @@ void run_const_lvalue_ref_tests()
 
 void run_rvalue_ref_tests()
 {
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_NO_CXX11_REF_QUALIFIERS)
     variant_type v1(10), v2(20), v3(30);
     test_rvalue_parameter(boost::move(v1));
     test_rvalue_parameter2(boost::move(v2), boost::move(v3));
@@ -258,6 +264,7 @@ void run_mixed_tests()
     variant_type v1(1), v2(2);
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_REF_QUALIFIERS
     std::cout << "Testing lvalue + rvalue visitable\n";
     BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), v1, variant_type(10)) == "lvalue reference, rvalue reference");
 
@@ -271,9 +278,12 @@ void run_mixed_tests()
     std::cout << "Testing lvalue + rvalue + lvalue + rvalue visitable\n";
     BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), v1, variant_type(10), v2, variant_type(20)) == "lvalue reference, rvalue reference, lvalue reference, rvalue reference");
 #endif
-#else
+
+#endif // #ifndef BOOST_NO_CXX11_REF_QUALIFIERS
+
+#else // #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     std::cout << "Testing lvalue + rvalue visitable\n";
-    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), v1, static_cast<const variant_type&>(variant_type(10))) == "lvalue reference, lvalue reference");
+    BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), v1, v1) == "lvalue reference, lvalue reference");
 
     std::cout << "Testing rvalue + lvalue visitable\n";
     BOOST_CHECK(boost::apply_visitor(lvalue_rvalue_detector(), static_cast<const variant_type&>(variant_type(10)), v1) == "lvalue reference, lvalue reference");
@@ -329,6 +339,8 @@ void run_cpp14_tests()
     test_cpp14_visitor(boost::move(vv1), boost::move(vv2), boost::move(vv3));
 #endif
 }
+
+
 
 int test_main(int , char* [])
 {

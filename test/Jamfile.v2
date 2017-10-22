@@ -31,6 +31,7 @@ test-suite variant
     [ run variant_visit_test.cpp ]
     [ run variant_get_test.cpp ]
     [ compile-fail variant_rvalue_get_with_ampersand_test.cpp ]
+    [ compile-fail no_rvalue_to_nonconst_visitation.cpp ]
     [ run variant_polymorphic_get_test.cpp ]
     [ run variant_multivisit_test.cpp ]
     [ run hash_variant_test.cpp ]
