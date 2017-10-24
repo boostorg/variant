@@ -4,7 +4,7 @@
 //-----------------------------------------------------------------------------
 //
 // Copyright (c) 2002-2003 Eric Friedman
-// Copyright (c) 2014 Antony Polukhin
+// Copyright (c) 2014-2017 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -19,12 +19,12 @@
 
 #include <boost/variant/detail/apply_visitor_unary.hpp>
 
-#if BOOST_WORKAROUND(__EDG__, BOOST_TESTED_AT(302))
 #include <boost/utility/enable_if.hpp>
+
+#if BOOST_WORKAROUND(__EDG__, BOOST_TESTED_AT(302))
 #include <boost/mpl/not.hpp>
 #include <boost/type_traits/is_const.hpp>
 #endif
-
 
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
 #   include <boost/variant/detail/has_result_type.hpp>
