@@ -19,8 +19,8 @@ int main() {
         boost::variant<int, std::string>("Hello")
     );
 
-#if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && defined(BOOST_MSVC)
-#   error Temporaries could bind to non-const lvalues on old MSVC compilers
+#ifdef BOOST_MSVC
+#   error Temporaries/rvalues could bind to non-const lvalues on MSVC compilers
 #endif
 
     return 0;

@@ -1,4 +1,4 @@
-// Copyright (c) 2017 
+// Copyright (c) 2017 Levon Tarakchyan
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -16,35 +16,35 @@
 
 struct construction_logger
 {
-    int _val;
+    int val_;
 
-    construction_logger(int val) : _val(val)
+    construction_logger(int val) : val_(val)
     {
-        std::cout << _val << " constructed\n";
+        std::cout << val_ << " constructed\n";
     }
 
     construction_logger(const construction_logger& cl) :
-        _val(cl._val)
+        val_(cl.val_)
     {
-        std::cout << _val << " copy constructed\n";
+        std::cout << val_ << " copy constructed\n";
     }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     construction_logger(construction_logger&& cl) :
-        _val(cl._val)
+        val_(cl.val_)
     {
-        std::cout << _val << " move constructed\n";
+        std::cout << val_ << " move constructed\n";
     }
 #endif
 
     friend std::ostream& operator << (std::ostream& os, const construction_logger& cl)
     {
-        return os << cl._val;
+        return os << cl.val_;
     }
 
     friend std::istream& operator << (std::istream& is, construction_logger& cl)
     {
-        return is >> cl._val;
+        return is >> cl.val_;
     }
 };
 
