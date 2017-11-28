@@ -31,6 +31,7 @@
 #endif
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#   include <boost/type_traits/is_lvalue_reference.hpp>
 #   include <boost/type_traits/is_same.hpp>
 #   include <boost/move/move.hpp>
 #   include <boost/move/utility.hpp>
