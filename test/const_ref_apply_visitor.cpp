@@ -190,6 +190,13 @@ void test_cpp14_visitor(const variant_type& test_var)
     BOOST_CHECK(boost::apply_visitor([](auto&& v) { return lvalue_rvalue_detector()(FORWARD(v)); }, test_var) == "lvalue reference");
 }
 
+void test_cpp14_mutable_visitor(const variant_type& test_var)
+{
+    std::cout << "Testing const lvalue visitable for c++14 with inline mutable lambda\n";
+
+    BOOST_CHECK(boost::apply_visitor([](auto&& v) mutable -> auto { return lvalue_rvalue_detector()(FORWARD(v)); }, test_var) == "lvalue reference");
+}
+
 void test_cpp14_visitor(const variant_type& test_var, const variant_type& test_var2)
 {
     std::cout << "Testing const lvalue visitable for c++14\n";
@@ -329,6 +336,7 @@ void run_cpp14_tests()
     variant_type v1(10), v2(20), v3(30);
 
     test_cpp14_visitor(v1);
+    test_cpp14_mutable_visitor(v1);
     test_cpp14_visitor(v2, v3);
     test_cpp14_visitor(v1, v2, v3);
 
