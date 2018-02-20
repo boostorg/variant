@@ -145,7 +145,31 @@ struct substitute<
           Ts, Dest, Source
         >::type...> type;
 };
-#endif // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
+
+//
+// function specializations
+//
+template <
+      typename R
+    , typename... A
+    , typename Dest
+    , typename Source
+      BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(typename Arity)
+    >
+struct substitute<
+      R (*)(A...)
+    , Dest
+    , Source
+      BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(mpl::int_<-1>)
+    >
+{
+private:
+    typedef typename substitute< R, Dest, Source >::type r;
+
+public:
+    typedef r (*type)(A...);
+};
+#else
 
 #define BOOST_VARIANT_AUX_SUBSTITUTE_TYPEDEF_IMPL(N) \
     typedef typename substitute< \
@@ -164,6 +188,7 @@ struct substitute<
 #undef BOOST_VARIANT_AUX_SUBSTITUTE_TYPEDEF_IMPL
 #undef BOOST_VARIANT_AUX_SUBSTITUTE_TYPEDEF
 
+#endif // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 #endif // !defined(BOOST_VARIANT_DETAIL_NO_SUBSTITUTE)
 
 }} // namespace detail::variant
