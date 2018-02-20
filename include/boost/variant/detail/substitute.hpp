@@ -154,7 +154,6 @@ template <
     , typename... A
     , typename Dest
     , typename Source
-      BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(typename Arity)
     >
 struct substitute<
       R (*)(A...)
