@@ -166,7 +166,9 @@ private:
     typedef typename substitute< R, Dest, Source >::type r;
 
 public:
-    typedef r (*type)(A...);
+    typedef r (*type)(typename substitute<
+          A, Dest, Source
+        >::type...);
 };
 #else
 

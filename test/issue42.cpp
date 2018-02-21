@@ -25,7 +25,8 @@
     typedef std::shared_ptr<boost::recursive_variant_> ptr_t;
 #endif
 
-
+template <class F>
+class func{};
 
 int main() {
     typedef boost::make_recursive_variant<
@@ -36,6 +37,7 @@ int main() {
     node x = 1;
     (void)x;
 
+
     typedef boost::make_recursive_variant<
         std::string, int, double, bool,
         ptr_t,
@@ -45,4 +47,15 @@ int main() {
 
     node2 x2 = 1;
     (void)x2;
+
+
+    typedef boost::make_recursive_variant<
+        int,
+        func<boost::recursive_variant_(*)(boost::recursive_variant_&, const boost::recursive_variant_&)>,
+        boost::recursive_variant_&(*)(boost::recursive_variant_, boost::recursive_variant_*),
+        ptr_t
+    >::type node3;
+
+    node3 x3 = func<node3(*)(node3&, const node3&)>();
+    (void)x3;
 }
