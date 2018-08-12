@@ -4,7 +4,7 @@
 //-----------------------------------------------------------------------------
 //
 // Copyright (c) 2002-2003 Eric Friedman, Itay Maman
-// Copyright (c) 2012-2018 Antony Polukhin
+// Copyright (c) 2012-2016 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -32,7 +32,6 @@
 #include <boost/variant/detail/over_sequence.hpp>
 #include <boost/variant/detail/visitation_impl.hpp>
 #include <boost/variant/detail/hash_variant.hpp>
-#include <boost/variant/detail/std_hash.hpp>
 
 #include <boost/variant/detail/generic_result_type.hpp>
 #include <boost/variant/detail/move.hpp>

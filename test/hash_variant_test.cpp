@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2018
+// Copyright (c) 2011-2014
 // Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
@@ -6,25 +6,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "boost/test/minimal.hpp"
-#include "boost/config.hpp"
 #include "boost/variant.hpp"
 #include "boost/functional/hash/hash.hpp"
-
-#if !defined(BOOST_NO_CXX11_HDR_UNORDERED_SET) && !defined(BOOST_VARIANT_DO_NOT_SPECIALIZE_STD_HASH)
-
-#include <unordered_set>
-
-void test_std_hash() {
-    std::unordered_set<variant<int, bool> > us;
-    us.insert(1);
-    us.insert(true);
-    BOOST_CHECK(is.size() == 2);
-}
-
-#else
-void test_std_hash() {}
-#endif
-
 
 void run()
 {
@@ -50,7 +33,6 @@ void run()
 int test_main(int , char* [])
 {
    run();
-   test_std_hash();
    return 0;
 }
 

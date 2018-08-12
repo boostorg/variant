@@ -140,13 +140,6 @@
     </description>
   </macro>
 
-  <macro name="BOOST_VARIANT_DO_NOT_SPECIALIZE_STD_HASH">
-    <purpose>
-      <simpara>Define this macro if you do not with to have a <code><classname>std::hash</classname></code> specialization for
-      <code><classname>boost::variant</classname></code>.</simpara>
-    </purpose>
-  </macro>
-
   <macro name="BOOST_VARIANT_NO_FULL_RECURSIVE_VARIANT_SUPPORT">
     <purpose>
       <simpara>Indicates
