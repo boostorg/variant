@@ -121,39 +121,27 @@ struct result_multideduce1 {
         begin_it, boost::mpl::int_<boost::mpl::size<types>::type::value - 1>
     >::type                                         last_it;
 
-    // For metaprogramming purposes ONLY! Do not use this method (and class) at runtime!
-    static Visitor& vis() BOOST_NOEXCEPT {
-        // Functions that work with lambdas must be defined in same translation unit.
-        // Because of that, we can not use `boost::decval<Visitor&>()` here.
-        Visitor&(*f)() = 0; // pointer to function
-        return f();
-    }
-
-    static decltype(auto) deduce_impl(last_it, unsigned /*helper*/) {
-        typedef typename boost::mpl::deref<last_it>::type value_t;
-        return vis()( boost::declval< value_t& >() );
-    }
-
-    template <class It>
-    static decltype(auto) deduce_impl(It, unsigned helper) {
+    template <class It, class Dummy = void> // avoid explicit specialization in class scope
+    struct deduce_impl {
         typedef typename boost::mpl::next<It>::type next_t;
         typedef typename boost::mpl::deref<It>::type value_t;
-        if (helper == boost::mpl::distance<begin_it, It>::type::value) {
-            return deduce_impl(next_t(), ++helper);
-        }
+        typedef decltype(true ? boost::declval< Visitor& >()( boost::declval< value_t& >() )
+                              : boost::declval< typename deduce_impl<next_t>::type >()) type;
+    };
 
-        return vis()( boost::declval< value_t& >() );
-    }
+    template <class Dummy>
+    struct deduce_impl<last_it, Dummy> {
+        typedef typename boost::mpl::deref<last_it>::type value_t;
+        typedef decltype(boost::declval< Visitor& >()( boost::declval< value_t& >() )) type;
+    };
 
-    static decltype(auto) deduce() {
-        return deduce_impl(begin_it(), 0);
-    }
+    typedef typename deduce_impl<begin_it>::type type;
 };
 
 template <class Visitor, class Variant>
 struct result_wrapper1
 {
-    typedef decltype(result_multideduce1<Visitor, Variant>::deduce()) result_type;
+    typedef typename result_multideduce1<Visitor, Variant>::type result_type;
 
     Visitor&& visitor_;
     explicit result_wrapper1(Visitor&& visitor) BOOST_NOEXCEPT
