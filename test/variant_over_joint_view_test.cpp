@@ -11,7 +11,7 @@
 #include <string>
 
 #include "boost/config.hpp"
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 
 #include "boost/variant.hpp"
 #include "boost/mpl/joint_view.hpp"
@@ -22,9 +22,9 @@ template<class T, class Variant>
 void check_exception_on_get(Variant& v) {
     try {
         boost::get<T>(v);
-        BOOST_FAIL("Expected exception boost::bad_get, but got nothing.");
+        BOOST_ERROR("Expected exception boost::bad_get, but got nothing.");
     } catch (boost::bad_get&) { //okay it is expected behaviour
-    } catch (...) { BOOST_FAIL("Expected exception boost::bad_get, but got something else."); }
+    } catch (...) { BOOST_ERROR("Expected exception boost::bad_get, but got something else."); }
 }
 
 void test_joint_view() {
@@ -35,11 +35,11 @@ void test_joint_view() {
     v1 a = 1;
     v2 b = "2";
     v3 c = a;
-    BOOST_CHECK(boost::get<int>(c) == 1);
-    BOOST_CHECK(c.which() == 0);
+    BOOST_TEST(boost::get<int>(c) == 1);
+    BOOST_TEST(c.which() == 0);
     v3 d = b;
-    BOOST_CHECK(boost::get<std::string>(d) == "2");
-    BOOST_CHECK(d.which() == 1);
+    BOOST_TEST(boost::get<std::string>(d) == "2");
+    BOOST_TEST(d.which() == 1);
     check_exception_on_get<std::string>(c);
     check_exception_on_get<int>(d);
 }
@@ -49,16 +49,16 @@ void test_set() {
     typedef boost::make_variant_over< types >::type v;
 
     v a = 1;
-    BOOST_CHECK(boost::get<int>(a) == 1);
+    BOOST_TEST(boost::get<int>(a) == 1);
     check_exception_on_get<std::string>(a);
     a = "2";
-    BOOST_CHECK(boost::get<std::string>(a) == "2");
+    BOOST_TEST(boost::get<std::string>(a) == "2");
     check_exception_on_get<int>(a);
 }
 
-int test_main(int , char* [])
+int main()
 {
     test_joint_view();
     test_set();
-    return 0;
+    return boost::report_errors();
 }

@@ -10,7 +10,7 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include "boost/variant.hpp"
 
 #include <iostream>
@@ -113,7 +113,7 @@ struct Calculator : boost::static_visitor<int>
 /////////////////////////////////////////////////////////////////////
 
 
-int test_main(int, char* [])
+int main()
 {
 
    int n = 13;
@@ -122,13 +122,13 @@ int test_main(int, char* [])
    std::ostringstream e1_str;
    e1_str << e1;
 
-   BOOST_CHECK(e1.type() == boost::typeindex::type_id<Add>());
-   BOOST_CHECK(e1_str.str() == "(13+((40+2)-(10+4)))");
+   BOOST_TEST(e1.type() == boost::typeindex::type_id<Add>());
+   BOOST_TEST(e1_str.str() == "(13+((40+2)-(10+4)))");
 
    //Evaluate expression
    int res = boost::apply_visitor(Calculator(), e1);
-   BOOST_CHECK(res == n + 28);
+   BOOST_TEST(res == n + 28);
 
-   return 0;
+   return boost::report_errors();
 }
 

@@ -13,7 +13,7 @@
 #include "boost/variant/variant.hpp"
 #include "boost/variant/apply_visitor.hpp"
 #include "boost/variant/static_visitor.hpp"
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 
 #include "boost/mpl/bool.hpp"
 #include "boost/mpl/and.hpp"
@@ -70,14 +70,14 @@ inline void unary_test(Variant& var, Checker* = 0)
 
     // standard tests
 
-    BOOST_CHECK( boost::apply_visitor(checker, var) );
-    BOOST_CHECK( boost::apply_visitor(const_checker, var) );
-    BOOST_CHECK( boost::apply_visitor(Checker(), var) );
+    BOOST_TEST( boost::apply_visitor(checker, var) );
+    BOOST_TEST( boost::apply_visitor(const_checker, var) );
+    BOOST_TEST( boost::apply_visitor(Checker(), var) );
 
     // delayed tests
 
-    BOOST_CHECK( boost::apply_visitor(checker)(var) );
-    BOOST_CHECK( boost::apply_visitor(const_checker)(var) );
+    BOOST_TEST( boost::apply_visitor(checker)(var) );
+    BOOST_TEST( boost::apply_visitor(const_checker)(var) );
 }
 
 template <typename Checker, typename Variant1, typename Variant2>
@@ -88,17 +88,17 @@ inline void binary_test(Variant1& var1, Variant2& var2, Checker* = 0)
 
     // standard tests
 
-    BOOST_CHECK( boost::apply_visitor(checker, var1, var2) );
-    BOOST_CHECK( boost::apply_visitor(const_checker, var1, var2) );
-    BOOST_CHECK( boost::apply_visitor(Checker(), var1, var2) );
+    BOOST_TEST( boost::apply_visitor(checker, var1, var2) );
+    BOOST_TEST( boost::apply_visitor(const_checker, var1, var2) );
+    BOOST_TEST( boost::apply_visitor(Checker(), var1, var2) );
 
     // delayed tests
 
-    BOOST_CHECK( boost::apply_visitor(checker)(var1, var2) );
-    BOOST_CHECK( boost::apply_visitor(const_checker)(var1, var2) );
+    BOOST_TEST( boost::apply_visitor(checker)(var1, var2) );
+    BOOST_TEST( boost::apply_visitor(const_checker)(var1, var2) );
 }
 
-int test_main(int , char* [])
+int main()
 {
     typedef boost::variant<udt1,udt2> var_t;
     udt1 u1;
@@ -139,5 +139,5 @@ int test_main(int , char* [])
     binary_test< check21_t       >(var2,var1);
     binary_test< check21_const_t >(cvar2,cvar1);
 
-    return boost::exit_success;
+    return boost::report_errors();
 }

@@ -16,7 +16,7 @@
 #pragma warning(disable:4244) // conversion from 'const int' to 'const short'
 #endif
 
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include "boost/variant.hpp"
 
 #include "jobs.h"
@@ -32,7 +32,7 @@ typedef variant<std::string, class_a, short> var_type_2;
 
 #include "class_a.h"
 
-int test_main(int , char* [])
+int main()
 {
    using namespace boost;
 
@@ -53,5 +53,5 @@ int test_main(int , char* [])
    v2 = 5;
    v1 = v2;
 
-   return boost::exit_success;
+   return boost::report_errors();
 }

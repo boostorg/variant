@@ -11,7 +11,7 @@
 
 #include "boost/variant/get.hpp"
 #include "boost/variant/variant.hpp"
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 
 #include <boost/move/move.hpp>
 #include <boost/static_assert.hpp>
@@ -36,8 +36,8 @@ inline void run()
 #endif
 }
 
-int test_main(int /*argc*/, char* /*argv*/ [])
+int main()
 {
     run();
-    return boost::exit_success;
+    return boost::report_errors();
 }

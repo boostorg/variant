@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2012-2014 Antony Polukhin
+// Copyright (c) 2012-2018 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -11,7 +11,7 @@
 
 #include "boost/config.hpp"
 
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include "boost/variant.hpp"
 #include "boost/type_traits/is_nothrow_move_assignable.hpp"
 #include "boost/mpl/bool.hpp"
@@ -84,23 +84,23 @@ void run()
 
 void run1()
 {
-    BOOST_CHECK(true);
+    BOOST_TEST(true);
 }
 
 void run_move_only()
 {
-    BOOST_CHECK(true);
+    BOOST_TEST(true);
 }
 
 void run_moves_are_noexcept()
 {
-    BOOST_CHECK(true);
+    BOOST_TEST(true);
 }
 
 
 void run_const_rvalues()
 {
-    BOOST_CHECK(true);
+    BOOST_TEST(true);
 }
 
 
@@ -113,12 +113,12 @@ void run()
     variant_I_type v1, v2;
     
     // Assuring that `move_copy_conting_class` was not created
-    BOOST_CHECK(move_copy_conting_class::copy_count == 0);
-    BOOST_CHECK(move_copy_conting_class::moves_count == 0);
+    BOOST_TEST(move_copy_conting_class::copy_count == 0);
+    BOOST_TEST(move_copy_conting_class::moves_count == 0);
     
     v1 = move_copy_conting_class();
     // Assuring that `move_copy_conting_class` was moved at least once
-    BOOST_CHECK(move_copy_conting_class::moves_count != 0);
+    BOOST_TEST(move_copy_conting_class::moves_count != 0);
     
     unsigned int total_count = move_copy_conting_class::moves_count + move_copy_conting_class::copy_count;
     move_copy_conting_class var;
@@ -127,28 +127,28 @@ void run()
     move_copy_conting_class::copy_count = 0;
     v1 = var;
     // Assuring that move assignment operator moves/copyes value not more times than copy assignment operator
-    BOOST_CHECK(total_count <= move_copy_conting_class::moves_count + move_copy_conting_class::copy_count);
+    BOOST_TEST(total_count <= move_copy_conting_class::moves_count + move_copy_conting_class::copy_count);
 
     move_copy_conting_class::moves_count = 0;
     move_copy_conting_class::copy_count = 0;
     v2 = boost::move(v1);
     // Assuring that `move_copy_conting_class` in v1 was moved at least once and was not copied
-    BOOST_CHECK(move_copy_conting_class::moves_count != 0);
-    BOOST_CHECK(move_copy_conting_class::copy_count == 0);
+    BOOST_TEST(move_copy_conting_class::moves_count != 0);
+    BOOST_TEST(move_copy_conting_class::copy_count == 0);
 
     v1 = move_copy_conting_class();
     move_copy_conting_class::moves_count = 0;
     move_copy_conting_class::copy_count = 0;
     v2 = boost::move(v1);
     // Assuring that `move_copy_conting_class` in v1 was moved at least once and was not copied
-    BOOST_CHECK(move_copy_conting_class::moves_count != 0);
-    BOOST_CHECK(move_copy_conting_class::copy_count == 0);
+    BOOST_TEST(move_copy_conting_class::moves_count != 0);
+    BOOST_TEST(move_copy_conting_class::copy_count == 0);
     total_count = move_copy_conting_class::moves_count + move_copy_conting_class::copy_count;
     move_copy_conting_class::moves_count = 0;
     move_copy_conting_class::copy_count = 0;
     v1 = v2;
     // Assuring that move assignment operator moves/copyes value not more times than copy assignment operator
-    BOOST_CHECK(total_count <= move_copy_conting_class::moves_count + move_copy_conting_class::copy_count);
+    BOOST_TEST(total_count <= move_copy_conting_class::moves_count + move_copy_conting_class::copy_count);
 
 
     typedef boost::variant<move_copy_conting_class, int> variant_II_type;
@@ -157,27 +157,27 @@ void run()
     move_copy_conting_class::copy_count = 0;
     v1 = boost::move(v3);
     // Assuring that `move_copy_conting_class` in v3 was moved at least once (v1 and v3 have different types)
-    BOOST_CHECK(move_copy_conting_class::moves_count != 0);
+    BOOST_TEST(move_copy_conting_class::moves_count != 0);
 
     move_copy_conting_class::moves_count = 0;
     move_copy_conting_class::copy_count = 0;
     v2 = boost::move(v1);
     // Assuring that `move_copy_conting_class` in v1 was moved at least once (v1 and v3 have different types)
-    BOOST_CHECK(move_copy_conting_class::moves_count != 0);
+    BOOST_TEST(move_copy_conting_class::moves_count != 0);
 
     move_copy_conting_class::moves_count = 0;
     move_copy_conting_class::copy_count = 0;
     variant_I_type v5(boost::move(v1));
     // Assuring that `move_copy_conting_class` in v1 was moved at least once and was not copied
-    BOOST_CHECK(move_copy_conting_class::moves_count != 0);
-    BOOST_CHECK(move_copy_conting_class::copy_count == 0);
+    BOOST_TEST(move_copy_conting_class::moves_count != 0);
+    BOOST_TEST(move_copy_conting_class::copy_count == 0);
 
     total_count = move_copy_conting_class::moves_count + move_copy_conting_class::copy_count;
     move_copy_conting_class::moves_count = 0;
     move_copy_conting_class::copy_count = 0;
     variant_I_type v6(v1);
     // Assuring that move constructor moves/copyes value not more times than copy constructor
-    BOOST_CHECK(total_count <= move_copy_conting_class::moves_count + move_copy_conting_class::copy_count);
+    BOOST_TEST(total_count <= move_copy_conting_class::moves_count + move_copy_conting_class::copy_count);
 }
 
 void run1()
@@ -190,8 +190,8 @@ void run1()
     variant_I_type v1(boost::move(c1));
     
     // Assuring that `move_copy_conting_class` was not copyied
-    BOOST_CHECK(move_copy_conting_class::copy_count == 0);
-    BOOST_CHECK(move_copy_conting_class::moves_count > 0);
+    BOOST_TEST(move_copy_conting_class::copy_count == 0);
+    BOOST_TEST(move_copy_conting_class::moves_count > 0);
 }
 
 struct move_only_structure {
@@ -215,26 +215,26 @@ void run_move_only()
 {
     move_only_structure mo;
     boost::variant<int, move_only_structure > vi, vi2(static_cast<move_only_structure&&>(mo));
-    BOOST_CHECK(vi.which() == 0);
-    BOOST_CHECK(vi2.which() == 1);
+    BOOST_TEST(vi.which() == 0);
+    BOOST_TEST(vi2.which() == 1);
 
     vi = 10;
     vi2 = 10;
-    BOOST_CHECK(vi.which() == 0);
-    BOOST_CHECK(vi2.which() == 0);
+    BOOST_TEST(vi.which() == 0);
+    BOOST_TEST(vi2.which() == 0);
 
     vi = static_cast<move_only_structure&&>(mo);
     vi2 = static_cast<move_only_structure&&>(mo);
-    BOOST_CHECK(vi.which() == 1);
+    BOOST_TEST(vi.which() == 1);
 
     boost::variant<move_only_structure, int > rvi (1);
-    BOOST_CHECK(rvi.which() == 1);
+    BOOST_TEST(rvi.which() == 1);
     rvi = static_cast<move_only_structure&&>(mo);
-    BOOST_CHECK(rvi.which() == 0);
+    BOOST_TEST(rvi.which() == 0);
     rvi = 1;
-    BOOST_CHECK(rvi.which() == 1);
+    BOOST_TEST(rvi.which() == 1);
     rvi = static_cast<boost::variant<int, move_only_structure >&&>(vi2);
-    BOOST_CHECK(rvi.which() == 0);
+    BOOST_TEST(rvi.which() == 0);
 
     move_only_structure from_visitor = boost::apply_visitor(visitor_returning_move_only_type(), vi);
     (void)from_visitor;
@@ -243,12 +243,12 @@ void run_move_only()
 void run_moves_are_noexcept() {
 #if !defined(BOOST_NO_CXX11_NOEXCEPT) && (!defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4 || __GNUC_MINOR__ >= 8)
     typedef boost::variant<int, short, double> variant_noexcept_t;
-    BOOST_CHECK(boost::is_nothrow_move_assignable<variant_noexcept_t>::value);
-    BOOST_CHECK(boost::is_nothrow_move_constructible<variant_noexcept_t>::value);
+    BOOST_TEST(boost::is_nothrow_move_assignable<variant_noexcept_t>::value);
+    BOOST_TEST(boost::is_nothrow_move_constructible<variant_noexcept_t>::value);
 
     typedef boost::variant<int, short, double, move_only_structure> variant_except_t;
-    BOOST_CHECK(!boost::is_nothrow_move_assignable<variant_except_t>::value);
-    BOOST_CHECK(!boost::is_nothrow_move_constructible<variant_except_t>::value);
+    BOOST_TEST(!boost::is_nothrow_move_assignable<variant_except_t>::value);
+    BOOST_TEST(!boost::is_nothrow_move_constructible<variant_except_t>::value);
 #endif
 }
 
@@ -304,12 +304,12 @@ struct is_container<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
 
 void run_is_container_compilation_test()
 {
-    BOOST_CHECK((!is_container<boost::variant<double, int> >::value));
-    BOOST_CHECK((!is_container<boost::variant<double, int, char> >::value));
-    BOOST_CHECK((!is_container<boost::variant<double, int, char, float> >::value));
+    BOOST_TEST((!is_container<boost::variant<double, int> >::value));
+    BOOST_TEST((!is_container<boost::variant<double, int, char> >::value));
+    BOOST_TEST((!is_container<boost::variant<double, int, char, float> >::value));
 }
 
-int test_main(int , char* [])
+int main()
 {
    swap_ambiguouty_test_ns::swap_ambiguouty_test();
    run();
@@ -322,11 +322,11 @@ int test_main(int , char* [])
 
 #if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ > 6)
 #   ifdef BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES
-        BOOST_CHECK(false && 
+        BOOST_TEST(false && 
             "Something wrong with macro definitions. GCC-4.7+ is known to work with variadic templates"
         );
 #   endif
 #endif
 
-   return 0;
+   return boost::report_errors();
 }
