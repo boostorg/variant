@@ -8,7 +8,7 @@
 # See https://svn.boost.org/trac/boost/wiki/TravisCoverals for description of this file
 # and how it can be used with Boost libraries.
 #
-# File revision #6
+# File revision #7
 
 init:
     # boost-local/libs/ folder to put this library into. This may be useful, if you're for example running Travis
@@ -46,6 +46,7 @@ environment:
       ADDPATH: C:\cygwin64\bin;
       TOOLSET: gcc
       CXXSTD: 03,11,14,1z
+      VARIANT: release          # "variant_get_test.o: File too big" errors in debug
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
       ADDPATH: C:\mingw\bin;
       TOOLSET: gcc
@@ -54,6 +55,7 @@ environment:
       ADDPATH: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;
       TOOLSET: gcc
       CXXSTD: 03,11,14,1z
+      VARIANT: release          # "variant_get_test.o: File too big" errors in debug
 
 before_build:
     - set BOOST_BRANCH=develop
@@ -80,8 +82,9 @@ test_script:
   - PATH=%ADDPATH%%PATH%
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
   - if not "%ADDRMD%" == "" set ADDRMD=address-model=%ADDRMD%
+  - if not "%VARIANT%"== "" set VARIANT=variant=%VARIANT% else set VARIANT=variant=debug,release
   - echo "Running command ..\..\..\b2 -j3 toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release"
-  - ..\..\..\b2.exe -j3 toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release cxxflags="-DBOOST_TRAVISCI_BUILD"
+  - ..\..\..\b2.exe -j3 toolset=%TOOLSET% %CXXSTD% %ADDRMD% %VARIANT% cxxflags="-DBOOST_TRAVISCI_BUILD"
 
 after_test:
 on_success:
