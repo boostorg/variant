@@ -21,7 +21,7 @@ init:
 # From this point and below code is same for all the Boost libs
 ###############################################################################################################
 
-version: 1.64.{build}-{branch}
+version: 1.69.{build}-{branch}
  
 # branches to build
 branches:
@@ -82,7 +82,8 @@ test_script:
   - PATH=%ADDPATH%%PATH%
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
   - if not "%ADDRMD%" == "" set ADDRMD=address-model=%ADDRMD%
-  - if not "%VARIANT%"== "" set VARIANT=variant=%VARIANT% else set VARIANT=variant=debug,release
+  - if "%VARIANT%"== "" set VARIANT=debug,release
+  - set VARIANT=variant=%VARIANT%
   - echo "Running command ..\..\..\b2 -j3 toolset=%TOOLSET% %CXXSTD% %ADDRMD% variant=debug,release"
   - ..\..\..\b2.exe -j3 toolset=%TOOLSET% %CXXSTD% %ADDRMD% %VARIANT% cxxflags="-DBOOST_TRAVISCI_BUILD"
 
