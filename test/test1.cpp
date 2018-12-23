@@ -16,7 +16,7 @@
 #pragma warning(disable:4244) // conversion from const int to const short
 #endif
 
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include "boost/variant.hpp"
 
 #include "class_a.h"
@@ -121,11 +121,11 @@ void run()
    v1 = 3.4f;
    apply_visitor(ts, v1);
 
-   BOOST_CHECK(ts.result() == sizeof(int) + sizeof(double)*2);
+   BOOST_TEST(ts.result() == sizeof(int) + sizeof(double)*2);
 
    v11 = 5;
    string res_s = apply_visitor(int_printer(), v11);
-   BOOST_CHECK(res_s == "5");
+   BOOST_TEST(res_s == "5");
 
    //
    // A variant object holding an std::vector 
@@ -138,13 +138,13 @@ void run()
 
    v11 = int_vec_1;
    res_s = apply_visitor(int_printer(), v11);
-   BOOST_CHECK(res_s == ",512,256,128,64");
+   BOOST_TEST(res_s == ",512,256,128,64");
 }
 
 
 
-int test_main(int , char* [])
+int main()
 {
-   run();
-   return 0;
+    run();
+    return boost::report_errors();
 }

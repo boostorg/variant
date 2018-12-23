@@ -10,7 +10,7 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include "boost/variant.hpp"
 
 #include "jobs.h"
@@ -58,14 +58,14 @@ void run()
    verify(v3, spec<int>());
 
 
-   BOOST_CHECK(apply_visitor(sum_int(), v2) == c0);
-   BOOST_CHECK(apply_visitor(sum_int(), v3) == c0);
+   BOOST_TEST(apply_visitor(sum_int(), v2) == c0);
+   BOOST_TEST(apply_visitor(sum_int(), v3) == c0);
 
    sum_int adder;
    apply_visitor(adder, v2);
    apply_visitor(adder, v3);
 
-   BOOST_CHECK(adder.result() == 2*c0);
+   BOOST_TEST(adder.result() == 2*c0);
 
    //
    // A variant holding a variant
@@ -82,9 +82,9 @@ void run()
 
 
 
-int test_main(int , char* [])
+int main()
 {
    run();
-   return 0;
+   return boost::report_errors();
 }
 

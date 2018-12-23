@@ -4,14 +4,14 @@
 //-----------------------------------------------------------------------------
 //
 // Copyright (c) 2003 Eric Friedman, Itay Maman
-// Copyright (c) 2014 Antony Polukhin
+// Copyright (c) 2014-2018 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "boost/variant/variant.hpp"
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -31,38 +31,38 @@ void assert_equality_comparable(
     )
 {
     // identity check
-    BOOST_CHECK( !(&x == &y) || (x == y) );
-    BOOST_CHECK( !(&x == &z) || (x == z) );
-    BOOST_CHECK( !(&y == &z) || (y == z) );
-    BOOST_CHECK( !(&x == &y) || !(x != y) );
-    BOOST_CHECK( !(&x == &z) || !(x != z) );
-    BOOST_CHECK( !(&y == &z) || !(y != z) );
+    BOOST_TEST( !(&x == &y) || (x == y) );
+    BOOST_TEST( !(&x == &z) || (x == z) );
+    BOOST_TEST( !(&y == &z) || (y == z) );
+    BOOST_TEST( !(&x == &y) || !(x != y) );
+    BOOST_TEST( !(&x == &z) || !(x != z) );
+    BOOST_TEST( !(&y == &z) || !(y != z) );
 
     // reflexivity check
-    BOOST_CHECK( (x == x) );
-    BOOST_CHECK( (y == y) );
-    BOOST_CHECK( (z == z) );
+    BOOST_TEST( (x == x) );
+    BOOST_TEST( (y == y) );
+    BOOST_TEST( (z == z) );
 
     // symmetry check
-    BOOST_CHECK( !(x == y) || (y == x) );
-    BOOST_CHECK( !(y == x) || (x == y) );
-    BOOST_CHECK( (x != y) || (y == x) );
-    BOOST_CHECK( (y != x) || (x == y) );
+    BOOST_TEST( !(x == y) || (y == x) );
+    BOOST_TEST( !(y == x) || (x == y) );
+    BOOST_TEST( (x != y) || (y == x) );
+    BOOST_TEST( (y != x) || (x == y) );
 
-    BOOST_CHECK( !(x == z) || (z == x) );
-    BOOST_CHECK( !(z == x) || (x == z) );
-    BOOST_CHECK( (x != z) || (z == x) );
-    BOOST_CHECK( (z != x) || (x == z) );
+    BOOST_TEST( !(x == z) || (z == x) );
+    BOOST_TEST( !(z == x) || (x == z) );
+    BOOST_TEST( (x != z) || (z == x) );
+    BOOST_TEST( (z != x) || (x == z) );
 
-    BOOST_CHECK( !(y == z) || (z == y) );
-    BOOST_CHECK( !(z == y) || (y == z) );
-    BOOST_CHECK( (y != z) || (z == y) );
-    BOOST_CHECK( (z != y) || (y == z) );
+    BOOST_TEST( !(y == z) || (z == y) );
+    BOOST_TEST( !(z == y) || (y == z) );
+    BOOST_TEST( (y != z) || (z == y) );
+    BOOST_TEST( (z != y) || (y == z) );
 
     // transitivity check
-    BOOST_CHECK( !(x == y && y == z) || (x == z) );
-    BOOST_CHECK( !(x == z && z == y) || (x == y) );
-    BOOST_CHECK( !(y == z && z == x) || (y == x) );
+    BOOST_TEST( !(x == y && y == z) || (x == z) );
+    BOOST_TEST( !(x == z && z == y) || (x == y) );
+    BOOST_TEST( !(y == z && z == x) || (y == x) );
 }
 
 template <typename T>
@@ -71,41 +71,41 @@ void assert_less_than_comparable(
     )
 {
     // irreflexivity check
-    BOOST_CHECK( !(x < x) );
-    BOOST_CHECK( !(y < y) );
-    BOOST_CHECK( !(z < z) );
-    BOOST_CHECK( !(x > x) );
-    BOOST_CHECK( !(y > y) );
-    BOOST_CHECK( !(z > z) );
+    BOOST_TEST( !(x < x) );
+    BOOST_TEST( !(y < y) );
+    BOOST_TEST( !(z < z) );
+    BOOST_TEST( !(x > x) );
+    BOOST_TEST( !(y > y) );
+    BOOST_TEST( !(z > z) );
 
-    BOOST_CHECK( (x <= x) );
-    BOOST_CHECK( (y <= y) );
-    BOOST_CHECK( (z <= z) );
-    BOOST_CHECK( (x >= x) );
-    BOOST_CHECK( (y >= y) );
-    BOOST_CHECK( (z >= z) );
+    BOOST_TEST( (x <= x) );
+    BOOST_TEST( (y <= y) );
+    BOOST_TEST( (z <= z) );
+    BOOST_TEST( (x >= x) );
+    BOOST_TEST( (y >= y) );
+    BOOST_TEST( (z >= z) );
 
     // transitivity check
-    BOOST_CHECK( (x < y) );
-    BOOST_CHECK( (y < z) );
-    BOOST_CHECK( (x < z) );
+    BOOST_TEST( (x < y) );
+    BOOST_TEST( (y < z) );
+    BOOST_TEST( (x < z) );
 
-    BOOST_CHECK( (x <= y) );
-    BOOST_CHECK( (y <= z) );
-    BOOST_CHECK( (x <= z) );
+    BOOST_TEST( (x <= y) );
+    BOOST_TEST( (y <= z) );
+    BOOST_TEST( (x <= z) );
 
-    BOOST_CHECK( (z > y) );
-    BOOST_CHECK( (y > x) );
-    BOOST_CHECK( (z > x) );
+    BOOST_TEST( (z > y) );
+    BOOST_TEST( (y > x) );
+    BOOST_TEST( (z > x) );
 
-    BOOST_CHECK( (z >= y) );
-    BOOST_CHECK( (y >= x) );
-    BOOST_CHECK( (z >= x) );
+    BOOST_TEST( (z >= y) );
+    BOOST_TEST( (y >= x) );
+    BOOST_TEST( (z >= x) );
 
     // antisymmetry check
-    BOOST_CHECK( !(y < x) );
-    BOOST_CHECK( !(z < y) );
-    BOOST_CHECK( !(z < x) );
+    BOOST_TEST( !(y < x) );
+    BOOST_TEST( !(z < y) );
+    BOOST_TEST( !(z < x) );
 }
 
 template <typename It>
@@ -122,7 +122,7 @@ std::string print_range(It first, It last)
     return result.str();
 }
 
-int test_main(int , char* [])
+int main()
 {
     typedef boost::variant<int, std::string> var_t;
     
@@ -146,13 +146,13 @@ int test_main(int , char* [])
     std::sort(vec.begin(), vec.end());
 
     std::string sort_result( print_range(vec.begin(), vec.end()) );
-    BOOST_CHECK( sort_result == "3 5 goodbye hello " );
+    BOOST_TEST( sort_result == "3 5 goodbye hello " );
 
     // https://svn.boost.org/trac/boost/ticket/11751
     int a = 0, b = 0;
 
     boost::variant< int& > v (a), u (b);
-    BOOST_CHECK(v == u);
+    BOOST_TEST(v == u);
 
-    return boost::exit_success;
+    return boost::report_errors();
 }

@@ -244,14 +244,14 @@ inline void verify(VariantType& var, spec<S>, std::string str = "")
 {
    const VariantType& cvar = var;
 
-   BOOST_CHECK(boost::apply_visitor(total_sizeof(), cvar) == sizeof(S));
-   BOOST_CHECK(cvar.type() == boost::typeindex::type_id<S>());
+   BOOST_TEST(boost::apply_visitor(total_sizeof(), cvar) == sizeof(S));
+   BOOST_TEST(cvar.type() == boost::typeindex::type_id<S>());
 
    //
    // Check get<>()
    //
-   BOOST_CHECK(boost::get<S>(&var));
-   BOOST_CHECK(boost::get<S>(&cvar));
+   BOOST_TEST(boost::get<S>(&var));
+   BOOST_TEST(boost::get<S>(&cvar));
 
    const S* ptr1 = 0;
    const S* ptr2 = 0;
@@ -275,7 +275,7 @@ inline void verify(VariantType& var, spec<S>, std::string str = "")
       BOOST_ERROR( "get<S> const failed unexpectedly" );
    }
 
-   BOOST_CHECK(ptr1 != 0 && ptr2 == ptr1);
+   BOOST_TEST(ptr1 != 0 && ptr2 == ptr1);
 
    //
    // Check string content
@@ -284,7 +284,7 @@ inline void verify(VariantType& var, spec<S>, std::string str = "")
    {
       std::string temp = boost::apply_visitor(to_text(), cvar);
       std::cout << "temp = " << temp << ", str = " << str << std::endl;
-      BOOST_CHECK(temp == str);         
+      BOOST_TEST(temp == str);
    }
 }
 
@@ -294,13 +294,13 @@ inline void verify_not(VariantType& var, spec<S>)
 {
    const VariantType& cvar = var;
 
-   BOOST_CHECK(cvar.type() != boost::typeindex::type_id<S>());
+   BOOST_TEST(cvar.type() != boost::typeindex::type_id<S>());
 
    //
    // Check get<>()
    //
-   BOOST_CHECK(!boost::get<S>(&var));
-   BOOST_CHECK(!boost::get<S>(&cvar));
+   BOOST_TEST(!boost::get<S>(&var));
+   BOOST_TEST(!boost::get<S>(&cvar));
 
    const S* ptr1 = 0;
    const S* ptr2 = 0;
@@ -328,7 +328,7 @@ inline void verify_not(VariantType& var, spec<S>)
       // do nothing except pass-through
    }
 
-   BOOST_CHECK(ptr1 == 0 && ptr2 == 0);   
+   BOOST_TEST(ptr1 == 0 && ptr2 == 0);
 }
 
 

@@ -16,7 +16,7 @@
 #pragma warning(disable:4244) // conversion from 'const int' to 'const short'
 #endif
 
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include "boost/variant.hpp"
 
 #include "jobs.h"
@@ -141,9 +141,9 @@ void run()
 }
 
 
-int test_main(int , char* [])
+int main()
 {
-   run();
-   return 0;
+    run();
+    return boost::report_errors();
 }
 

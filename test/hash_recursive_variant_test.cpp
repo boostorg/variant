@@ -6,7 +6,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "boost/config.hpp"
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 
 #if !defined(BOOST_NO_CXX11_TEMPLATE_ALIASES) && !defined(BOOST_NO_CXX11_HDR_UNORDERED_SET)
 // Test is based on reported issues:
@@ -48,15 +48,15 @@ void run()
     int_t i = 3;
     value_t v = i;
     auto emplace_result = s.emplace(v); // raises error above
-    BOOST_CHECK(emplace_result.second);
+    BOOST_TEST(emplace_result.second);
     v = s;
     const set_t& check_set = boost::get<set_t>(v);
-    BOOST_CHECK(!check_set.empty());
+    BOOST_TEST(!check_set.empty());
     for (const auto& check_v : check_set) {
-      BOOST_CHECK(s.find(check_v) != s.end());
+      BOOST_TEST(s.find(check_v) != s.end());
     }
     for (const auto& check_v : s) {
-      BOOST_CHECK(check_set.find(check_v) != check_set.end());
+      BOOST_TEST(check_set.find(check_v) != check_set.end());
     }
 }
 
@@ -65,9 +65,9 @@ void run()
 void run() {}
 #endif
 
-int test_main(int , char* [])
+int main()
 {
    run();
-   return 0;
+   return boost::report_errors();
 }
 

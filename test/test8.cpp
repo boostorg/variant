@@ -10,7 +10,7 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include "boost/variant.hpp"
 
 #include <iostream>
@@ -40,12 +40,12 @@ struct int_sum : static_visitor<>
 template <typename T, typename Variant>
 T& check_pass(Variant& v, T value)
 {
-    BOOST_CHECK(get<T>(&v));
+    BOOST_TEST(get<T>(&v));
 
     try
     {
         T& r = get<T>(v);
-        BOOST_CHECK(r == value);
+        BOOST_TEST(r == value);
         return r;
     }
     catch(boost::bad_get&)
@@ -57,21 +57,21 @@ T& check_pass(Variant& v, T value)
 template <typename T, typename Variant>
 void check_fail(Variant& v)
 {
-    BOOST_CHECK(!relaxed_get<T>(&v));
+    BOOST_TEST(!relaxed_get<T>(&v));
 
     try
     {
         T& r = relaxed_get<T>(v);
         (void)r; // suppress warning about r not being used
-        BOOST_CHECK(false && relaxed_get<T>(&v)); // should never reach
+        BOOST_TEST(false && relaxed_get<T>(&v)); // should never reach
     }
     catch(const boost::bad_get& e)
     {
-        BOOST_CHECK(!!e.what()); // make sure that what() is const qualified and returnes something
+        BOOST_TEST(!!e.what()); // make sure that what() is const qualified and returnes something
     }
 }
 
-int test_main(int , char* [])
+int main()
 {
    int_sum acc;
    t_var1 v1 = 800;
@@ -87,12 +87,12 @@ int test_main(int , char* [])
       check_fail<const short>(v1);
 
       apply_visitor(acc, v1);
-      BOOST_CHECK(acc.result_ == 800);
+      BOOST_TEST(acc.result_ == 800);
 
       r1 = 920; // NOTE: modifies content of v1
       apply_visitor(acc, v1);
-      BOOST_CHECK(cr1 == 920);
-      BOOST_CHECK(acc.result_ == 800 + 920);
+      BOOST_TEST(cr1 == 920);
+      BOOST_TEST(acc.result_ == 800 + 920);
    }
 
    // check const correctness:
@@ -108,6 +108,6 @@ int test_main(int , char* [])
       //check_fail<short>(c);
    }
 
-   return boost::exit_success;
+   return boost::report_errors();
 }
 

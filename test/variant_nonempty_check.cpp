@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2014 Antony Polukhin
+// Copyright (c) 2014-2018 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -23,7 +23,7 @@
 
 #include "boost/variant/variant.hpp"
 #include "boost/variant/get.hpp"
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include <stdexcept>
 
 struct exception_on_assignment : std::exception {};
@@ -197,21 +197,21 @@ inline void check_1_impl(int helper)
     boost::variant<throwing_class, Nonthrowing> v;
     try {
         v = throwing_class(helper);
-        BOOST_CHECK(!v.which());
-        BOOST_CHECK(boost::get<throwing_class>(&v));
+        BOOST_TEST(!v.which());
+        BOOST_TEST(boost::get<throwing_class>(&v));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(!v.which());
-        BOOST_CHECK(boost::get<throwing_class>(&v));
+        BOOST_TEST(!v.which());
+        BOOST_TEST(boost::get<throwing_class>(&v));
     }
 
     try {
         throwing_class tc(helper);
         v = tc;
-        BOOST_CHECK(!v.which());
-        BOOST_CHECK(boost::get<throwing_class>(&v));
+        BOOST_TEST(!v.which());
+        BOOST_TEST(boost::get<throwing_class>(&v));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(!v.which());
-        BOOST_CHECK(boost::get<throwing_class>(&v));
+        BOOST_TEST(!v.which());
+        BOOST_TEST(boost::get<throwing_class>(&v));
     }
 }
 
@@ -230,21 +230,21 @@ inline void check_2_impl(int helper)
     boost::variant<Nonthrowing, throwing_class> v;
     try {
         v = throwing_class(helper);
-        BOOST_CHECK(v.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v));
+        BOOST_TEST(v.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(!v.which());
-        BOOST_CHECK(boost::get<Nonthrowing>(&v));
+        BOOST_TEST(!v.which());
+        BOOST_TEST(boost::get<Nonthrowing>(&v));
     }
 
     try {
         throwing_class cl(helper);
         v = cl;
-        BOOST_CHECK(v.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v));
+        BOOST_TEST(v.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(!v.which());
-        BOOST_CHECK(boost::get<Nonthrowing>(&v));
+        BOOST_TEST(!v.which());
+        BOOST_TEST(boost::get<Nonthrowing>(&v));
     }
 }
 
@@ -265,30 +265,30 @@ inline void check_3_impl(int helper)
     swap(v1, v2);
     try {
         v1 = throwing_class(helper);
-        BOOST_CHECK(v1.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v1));
+        BOOST_TEST(v1.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v1));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(!v1.which());
-        BOOST_CHECK(boost::get<Nonthrowing>(&v1));
+        BOOST_TEST(!v1.which());
+        BOOST_TEST(boost::get<Nonthrowing>(&v1));
     }
 
 
     try {
         v2 = throwing_class(helper);
-        BOOST_CHECK(v2.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v2));
+        BOOST_TEST(v2.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v2));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(!v2.which());
-        BOOST_CHECK(boost::get<Nonthrowing>(&v2));
+        BOOST_TEST(!v2.which());
+        BOOST_TEST(boost::get<Nonthrowing>(&v2));
     }
 
 
     if (!v1.which() && !v2.which()) {
         swap(v1, v2); // Make sure that two backup holders swap well
-        BOOST_CHECK(!v1.which());
-        BOOST_CHECK(boost::get<Nonthrowing>(&v1));
-        BOOST_CHECK(!v2.which());
-        BOOST_CHECK(boost::get<Nonthrowing>(&v2));
+        BOOST_TEST(!v1.which());
+        BOOST_TEST(boost::get<Nonthrowing>(&v1));
+        BOOST_TEST(!v2.which());
+        BOOST_TEST(boost::get<Nonthrowing>(&v2));
 
         v1 = v2;
     }
@@ -311,29 +311,29 @@ inline void check_4(int helper = 1)
     swap(v1, v2);
     try {
         v1 = throwing_class(helper);
-        BOOST_CHECK(v1.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v1));
+        BOOST_TEST(v1.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v1));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(!v1.which());
-        BOOST_CHECK(boost::get<int>(&v1));
+        BOOST_TEST(!v1.which());
+        BOOST_TEST(boost::get<int>(&v1));
     }
 
 
     try {
         v2 = throwing_class(helper);
-        BOOST_CHECK(v2.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v2));
+        BOOST_TEST(v2.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v2));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(!v2.which());
-        BOOST_CHECK(boost::get<int>(&v2));
+        BOOST_TEST(!v2.which());
+        BOOST_TEST(boost::get<int>(&v2));
     }
 
     if (!v1.which() && !v2.which()) {
         swap(v1, v2);
-        BOOST_CHECK(!v1.which());
-        BOOST_CHECK(boost::get<int>(&v1));
-        BOOST_CHECK(!v2.which());
-        BOOST_CHECK(boost::get<int>(&v2));
+        BOOST_TEST(!v1.which());
+        BOOST_TEST(boost::get<int>(&v1));
+        BOOST_TEST(!v2.which());
+        BOOST_TEST(boost::get<int>(&v2));
 
         v1 = v2;
     }
@@ -353,11 +353,11 @@ inline void check_5_impl(int helper)
 
     try {
         v1 = throwing_class(helper);
-        BOOST_CHECK(v1.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v1));
+        BOOST_TEST(v1.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v1));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(v1.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v1));
+        BOOST_TEST(v1.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v1));
     }
 
     boost::get<throwing_class>(v1).trash = throwing_class::do_not_throw;
@@ -366,22 +366,22 @@ inline void check_5_impl(int helper)
     v2 = Nonthrowing();
     try {
         v1 = throwing_class(helper);
-        BOOST_CHECK(v1.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v1));
+        BOOST_TEST(v1.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v1));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(v1.which() == 0);
-        BOOST_CHECK(boost::get<Nonthrowing>(&v1));
+        BOOST_TEST(v1.which() == 0);
+        BOOST_TEST(boost::get<Nonthrowing>(&v1));
     }
 
     int v1_type = v1.which();
     int v2_type = v2.which();
     try {
         swap(v1, v2); // Make sure that backup holders swap well
-        BOOST_CHECK(v1.which() == v2_type);
-        BOOST_CHECK(v2.which() == v1_type);
+        BOOST_TEST(v1.which() == v2_type);
+        BOOST_TEST(v2.which() == v1_type);
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(v1.which() == v1_type);
-        BOOST_CHECK(v2.which() == v2_type);
+        BOOST_TEST(v1.which() == v1_type);
+        BOOST_TEST(v2.which() == v2_type);
     }
 }
 
@@ -418,18 +418,18 @@ inline void check_6_impl(int helper)
         throwing_class tc;
         tc.trash = helper;
         v1 = tc;
-        BOOST_CHECK(v1.which() == 1);
-        BOOST_CHECK(boost::get<throwing_class>(&v1));
+        BOOST_TEST(v1.which() == 1);
+        BOOST_TEST(boost::get<throwing_class>(&v1));
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(v1.which() == 0);
+        BOOST_TEST(v1.which() == 0);
     }
 
     v2 = Nonthrowing();
     try {
         v2 = 2;
-        BOOST_CHECK(false);
+        BOOST_TEST(false);
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(v2.which() == 0);
+        BOOST_TEST(v2.which() == 0);
     }
 
     // Probably the most significant test:
@@ -439,9 +439,9 @@ inline void check_6_impl(int helper)
     try {
         swap(v1, v2);
     } catch (const exception_on_assignment& /*e*/) {
-        BOOST_CHECK(v1.which() == 1);
-        BOOST_CHECK(v2.which() == 0);
-        BOOST_CHECK(boost::get<throwing_class>(v1).trash == helper);
+        BOOST_TEST(v1.which() == 1);
+        BOOST_TEST(v2.which() == 0);
+        BOOST_TEST(boost::get<throwing_class>(v1).trash == helper);
     }
 }
 
@@ -455,7 +455,7 @@ inline void check_6(int helper = 1)
     check_6_impl<boost::blank>(helper);
 }
 
-int test_main(int , char* [])
+int main()
 {
     // throwing_class::throw_after_1 + 1  => throw on first assignment/construction
     // throwing_class::throw_after_1  => throw on second assignment/construction
@@ -470,5 +470,5 @@ int test_main(int , char* [])
         check_6(i);
     }
 
-    return boost::exit_success;
+    return boost::report_errors();
 }

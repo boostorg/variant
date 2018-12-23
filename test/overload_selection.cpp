@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2016 Antony Polukhin
+// Copyright (c) 2016-2018 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -16,7 +16,7 @@
 
 #include "boost/variant/variant.hpp"
 #include "boost/variant/recursive_variant.hpp"
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 
 #include <string>
 #include <list>
@@ -37,10 +37,10 @@ bool foo(const boost::variant<C, D>& ) {
 
 void test_overload_selection_variant_constructor() {
     D d;
-    BOOST_CHECK(foo(d));
+    BOOST_TEST(foo(d));
 
     boost::variant<B, A> v;
-    BOOST_CHECK(!foo(v));
+    BOOST_TEST(!foo(v));
 }
 
 // Pre msvc-14.0 could not dustinguish between multiple assignment operators:
@@ -51,7 +51,7 @@ void test_overload_selection_variant_constructor() {
 #if (defined(__GNUC__) && (__GNUC__ < 4)) || (defined(_MSC_VER) && _MSC_VER < 1900)
 
 void test_overload_selection_variant_assignment() {
-    BOOST_CHECK(true);
+    BOOST_TEST(true);
 }
 
 #else
@@ -66,13 +66,13 @@ void test_overload_selection_variant_assignment() {
     assignment_tester tester;
     tester = a;
     const int which0 = static_cast< boost::variant<B, A>& >(tester).which();
-    BOOST_CHECK(which0 == 1);
+    BOOST_TEST(which0 == 1);
 
     boost::variant<A, B> b;
     b = B();
     tester = b;
     const int which1 = static_cast< boost::variant<B, A>& >(tester).which();
-    BOOST_CHECK(which1 == 0);
+    BOOST_TEST(which1 == 0);
 }
 
 #endif
@@ -88,7 +88,7 @@ struct convertible {
 void test_implicit_conversion_operator() {
     // https://svn.boost.org/trac/boost/ticket/8555
     my_variant y = convertible();
-    BOOST_CHECK(y.which() == 0);
+    BOOST_TEST(y.which() == 0);
 }
 
 struct X: boost::variant< int > {};
@@ -100,27 +100,27 @@ void test_derived_from_variant_construction() {
     // https://svn.boost.org/trac/boost/ticket/7120
     X x;
     boost::variant<X> y(x);
-    BOOST_CHECK(y.which() == 0);
+    BOOST_TEST(y.which() == 0);
 
     // https://svn.boost.org/trac/boost/ticket/10278
     boost::variant<V1, std::string> v2 = V1();
-    BOOST_CHECK(v2.which() == 0);
+    BOOST_TEST(v2.which() == 0);
 
     // https://svn.boost.org/trac/boost/ticket/12155
     AB ab;
     boost::variant<AB, C> ab_c(ab);
-    BOOST_CHECK(ab_c.which() == 0);
+    BOOST_TEST(ab_c.which() == 0);
 
     boost::variant<A, B> a_b(ab);
-    BOOST_CHECK(a_b.which() == 0);
+    BOOST_TEST(a_b.which() == 0);
 
     boost::variant<B, C, A> b_c_a1(static_cast<boost::variant<A, B>& >(ab));
-    BOOST_CHECK(b_c_a1.which() == 2);
+    BOOST_TEST(b_c_a1.which() == 2);
 
 
 //  Following conversion seems harmful as it may lead to slicing:
 //  boost::variant<B, C, A> b_c_a(ab);
-//  BOOST_CHECK(b_c_a.which() == 2);
+//  BOOST_TEST(b_c_a.which() == 2);
 }
 
 void test_derived_from_variant_assignment() {
@@ -128,32 +128,32 @@ void test_derived_from_variant_assignment() {
     X x;
     boost::variant<X> y;
     y = x;
-    BOOST_CHECK(y.which() == 0);
+    BOOST_TEST(y.which() == 0);
 
     // https://svn.boost.org/trac/boost/ticket/10278
     boost::variant<V1, std::string> v2;
     v2 = V1();
-    BOOST_CHECK(v2.which() == 0);
+    BOOST_TEST(v2.which() == 0);
 
     // https://svn.boost.org/trac/boost/ticket/12155
     AB ab;
     boost::variant<AB, C> ab_c;
     ab_c = ab;
-    BOOST_CHECK(ab_c.which() == 0);
+    BOOST_TEST(ab_c.which() == 0);
 
     boost::variant<A, B> a_b;
     a_b = ab;
-    BOOST_CHECK(a_b.which() == 0);
+    BOOST_TEST(a_b.which() == 0);
 
     boost::variant<B, C, A> b_c_a1;
     b_c_a1 = static_cast<boost::variant<A, B>& >(ab);
-    BOOST_CHECK(b_c_a1.which() == 2);
+    BOOST_TEST(b_c_a1.which() == 2);
 
 
 //  Following conversion seems harmful as it may lead to slicing:
 //  boost::variant<B, C, A> b_c_a;
 //  b_c_a = ab;
-//  BOOST_CHECK(b_c_a.which() == 2);
+//  BOOST_TEST(b_c_a.which() == 2);
 }
 
 
@@ -175,34 +175,34 @@ struct info {
     inline void test_on_incomplete_types() {
         info i0;
         i0.v = "Hello";
-        BOOST_CHECK(i0.v.which() == 1);
+        BOOST_TEST(i0.v.which() == 1);
 
         info::value_type v0 = "Hello";
-        BOOST_CHECK(v0.which() == 1);
+        BOOST_TEST(v0.which() == 1);
 
         info::value_type v1("Hello");
-        BOOST_CHECK(v1.which() == 1);
+        BOOST_TEST(v1.which() == 1);
 
         info::value_type v2 = i0;
-        BOOST_CHECK(v2.which() == 2);
+        BOOST_TEST(v2.which() == 2);
 
         info::value_type v3(i0);
-        BOOST_CHECK(v3.which() == 2);
+        BOOST_TEST(v3.which() == 2);
 
         v0 = v3;
-        BOOST_CHECK(v0.which() == 2);
+        BOOST_TEST(v0.which() == 2);
 
         v3 = v1;
-        BOOST_CHECK(v3.which() == 1);
+        BOOST_TEST(v3.which() == 1);
 
         v3 = nil_();
-        BOOST_CHECK(v3.which() == 0);
+        BOOST_TEST(v3.which() == 0);
     }
 };
 
 
 
-int test_main(int , char* [])
+int main()
 {
     test_overload_selection_variant_constructor();
     test_overload_selection_variant_assignment();
@@ -211,5 +211,5 @@ int test_main(int , char* [])
     test_derived_from_variant_assignment();
     info().test_on_incomplete_types();
 
-    return boost::exit_success;
+    return boost::report_errors();
 }

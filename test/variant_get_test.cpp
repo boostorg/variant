@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2014-2017 Antony Polukhin
+// Copyright (c) 2014-2018 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -17,7 +17,7 @@
 #include "boost/variant/variant.hpp"
 #include "boost/variant/polymorphic_get.hpp"
 #include "boost/variant/recursive_wrapper.hpp"
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 
 struct base {
     int trash;
@@ -63,32 +63,32 @@ inline void check_polymorphic_get_on_types_impl_single_type(V* v)
     const bool ref_same = !!boost::is_same<TypeInVariant, ref_test_t>::value;
 
     if (exact_same || ref_same) {
-        BOOST_CHECK(boost::polymorphic_get<TestType>(v));
-        BOOST_CHECK(boost::polymorphic_get<const TestType>(v));
-        BOOST_CHECK(boost::polymorphic_strict_get<TestType>(v));
-        BOOST_CHECK(boost::polymorphic_strict_get<const TestType>(v));
-        BOOST_CHECK(boost::polymorphic_relaxed_get<TestType>(v));
-        BOOST_CHECK(boost::polymorphic_relaxed_get<const TestType>(v));
+        BOOST_TEST(boost::polymorphic_get<TestType>(v));
+        BOOST_TEST(boost::polymorphic_get<const TestType>(v));
+        BOOST_TEST(boost::polymorphic_strict_get<TestType>(v));
+        BOOST_TEST(boost::polymorphic_strict_get<const TestType>(v));
+        BOOST_TEST(boost::polymorphic_relaxed_get<TestType>(v));
+        BOOST_TEST(boost::polymorphic_relaxed_get<const TestType>(v));
 
-        BOOST_CHECK(boost::polymorphic_get<cref_test_t>(v));
-        BOOST_CHECK(boost::polymorphic_strict_get<cref_test_t>(v));
-        BOOST_CHECK(boost::polymorphic_relaxed_get<cref_test_t>(v));
+        BOOST_TEST(boost::polymorphic_get<cref_test_t>(v));
+        BOOST_TEST(boost::polymorphic_strict_get<cref_test_t>(v));
+        BOOST_TEST(boost::polymorphic_relaxed_get<cref_test_t>(v));
 
         if (ref_same) {
-            BOOST_CHECK(boost::polymorphic_get<ref_test_t>(v));
-            BOOST_CHECK(boost::polymorphic_get<cref_test_t>(v));
-            BOOST_CHECK(boost::polymorphic_strict_get<ref_test_t>(v));
-            BOOST_CHECK(boost::polymorphic_strict_get<cref_test_t>(v));
-            BOOST_CHECK(boost::polymorphic_relaxed_get<ref_test_t>(v));
-            BOOST_CHECK(boost::polymorphic_relaxed_get<cref_test_t>(v));
+            BOOST_TEST(boost::polymorphic_get<ref_test_t>(v));
+            BOOST_TEST(boost::polymorphic_get<cref_test_t>(v));
+            BOOST_TEST(boost::polymorphic_strict_get<ref_test_t>(v));
+            BOOST_TEST(boost::polymorphic_strict_get<cref_test_t>(v));
+            BOOST_TEST(boost::polymorphic_relaxed_get<ref_test_t>(v));
+            BOOST_TEST(boost::polymorphic_relaxed_get<cref_test_t>(v));
         }
     } else {
-        BOOST_CHECK(!boost::polymorphic_get<TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_get<const TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_strict_get<TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_strict_get<const TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_relaxed_get<TestType>(v));
-        BOOST_CHECK(!boost::polymorphic_relaxed_get<const TestType>(v));
+        BOOST_TEST(!boost::polymorphic_get<TestType>(v));
+        BOOST_TEST(!boost::polymorphic_get<const TestType>(v));
+        BOOST_TEST(!boost::polymorphic_strict_get<TestType>(v));
+        BOOST_TEST(!boost::polymorphic_strict_get<const TestType>(v));
+        BOOST_TEST(!boost::polymorphic_relaxed_get<TestType>(v));
+        BOOST_TEST(!boost::polymorphic_relaxed_get<const TestType>(v));
     }
 }
 
@@ -101,32 +101,32 @@ inline void check_get_on_types_impl_single_type(V* v)
     const bool ref_same = !!boost::is_same<T, ref_test_t>::value;
 
     if (exact_same || ref_same) {
-        BOOST_CHECK(boost::get<TestType>(v));
-        BOOST_CHECK(boost::get<const TestType>(v));
-        BOOST_CHECK(boost::strict_get<TestType>(v));
-        BOOST_CHECK(boost::strict_get<const TestType>(v));
-        BOOST_CHECK(boost::relaxed_get<TestType>(v));
-        BOOST_CHECK(boost::relaxed_get<const TestType>(v));
+        BOOST_TEST(boost::get<TestType>(v));
+        BOOST_TEST(boost::get<const TestType>(v));
+        BOOST_TEST(boost::strict_get<TestType>(v));
+        BOOST_TEST(boost::strict_get<const TestType>(v));
+        BOOST_TEST(boost::relaxed_get<TestType>(v));
+        BOOST_TEST(boost::relaxed_get<const TestType>(v));
 
-        BOOST_CHECK(boost::get<cref_test_t>(v));
-        BOOST_CHECK(boost::strict_get<cref_test_t>(v));
-        BOOST_CHECK(boost::relaxed_get<cref_test_t>(v));
+        BOOST_TEST(boost::get<cref_test_t>(v));
+        BOOST_TEST(boost::strict_get<cref_test_t>(v));
+        BOOST_TEST(boost::relaxed_get<cref_test_t>(v));
 
         if (ref_same) {
-            BOOST_CHECK(boost::get<ref_test_t>(v));
-            BOOST_CHECK(boost::get<cref_test_t>(v));
-            BOOST_CHECK(boost::strict_get<ref_test_t>(v));
-            BOOST_CHECK(boost::strict_get<cref_test_t>(v));
-            BOOST_CHECK(boost::relaxed_get<ref_test_t>(v));
-            BOOST_CHECK(boost::relaxed_get<cref_test_t>(v));
+            BOOST_TEST(boost::get<ref_test_t>(v));
+            BOOST_TEST(boost::get<cref_test_t>(v));
+            BOOST_TEST(boost::strict_get<ref_test_t>(v));
+            BOOST_TEST(boost::strict_get<cref_test_t>(v));
+            BOOST_TEST(boost::relaxed_get<ref_test_t>(v));
+            BOOST_TEST(boost::relaxed_get<cref_test_t>(v));
         }
     } else {
-        BOOST_CHECK(!boost::get<TestType>(v));
-        BOOST_CHECK(!boost::get<const TestType>(v));
-        BOOST_CHECK(!boost::strict_get<TestType>(v));
-        BOOST_CHECK(!boost::strict_get<const TestType>(v));
-        BOOST_CHECK(!boost::relaxed_get<TestType>(v));
-        BOOST_CHECK(!boost::relaxed_get<const TestType>(v));
+        BOOST_TEST(!boost::get<TestType>(v));
+        BOOST_TEST(!boost::get<const TestType>(v));
+        BOOST_TEST(!boost::strict_get<TestType>(v));
+        BOOST_TEST(!boost::strict_get<const TestType>(v));
+        BOOST_TEST(!boost::relaxed_get<TestType>(v));
+        BOOST_TEST(!boost::relaxed_get<const TestType>(v));
     }
 }
 
@@ -148,19 +148,19 @@ inline void check_get_on_types_impl(V* v)
     check_polymorphic_get_on_types_impl_single_type<T, V, std::string>(v);
 
     // Never exist in here
-    BOOST_CHECK(!boost::relaxed_get<short>(v));
-    BOOST_CHECK(!boost::relaxed_get<const short>(v));
-    BOOST_CHECK(!boost::relaxed_get<char>(v));
-    BOOST_CHECK(!boost::relaxed_get<char*>(v));
-    BOOST_CHECK(!boost::relaxed_get<bool>(v));
-    BOOST_CHECK(!boost::relaxed_get<const bool>(v));
+    BOOST_TEST(!boost::relaxed_get<short>(v));
+    BOOST_TEST(!boost::relaxed_get<const short>(v));
+    BOOST_TEST(!boost::relaxed_get<char>(v));
+    BOOST_TEST(!boost::relaxed_get<char*>(v));
+    BOOST_TEST(!boost::relaxed_get<bool>(v));
+    BOOST_TEST(!boost::relaxed_get<const bool>(v));
 
-    BOOST_CHECK(!boost::polymorphic_relaxed_get<short>(v));
-    BOOST_CHECK(!boost::polymorphic_relaxed_get<const short>(v));
-    BOOST_CHECK(!boost::polymorphic_relaxed_get<char>(v));
-    BOOST_CHECK(!boost::polymorphic_relaxed_get<char*>(v));
-    BOOST_CHECK(!boost::polymorphic_relaxed_get<bool>(v));
-    BOOST_CHECK(!boost::polymorphic_relaxed_get<const bool>(v));
+    BOOST_TEST(!boost::polymorphic_relaxed_get<short>(v));
+    BOOST_TEST(!boost::polymorphic_relaxed_get<const short>(v));
+    BOOST_TEST(!boost::polymorphic_relaxed_get<char>(v));
+    BOOST_TEST(!boost::polymorphic_relaxed_get<char*>(v));
+    BOOST_TEST(!boost::polymorphic_relaxed_get<bool>(v));
+    BOOST_TEST(!boost::polymorphic_relaxed_get<const bool>(v));
 
     boost::get<T>(*v);              // Must compile
     boost::get<const T>(*v);        // Must compile
@@ -271,20 +271,20 @@ inline void get_cref_test()
 {
     int i = 0;
     var_cref_t v(i);
-    BOOST_CHECK(boost::get<const int>(&v));
-    BOOST_CHECK(boost::get<const int&>(&v));
-    BOOST_CHECK(!boost::get<const base>(&v));
+    BOOST_TEST(boost::get<const int>(&v));
+    BOOST_TEST(boost::get<const int&>(&v));
+    BOOST_TEST(!boost::get<const base>(&v));
 
     base b;
     var_cref_t v1(b);
-    BOOST_CHECK(boost::get<const base>(&v1));
-    BOOST_CHECK(!boost::get<const derived1>(&v1));
-    BOOST_CHECK(!boost::get<const int>(&v1));
+    BOOST_TEST(boost::get<const base>(&v1));
+    BOOST_TEST(!boost::get<const derived1>(&v1));
+    BOOST_TEST(!boost::get<const int>(&v1));
 
     std::string s("Hello");
     const var_cref_t v4 = s;
-    BOOST_CHECK(boost::get<const std::string>(&v4));
-    BOOST_CHECK(!boost::get<const int>(&v4));
+    BOOST_TEST(boost::get<const std::string>(&v4));
+    BOOST_TEST(!boost::get<const int>(&v4));
 }
 
 inline void get_recursive_test()
@@ -314,45 +314,45 @@ inline void check_that_does_not_exist_impl()
 {
     using namespace boost::detail::variant;
 
-    BOOST_CHECK((holds_element<T, const int>::value));
-    BOOST_CHECK((!holds_element<T, short>::value));
-    BOOST_CHECK((!holds_element<T, short>::value));
-    BOOST_CHECK((!holds_element<T, const short>::value));
-    BOOST_CHECK((!holds_element<T, char*>::value));
-    BOOST_CHECK((!holds_element<T, const char*>::value));
-    BOOST_CHECK((!holds_element<T, char[5]>::value));
-    BOOST_CHECK((!holds_element<T, const char[5]>::value));
-    BOOST_CHECK((!holds_element<T, bool>::value));
-    BOOST_CHECK((!holds_element<T, const bool>::value));
+    BOOST_TEST((holds_element<T, const int>::value));
+    BOOST_TEST((!holds_element<T, short>::value));
+    BOOST_TEST((!holds_element<T, short>::value));
+    BOOST_TEST((!holds_element<T, const short>::value));
+    BOOST_TEST((!holds_element<T, char*>::value));
+    BOOST_TEST((!holds_element<T, const char*>::value));
+    BOOST_TEST((!holds_element<T, char[5]>::value));
+    BOOST_TEST((!holds_element<T, const char[5]>::value));
+    BOOST_TEST((!holds_element<T, bool>::value));
+    BOOST_TEST((!holds_element<T, const bool>::value));
 
-    BOOST_CHECK((!holds_element<T, boost::recursive_wrapper<int> >::value));
-    BOOST_CHECK((!holds_element<T, boost::recursive_wrapper<short> >::value));
-    BOOST_CHECK((!holds_element<T, boost::detail::reference_content<short> >::value));
+    BOOST_TEST((!holds_element<T, boost::recursive_wrapper<int> >::value));
+    BOOST_TEST((!holds_element<T, boost::recursive_wrapper<short> >::value));
+    BOOST_TEST((!holds_element<T, boost::detail::reference_content<short> >::value));
 
 
-    BOOST_CHECK((holds_element_polymorphic<T, const int>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, short>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, short>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, const short>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, char*>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, const char*>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, char[5]>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, const char[5]>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, bool>::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, const bool>::value));
+    BOOST_TEST((holds_element_polymorphic<T, const int>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, short>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, short>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, const short>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, char*>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, const char*>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, char[5]>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, const char[5]>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, bool>::value));
+    BOOST_TEST((!holds_element_polymorphic<T, const bool>::value));
 
-    BOOST_CHECK((!holds_element_polymorphic<T, boost::recursive_wrapper<int> >::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, boost::recursive_wrapper<short> >::value));
-    BOOST_CHECK((!holds_element_polymorphic<T, boost::detail::reference_content<short> >::value));
+    BOOST_TEST((!holds_element_polymorphic<T, boost::recursive_wrapper<int> >::value));
+    BOOST_TEST((!holds_element_polymorphic<T, boost::recursive_wrapper<short> >::value));
+    BOOST_TEST((!holds_element_polymorphic<T, boost::detail::reference_content<short> >::value));
 }
 
 inline void check_that_does_not_exist()
 {
     using namespace boost::detail::variant;
 
-    BOOST_CHECK((holds_element<var_t, int>::value));
-    BOOST_CHECK((holds_element<var_ref_t, int>::value));
-    BOOST_CHECK((!holds_element<var_cref_t, int>::value));
+    BOOST_TEST((holds_element<var_t, int>::value));
+    BOOST_TEST((holds_element<var_ref_t, int>::value));
+    BOOST_TEST((!holds_element<var_cref_t, int>::value));
 
     check_that_does_not_exist_impl<var_t>();
     check_that_does_not_exist_impl<var_ref_t>();
@@ -399,7 +399,7 @@ inline void get_rvref_test()
 }
 #endif  // BOOST_NO_CXX11_RVALUE_REFERENCES
 
-int test_main(int , char* [])
+int main()
 {
     get_test();
     get_test_no_fallback();
@@ -412,5 +412,5 @@ int test_main(int , char* [])
     get_rvref_test();
 #endif
 
-    return boost::exit_success;
+    return boost::report_errors();
 }

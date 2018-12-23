@@ -10,7 +10,7 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost/test/minimal.hpp"
+#include "boost/core/lightweight_test.hpp"
 #include "boost/variant.hpp"
 
 #include <iostream>
@@ -66,9 +66,9 @@ void run()
 
 
 
-int test_main(int , char* [])
+int main()
 {
    run();
-   return 0;
+   return boost::report_errors();
 }
 
