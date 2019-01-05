@@ -62,7 +62,7 @@ public:
 
 };
 
-#ifndef BOOST_NO_CXX11_REF_QUALIFIERS //BOOST_NO_CXX11_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_REF_QUALIFIERS // BOOST_NO_CXX11_RVALUE_REFERENCES is not enough for disabling buggy GCCs < 4.8
 struct rvalue_ref_visitor
 {
     typedef int result_type;
@@ -140,7 +140,7 @@ int main()
     unary_test< check2_t       >(var2);
     unary_test< check2_const_t >(cvar2);
 
-#ifndef BOOST_NO_CXX11_REF_QUALIFIERS //BOOST_NO_CXX11_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_REF_QUALIFIERS // BOOST_NO_CXX11_RVALUE_REFERENCES is not enough for disabling buggy GCCs < 4.8
     BOOST_TEST_EQ( (boost::apply_visitor(
                         rvalue_ref_visitor(),
                         boost::variant<udt1, udt2>(udt2()))), 1 );
