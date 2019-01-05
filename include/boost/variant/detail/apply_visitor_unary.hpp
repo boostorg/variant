@@ -108,6 +108,7 @@ apply_visitor(const Visitor& visitor, Visitable& visitable)
 
 
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
+#define BOOST_VARIANT_HAS_DECLTYPE_APPLY_VISITOR_RETURN_TYPE
 
 // C++14
 namespace detail { namespace variant {
@@ -125,14 +126,14 @@ struct result_multideduce1 {
     struct deduce_impl {
         typedef typename boost::mpl::next<It>::type next_t;
         typedef typename boost::mpl::deref<It>::type value_t;
-        typedef decltype(true ? boost::declval< Visitor& >()( boost::declval< value_t& >() )
+        typedef decltype(true ? boost::declval< Visitor& >()( boost::declval< value_t >() )
                               : boost::declval< typename deduce_impl<next_t>::type >()) type;
     };
 
     template <class Dummy>
     struct deduce_impl<last_it, Dummy> {
         typedef typename boost::mpl::deref<last_it>::type value_t;
-        typedef decltype(boost::declval< Visitor& >()( boost::declval< value_t& >() )) type;
+        typedef decltype(boost::declval< Visitor& >()( boost::declval< value_t >() )) type;
     };
 
     typedef typename deduce_impl<begin_it>::type type;
