@@ -17,15 +17,12 @@
 
 #include <boost/variant/detail/apply_visitor_unary.hpp>
 
-#include <boost/utility/enable_if.hpp>
-#include <boost/mpl/not.hpp>
-#include <boost/type_traits/is_const.hpp>
-
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
 #   include <boost/variant/detail/has_result_type.hpp>
 #endif
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#   include <boost/core/enable_if.hpp>
 #   include <boost/type_traits/is_lvalue_reference.hpp>
 #   include <boost/type_traits/is_same.hpp>
 #   include <boost/move/move.hpp>

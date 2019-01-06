@@ -16,11 +16,6 @@
 #include <boost/config.hpp>
 #include <boost/move/utility.hpp>
 
-#include <boost/core/enable_if.hpp>
-#include <boost/mpl/not.hpp>
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
 #   include <boost/mpl/distance.hpp>
 #   include <boost/mpl/advance.hpp>
@@ -28,6 +23,7 @@
 #   include <boost/mpl/size.hpp>
 #   include <boost/utility/declval.hpp>
 #   include <boost/core/enable_if.hpp>
+#   include <boost/type_traits/remove_reference.hpp>
 #   include <boost/variant/detail/has_result_type.hpp>
 #endif
 
