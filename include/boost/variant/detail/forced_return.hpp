@@ -14,7 +14,6 @@
 #define BOOST_VARIANT_DETAIL_FORCED_RETURN_HPP
 
 #include <boost/config.hpp>
-#include <boost/variant/detail/generic_result_type.hpp>
 #include <boost/assert.hpp>
 #include <cstdlib> // std::abort
 
@@ -39,8 +38,7 @@ BOOST_NORETURN inline void forced_return_no_return() { // fixes `must return a v
 // compile-time requirement of returning a result value.
 //
 template <typename T>
-BOOST_NORETURN inline
-    BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(T)
+BOOST_NORETURN inline T
 forced_return()
 {
     // logical error: should never be here! (see above)
@@ -49,7 +47,7 @@ forced_return()
     forced_return_no_return();
 
 #ifdef BOOST_NO_NORETURN
-    BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(T) (*dummy)() = 0;
+    T (*dummy)() = 0;
     return dummy();
 #endif
 }

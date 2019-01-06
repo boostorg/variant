@@ -15,7 +15,6 @@
 
 #include <boost/config.hpp>
 #include <boost/detail/workaround.hpp>
-#include <boost/variant/detail/generic_result_type.hpp>
 #include <boost/move/utility.hpp>
 
 #if BOOST_WORKAROUND(__EDG__, BOOST_TESTED_AT(302))
@@ -50,7 +49,7 @@ namespace boost {
 #if !BOOST_WORKAROUND(__EDG__, BOOST_TESTED_AT(302))
 
 #   define BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(V) \
-    BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename V::result_type) \
+    typename V::result_type \
     /**/
 
 #else // EDG-based compilers
@@ -58,7 +57,7 @@ namespace boost {
 #   define BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(V) \
     typename enable_if< \
           mpl::not_< is_const< V > > \
-        , BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename V::result_type) \
+        , typename V::result_type \
         >::type \
     /**/
 
@@ -90,16 +89,14 @@ apply_visitor(Visitor& visitor, Visitable& visitable)
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 template <typename Visitor, typename Visitable>
-inline
-    BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
+inline typename Visitor::result_type
 apply_visitor(const Visitor& visitor, Visitable&& visitable)
 {
     return ::boost::forward<Visitable>(visitable).apply_visitor(visitor);
 }
 #else
 template <typename Visitor, typename Visitable>
-inline
-    BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(typename Visitor::result_type)
+inline typename Visitor::result_type
 apply_visitor(const Visitor& visitor, Visitable& visitable)
 {
     return visitable.apply_visitor(visitor);
