@@ -14,16 +14,12 @@
 #define BOOST_VARIANT_DETAIL_APPLY_VISITOR_BINARY_HPP
 
 #include <boost/config.hpp>
-#include <boost/detail/workaround.hpp>
 
 #include <boost/variant/detail/apply_visitor_unary.hpp>
 
 #include <boost/utility/enable_if.hpp>
-
-#if BOOST_WORKAROUND(__EDG__, BOOST_TESTED_AT(302))
 #include <boost/mpl/not.hpp>
 #include <boost/type_traits/is_const.hpp>
-#endif
 
 #if !defined(BOOST_NO_CXX14_DECLTYPE_AUTO) && !defined(BOOST_NO_CXX11_DECLTYPE_N3276)
 #   include <boost/variant/detail/has_result_type.hpp>
@@ -181,28 +177,10 @@ private:
 // nonconst-visitor version:
 //
 
-#if !BOOST_WORKAROUND(__EDG__, BOOST_TESTED_AT(302))
-
-#   define BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(V) \
-    typename V::result_type \
-    /**/
-
-#else // EDG-based compilers
-
-#   define BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(V) \
-    typename enable_if< \
-          mpl::not_< is_const< V > > \
-        , typename V::result_type \
-        >::type \
-    /**/
-
-#endif // EDG-based compilers workaround
-
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 
 template <typename Visitor, typename Visitable1, typename Visitable2>
-inline
-    BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(Visitor)
+inline typename Visitor::result_type
 apply_visitor( Visitor& visitor, Visitable1&& visitable1, Visitable2&& visitable2)
 {
     ::boost::detail::variant::apply_visitor_binary_unwrap<
@@ -215,8 +193,7 @@ apply_visitor( Visitor& visitor, Visitable1&& visitable1, Visitable2&& visitable
 #else
 
 template <typename Visitor, typename Visitable1, typename Visitable2>
-inline
-    BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE(Visitor)
+inline typename Visitor::result_type
 apply_visitor( Visitor& visitor, Visitable1& visitable1, Visitable2& visitable2)
 {
     ::boost::detail::variant::apply_visitor_binary_unwrap<
@@ -227,8 +204,6 @@ apply_visitor( Visitor& visitor, Visitable1& visitable1, Visitable2& visitable2)
 }
 
 #endif
-
-#undef BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE
 
 //
 // const-visitor version:
