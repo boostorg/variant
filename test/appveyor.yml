@@ -2,7 +2,7 @@
 # subject to the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Copyright Antony Polukhin 2016-2018.
+# Copyright Antony Polukhin 2016-2019.
 
 #
 # See https://svn.boost.org/trac/boost/wiki/TravisCoverals for description of this file
@@ -69,7 +69,7 @@ before_build:
 
     - rm -rf %BOOST%/libs/%BOOST_LIBS_FOLDER%
     - mv -f %APPVEYOR_BUILD_FOLDER% %BOOST%/libs/%BOOST_LIBS_FOLDER%
-    - python tools/boostdep/depinst/depinst.py --git_args "--depth 1 --jobs 2" %BOOST_LIBS_FOLDER%
+    - python tools/boostdep/depinst/depinst.py --git_args "--depth 10 --jobs 2" %BOOST_LIBS_FOLDER%
 
 build_script:
     - cmd /c bootstrap
