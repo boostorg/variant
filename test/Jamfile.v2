@@ -56,6 +56,7 @@ test-suite variant
     [ run variant_swap_test.cpp ]
     [ run auto_visitors.cpp ]
     [ run issue42.cpp ]
+    [ run issue53.cpp ]
     [ run overload_selection.cpp ]
     [ run recursive_wrapper_move_test.cpp ]
     [ run variant_over_joint_view_test.cpp ]
