@@ -16,6 +16,7 @@
 #include <boost/variant/recursive_wrapper_fwd.hpp>
 #include <boost/variant/detail/move.hpp>
 #include <boost/checked_delete.hpp>
+#include <boost/core/exchange.hpp>
 
 namespace boost {
 
@@ -45,7 +46,7 @@ public: // structors
     recursive_wrapper(const T& operand);
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES 
-    recursive_wrapper(recursive_wrapper&& operand);
+    recursive_wrapper(recursive_wrapper&& operand) BOOST_NOEXCEPT;
     recursive_wrapper(T&& operand);
 #endif
 
@@ -125,8 +126,8 @@ recursive_wrapper<T>::recursive_wrapper(const T& operand)
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES 
 template <typename T>
-recursive_wrapper<T>::recursive_wrapper(recursive_wrapper&& operand)
-    : p_(new T( detail::variant::move(operand.get()) ))
+recursive_wrapper<T>::recursive_wrapper(recursive_wrapper&& operand) BOOST_NOEXCEPT
+    : p_(boost::exchange(operand.p_, nullptr))
 {
 }
 
