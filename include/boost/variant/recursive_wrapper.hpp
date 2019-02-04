@@ -16,7 +16,6 @@
 #include <boost/variant/recursive_wrapper_fwd.hpp>
 #include <boost/variant/detail/move.hpp>
 #include <boost/checked_delete.hpp>
-#include <boost/core/exchange.hpp>
 
 namespace boost {
 
@@ -46,7 +45,11 @@ public: // structors
     recursive_wrapper(const T& operand);
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES 
+#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
     recursive_wrapper(recursive_wrapper&& operand) BOOST_NOEXCEPT;
+#else
+    recursive_wrapper(recursive_wrapper&& operand);
+#endif
     recursive_wrapper(T&& operand);
 #endif
 
@@ -92,8 +95,8 @@ public: // modifiers
 
 public: // queries
 
-    T& get() { return *get_pointer(); }
-    const T& get() const { return *get_pointer(); }
+    T& get() { BOOST_ASSERT(get_pointer() != NULL); return *get_pointer(); }
+    const T& get() const { BOOST_ASSERT(get_pointer() != NULL); return *get_pointer(); }
 
     T* get_pointer() { return p_; }
     const T* get_pointer() const { return p_; }
@@ -125,11 +128,20 @@ recursive_wrapper<T>::recursive_wrapper(const T& operand)
 }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES 
+#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
 template <typename T>
 recursive_wrapper<T>::recursive_wrapper(recursive_wrapper&& operand) BOOST_NOEXCEPT
-    : p_(boost::exchange(operand.p_, nullptr))
+    : p_(operand.p_)
+{
+    operand.p_ = static_cast<T*>(NULL);
+}
+#else
+template <typename T>
+recursive_wrapper<T>::recursive_wrapper(recursive_wrapper&& operand)
+    : p_(new T( detail::variant::move(operand.get()) ))
 {
 }
+#endif
 
 template <typename T>
 recursive_wrapper<T>::recursive_wrapper(T&& operand)

@@ -1090,6 +1090,41 @@ private:
 #endif
 };
 
+class valueless_recursive_visitor
+{
+public: // visitor typedefs
+
+    typedef bool result_type;
+
+public: // internal visitor interfaces
+
+    template <typename T>
+    result_type internal_visit(const T& operand, int)
+    {
+        return false;
+    }
+
+public: // internal visitor interfaces, cont.
+
+    template <typename T>
+    result_type internal_visit(const boost::recursive_wrapper<T>& operand, long)
+    {
+        return operand.get_pointer() == NULL;
+    }
+
+    template <typename T>
+    result_type internal_visit(const boost::detail::reference_content<T>& operand, long)
+    {
+        return internal_visit( operand.get(), 1L );
+    }
+
+    template <typename T>
+    result_type internal_visit(const boost::detail::variant::backup_holder<T>& operand, long)
+    {
+        return internal_visit( operand.get(), 1L );
+    }
+};
+
 }} // namespace detail::variant
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2398,6 +2433,12 @@ public: // visitation support
     {
         detail::variant::invoke_visitor<Visitor, false> invoker(visitor);
         return this->internal_apply_visitor(invoker);
+    }
+
+    bool valueless_recursive() const
+    {
+        detail::variant::valueless_recursive_visitor visitor;
+        return this->internal_apply_visitor(visitor);
     }
 
 }; // class variant

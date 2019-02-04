@@ -67,7 +67,13 @@ template <class T, class U> struct is_constructible<recursive_wrapper<T>, recurs
 template <class T, class U> struct is_constructible<recursive_wrapper<T>, const recursive_wrapper<U>& > : boost::false_type{};
 
 // This specialisation is required to workaround GCC6 ICE: https://svn.boost.org/trac/boost/ticket/12680
-template <class T> struct is_nothrow_move_constructible<recursive_wrapper<T> > : boost::true_type{};
+template <class T> struct is_nothrow_move_constructible<recursive_wrapper<T> >
+#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
+    : boost::true_type{};
+#else
+// recursive_wrapper is not nothrow move constructible, because it's constructor does dynamic memory allocation.
+    : boost::false_type{};
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // metafunction is_recursive_wrapper (modeled on code by David Abrahams)
