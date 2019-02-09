@@ -1109,7 +1109,7 @@ public: // internal visitor interfaces, cont.
     template <typename T>
     result_type internal_visit(const boost::recursive_wrapper<T>& operand, long)
     {
-        return operand.get_pointer() == NULL;
+        return operand.empty();
     }
 
     template <typename T>

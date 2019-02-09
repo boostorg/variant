@@ -95,11 +95,14 @@ public: // modifiers
 
 public: // queries
 
-    T& get() { BOOST_ASSERT(get_pointer() != NULL); return *get_pointer(); }
-    const T& get() const { BOOST_ASSERT(get_pointer() != NULL); return *get_pointer(); }
+    bool empty() const BOOST_NOEXCEPT { return get_pointer() == NULL; }
 
-    T* get_pointer() { return p_; }
-    const T* get_pointer() const { return p_; }
+    // Expects: `!empty()`.
+    T& get() BOOST_NOEXCEPT { BOOST_ASSERT(!empty()); return *get_pointer(); }
+    const T& get() const BOOST_NOEXCEPT { BOOST_ASSERT(!empty()); return *get_pointer(); }
+
+    T* get_pointer() BOOST_NOEXCEPT { return p_; }
+    const T* get_pointer() const BOOST_NOEXCEPT { return p_; }
 
 };
 
