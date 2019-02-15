@@ -49,20 +49,20 @@ int main()
         boost::recursive_wrapper<int>,
         boost::recursive_wrapper<move_only_type>
     > a(boost::move(a_)), b(boost::move(b_)), c(3);
-    BOOST_TEST(!a.valueless_recursive());
-    BOOST_TEST(!b.valueless_recursive());
+    BOOST_TEST(!a.empty());
+    BOOST_TEST(!b.empty());
     a = boost::move(b);
-    BOOST_TEST(!a.valueless_recursive());
+    BOOST_TEST(!a.empty());
     BOOST_TEST_EQ(boost::get<move_only_type>(a).value_, 1);
     // check that we can reuse a moved out variant with move assignment
     move_only_type c_(2);
     b = boost::move(c_); // TODO: no emplace yet
-    BOOST_TEST(!b.valueless_recursive());
+    BOOST_TEST(!b.empty());
     BOOST_TEST_EQ(boost::get<move_only_type>(b).value_, 2);
     // check that recursive variant advertises its valueless after beging moved out
     BOOST_TEST_EQ(boost::get<int>(c), 3);
     c = boost::move(b);
-    BOOST_TEST( b.valueless_recursive());
+    BOOST_TEST( b.empty());
     BOOST_TEST_EQ(boost::get<move_only_type>(c).value_, 2);
     return boost::report_errors();
 }

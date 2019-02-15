@@ -1090,7 +1090,7 @@ private:
 #endif
 };
 
-class valueless_recursive_visitor
+class empty_check_visitor
 {
 public: // visitor typedefs
 
@@ -2235,7 +2235,8 @@ public: // queries
 
     bool empty() const BOOST_NOEXCEPT
     {
-        return false;
+        detail::variant::empty_check_visitor visitor;
+        return this->internal_apply_visitor(visitor);
     }
 
     const boost::typeindex::type_info& type() const
@@ -2433,12 +2434,6 @@ public: // visitation support
     {
         detail::variant::invoke_visitor<Visitor, false> invoker(visitor);
         return this->internal_apply_visitor(invoker);
-    }
-
-    bool valueless_recursive() const
-    {
-        detail::variant::valueless_recursive_visitor visitor;
-        return this->internal_apply_visitor(visitor);
     }
 
 }; // class variant
