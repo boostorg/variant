@@ -13,19 +13,29 @@ int main() {}
 #else
 #include "boost/core/lightweight_test.hpp"
 #include <boost/variant.hpp>
-#include <type_traits>
+#include <boost/type_traits/is_nothrow_move_constructible.hpp>
+#include <boost/type_traits/is_nothrow_move_assignable.hpp>
+#include <boost/type_traits/has_nothrow_constructor.hpp>
+#include <boost/type_traits/has_nothrow_assign.hpp>
 #include <utility>
 
+// pointer stealing does not care if move can throw
 struct move_only_type
 {
-    explicit move_only_type(int value) noexcept : value_(value) {}
-    move_only_type(move_only_type&& x) noexcept : value_(x.value_) {}
-    move_only_type& operator=(move_only_type&& x) noexcept { value_ = x.value_; return *this; }
+    explicit move_only_type(int value) : value_(value) {}
+    move_only_type(move_only_type&& x) : value_(x.value_) {}
+    move_only_type& operator=(move_only_type&& x) { value_ = x.value_; return *this; }
 
     int value_;
 };
-static_assert(std::is_nothrow_move_constructible<move_only_type>::value, "");
-static_assert(std::is_nothrow_move_assignable<move_only_type>::value, "");
+static_assert(!boost::is_nothrow_move_constructible<move_only_type>::value, "");
+#if !BOOST_WORKAROUND(BOOST_GCC_VERSION, < 40700)
+static_assert(!boost::is_nothrow_move_assignable<move_only_type>::value, "");
+#else // boostorg/type_traits#114
+namespace boost {
+template <> struct is_nothrow_move_assignable<move_only_type> : boost::false_type {};
+}
+#endif
 
 void test_noexcept()
 {
@@ -52,13 +62,13 @@ void test_noexcept()
 
 struct throwing_type
 {
-    throwing_type() noexcept(false) {}
-    throwing_type(throwing_type const&) noexcept(false) { throw 0l; }
-    throwing_type& operator=(throwing_type const&) noexcept(false) { throw 0l; }
+    throwing_type() {}
+    throwing_type(throwing_type const&) { throw 0l; }
+    throwing_type& operator=(throwing_type const&) { throw 0l; }
 };
-static_assert(!std::is_nothrow_default_constructible<throwing_type>::value, "");
-static_assert(!std::is_nothrow_copy_constructible<throwing_type>::value, "");
-static_assert(!std::is_nothrow_copy_assignable<throwing_type>::value, "");
+static_assert(!boost::has_nothrow_default_constructor<throwing_type>::value, "");
+static_assert(!boost::has_nothrow_copy_constructor<throwing_type>::value, "");
+//static_assert(!std::is_nothrow_copy_assignable<throwing_type>::value, ""); // no boost alternative
 
 void test_throwing()
 {
