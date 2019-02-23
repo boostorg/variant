@@ -8,62 +8,77 @@
 // Check that move-only types can be used with recursive_wrapper
 
 #include <boost/config.hpp>
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
-// variant does not support move emulation
+#if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) || defined(BOOST_NO_CXX11_NOEXCEPT)
 int main() {}
 #else
 #include "boost/core/lightweight_test.hpp"
 #include <boost/variant.hpp>
-#include <boost/move/utility_core.hpp>
+#include <type_traits>
+#include <utility>
 
 struct move_only_type
 {
-private:
-    BOOST_MOVABLE_BUT_NOT_COPYABLE(move_only_type)
-
-public:
-    explicit move_only_type(int value) BOOST_NOEXCEPT
-      : value_(value)
-    {}
-
-    // Move ctor
-    move_only_type(BOOST_RV_REF(move_only_type) x) BOOST_NOEXCEPT
-      : value_(x.value_)
-    {}
-
-    // Move assign
-    move_only_type& operator=(BOOST_RV_REF(move_only_type) x) BOOST_NOEXCEPT
-    {
-        value_ = x.value_;
-        return *this;
-    }
+    explicit move_only_type(int value) noexcept : value_(value) {}
+    move_only_type(move_only_type&& x) noexcept : value_(x.value_) {}
+    move_only_type& operator=(move_only_type&& x) noexcept { value_ = x.value_; return *this; }
 
     int value_;
 };
+static_assert(std::is_nothrow_move_constructible<move_only_type>::value, "");
+static_assert(std::is_nothrow_move_assignable<move_only_type>::value, "");
 
-int main()
+void test_noexcept()
 {
-    // TODO: variant does not have inplace construction yet
-    move_only_type a_(0), b_(1);
     boost::variant<
         boost::recursive_wrapper<int>,
         boost::recursive_wrapper<move_only_type>
-    > a(boost::move(a_)), b(boost::move(b_)), c(3);
+    > a(move_only_type(0)), b(move_only_type(1)), c(3);
     BOOST_TEST(!a.empty());
     BOOST_TEST(!b.empty());
-    a = boost::move(b);
+    a = std::move(b);
     BOOST_TEST(!a.empty());
     BOOST_TEST_EQ(boost::get<move_only_type>(a).value_, 1);
     // check that we can reuse a moved out variant with move assignment
     move_only_type c_(2);
-    b = boost::move(c_); // TODO: no emplace yet
+    b = std::move(c_); // TODO: no emplace yet
     BOOST_TEST(!b.empty());
     BOOST_TEST_EQ(boost::get<move_only_type>(b).value_, 2);
     // check that recursive variant advertises its valueless after beging moved out
     BOOST_TEST_EQ(boost::get<int>(c), 3);
-    c = boost::move(b);
+    c = std::move(b);
     BOOST_TEST( b.empty());
     BOOST_TEST_EQ(boost::get<move_only_type>(c).value_, 2);
+}
+
+struct throwing_type
+{
+    throwing_type() noexcept(false) {}
+    throwing_type(throwing_type const&) noexcept(false) { throw 0l; }
+    throwing_type& operator=(throwing_type const&) noexcept(false) { throw 0l; }
+};
+static_assert(!std::is_nothrow_default_constructible<throwing_type>::value, "");
+static_assert(!std::is_nothrow_copy_constructible<throwing_type>::value, "");
+static_assert(!std::is_nothrow_copy_assignable<throwing_type>::value, "");
+
+void test_throwing()
+{
+    boost::variant<
+        throwing_type,
+        boost::recursive_wrapper<int>
+    > a, b(1);
+
+    BOOST_TEST_THROWS(b = std::move(a), long);
+    // failed move must not change anything
+    BOOST_TEST(!a.empty());
+    BOOST_TEST(!b.empty());
+    BOOST_TEST_EQ(a.which(), 0);
+    BOOST_TEST_EQ(boost::get<int>(b), 1);
+}
+
+int main()
+{
+    test_noexcept();
+    test_throwing();
     return boost::report_errors();
 }
 #endif

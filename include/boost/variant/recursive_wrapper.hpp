@@ -95,7 +95,11 @@ public: // modifiers
 
 public: // queries
 
+#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
     bool empty() const BOOST_NOEXCEPT { return get_pointer() == NULL; }
+#else
+    bool empty() const BOOST_NOEXCEPT { return false; }
+#endif
 
     // Expects: `!empty()`.
     T& get() BOOST_NOEXCEPT { BOOST_ASSERT(!empty()); return *get_pointer(); }

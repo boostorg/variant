@@ -2235,8 +2235,12 @@ public: // queries
 
     bool empty() const BOOST_NOEXCEPT
     {
+#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
         detail::variant::empty_check_visitor visitor;
         return this->internal_apply_visitor(visitor);
+#else
+        return false;
+#endif
     }
 
     const boost::typeindex::type_info& type() const
