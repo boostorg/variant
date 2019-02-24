@@ -508,14 +508,18 @@
         <method name="empty" cv="const">
           <type>bool</type>
 
-          <returns><itemizedlist>
-            <listitem><code>false</code>: when is not a recursive <code>variant
-              </code> &ndash; it always contains exactly one of its bounded types.
-              (See <xref linkend="variant.design.never-empty"/> for more
-              information.)</listitem>
-            <listitem><code>true</code>: when a recursive <code>variant</code>
-              value was moved out.</listitem>
-          </itemizedlist></returns>
+          <returns>
+            <itemizedlist>
+              <listitem><code>false</code>: when is not a recursive <code>variant
+                </code> &ndash; it always contains exactly one of its bounded types.
+                (See <xref linkend="variant.design.never-empty"/> for more
+                information.)</listitem>
+              <listitem><code>true</code>: when a recursive <code>variant</code>
+                value was moved out.</listitem>
+            </itemizedlist>
+            <simpara>Note: When <macroname>BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING</macroname>
+                compatibility macro is defined &ndash; always returns <code>false</code>.</simpara>
+          </returns>
 
           <rationale>
             <simpara>Facilitates generic compatibility with

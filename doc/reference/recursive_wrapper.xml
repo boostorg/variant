@@ -212,6 +212,8 @@
           <description>
             <simpara>Returns <code>true</code> when <code>*this</code>
               contains a value.</simpara>
+            <simpara>Note: When <macroname>BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING</macroname>
+                compatibility macro is defined &ndash; always returns <code>false</code>.</simpara>
           </description>
 
           <throws>Will not throw.</throws>
@@ -309,4 +311,21 @@
     </class>
 
   </namespace>
+
+  <macro name="BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING">
+    <purpose>
+      <simpara>A backward-compatibility/migration macro for reverting to the
+        previous never-empty <code><classname>recursive_wrapper</classname></code>.</simpara>
+    </purpose>
+    <description>
+      <para>
+        Defining the macro disables <code><classname>recursive_wrapper</classname></code> pointer
+        stealing from an other <code><classname>recursive_wrapper</classname></code> on move
+        construction.
+      </para>
+      <para>
+        Not defined by default. Appeared in Boost 1.70.
+      </para>
+    </description>
+  </macro>
 </header>
