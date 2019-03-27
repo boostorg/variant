@@ -75,10 +75,8 @@ struct lvalue_rvalue_detector : boost::static_visitor<std::string>
     template <class T>
     std::string operator()(T&&) const
     {
-        if (std::is_lvalue_reference<T>::value)
-            return "lvalue reference";
-        else
-            return "rvalue reference";
+        return std::is_lvalue_reference<T>::value ? "lvalue reference"
+                                                  : "rvalue reference";
     }
 
     template <class T, class V>
@@ -174,6 +172,11 @@ void test_rvalue_parameter4(variant_type&& test_var, variant_type&& test_var2, v
     auto result = boost::apply_visitor(lvalue_rvalue_detector(), std::move(test_var), std::move(test_var2), std::move(test_var3), std::move(test_var4));
     std::cout << "result: " << result << std::endl;
     BOOST_TEST(result == "rvalue reference, rvalue reference, rvalue reference, rvalue reference");
+#else
+    (void)test_var;
+    (void)test_var2;
+    (void)test_var3;
+    (void)test_var4;
 #endif
 }
 
@@ -214,6 +217,10 @@ void test_cpp14_visitor(const variant_type& test_var, const variant_type& test_v
                 test_var, test_var2, test_var3);
     std::cout << "result: " << result << std::endl;
     BOOST_TEST(result == "lvalue reference, lvalue reference, lvalue reference");
+#else
+    (void)test_var;
+    (void)test_var2;
+    (void)test_var3;
 #endif
 }
 
@@ -241,6 +248,10 @@ void test_cpp14_visitor(variant_type&& test_var, variant_type&& test_var2, varia
                 std::move(test_var), std::move(test_var2), std::move(test_var3));
     std::cout << "result: " << result << std::endl;
     BOOST_TEST(result == "rvalue reference, rvalue reference, rvalue reference");
+#else
+    (void)test_var;
+    (void)test_var2;
+    (void)test_var3;
 #endif
 }
 

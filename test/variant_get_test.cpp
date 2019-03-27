@@ -11,6 +11,7 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4127) // conditional expression is constant
+#pragma warning(disable: 4181) // qualifier applied to reference type; ignored
 #endif
 
 #include "boost/variant/get.hpp"
