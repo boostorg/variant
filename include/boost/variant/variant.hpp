@@ -32,6 +32,7 @@
 #include <boost/variant/detail/over_sequence.hpp>
 #include <boost/variant/detail/visitation_impl.hpp>
 #include <boost/variant/detail/hash_variant.hpp>
+#include <boost/variant/detail/std_hash.hpp>
 
 #include <boost/variant/detail/move.hpp>
 
