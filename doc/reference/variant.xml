@@ -131,6 +131,11 @@
             <code>other</code>.</simpara>
         </postconditions>
         
+        <!--ensures--><postconditions>
+          <simpara><code>other.empty()</code> if <code>other</code> had an
+            active value of a recursive type.</simpara>
+        </postconditions>
+
         <throws>
           <simpara>May fail with any exceptions arising from the
             move constructor of <code>other</code>'s contained type.</simpara>
@@ -367,6 +372,11 @@
               destroying the previous content of <code>*this</code>.</simpara>
           </effects>
 
+          <!--ensures--><postconditions>
+            <simpara><code>rhs.empty()</code> if <code>rhs</code> had an
+              active value of a recursive type.</simpara>
+          </postconditions>
+
           <throws>
             <simpara>If the contained type of <code>rhs</code> is the same as
               the contained type of <code>*this</code>, then may fail with any
@@ -410,6 +420,10 @@
               resolution rules, destroying the previous content of
               <code>*this</code>.</simpara>
           </effects>
+
+          <!--ensures--><postconditions>
+            <simpara><code>!empty()</code>.</simpara>
+          </postconditions>
 
           <throws>
             <simpara>If the contained type of <code>*this</code> is
@@ -457,6 +471,10 @@
               <code>*this</code>(conversion is usually done via move construction).</simpara>
           </effects>
 
+          <!--ensures--><postconditions>
+            <simpara><code>!empty()</code>.</simpara>
+          </postconditions>
+
           <throws>
             <simpara>If the contained type of <code>*this</code> is
               <code>T</code>, then may fail with any exceptions arising from
@@ -491,10 +509,16 @@
           <type>bool</type>
 
           <returns>
-            <simpara><code>false</code>: <code>variant</code> always contains
-              exactly one of its bounded types. (See
-              <xref linkend="variant.design.never-empty"/>
-              for more information.)</simpara>
+            <itemizedlist>
+              <listitem><code>false</code>: when is not a recursive <code>variant
+                </code> &ndash; it always contains exactly one of its bounded types.
+                (See <xref linkend="variant.design.never-empty"/> for more
+                information.)</listitem>
+              <listitem><code>true</code>: when a recursive <code>variant</code>
+                value was moved out.</listitem>
+            </itemizedlist>
+            <simpara>Note: When <macroname>BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING</macroname>
+                compatibility macro is defined &ndash; always returns <code>false</code>.</simpara>
           </returns>
 
           <rationale>
@@ -561,6 +585,11 @@
               concept.</simpara>
           </requires>
 
+          <!--expects--><requires>
+            <simpara><code>!empty()</code> and <code>!rhs.empty()</code>.
+              </simpara>
+          </requires>
+
           <returns>
             <simpara><code>true</code> if <code>which() == rhs.which()</code>
               <emphasis>and</emphasis>
@@ -612,6 +641,11 @@
               concept.</simpara>
           </requires>
 
+          <!--expects--><requires>
+            <simpara><code>!empty()</code> and <code>!rhs.empty()</code>.
+              </simpara>
+          </requires>
+
           <returns>
             <simpara><code>true</code> if <code>!(*this == rhs)</code>.</simpara>
           </returns>
@@ -656,6 +690,11 @@
               fulfill the requirements of the
               <conceptname>LessThanComparable</conceptname>
               concept.</simpara>
+          </requires>
+
+          <!--expects--><requires>
+            <simpara><code>!empty()</code> and <code>!rhs.empty()</code>.
+              </simpara>
           </requires>
 
           <returns>
@@ -709,6 +748,11 @@
               concept.</simpara>
           </requires>
 
+          <!--expects--><requires>
+            <simpara><code>!empty()</code> and <code>!rhs.empty()</code>.
+              </simpara>
+          </requires>
+
           <returns>
             <simpara>true if <code>rhs &lt; *this</code>.</simpara>
           </returns>
@@ -756,6 +800,11 @@
               concept.</simpara>
           </requires>
 
+          <!--expects--><requires>
+            <simpara><code>!empty()</code> and <code>!rhs.empty()</code>.
+              </simpara>
+          </requires>
+
           <returns>
             <simpara>true if <code>!(*this > rhs)</code>.</simpara>
           </returns>
@@ -801,6 +850,11 @@
               fulfill the requirements of the
               <conceptname>LessThanComparable</conceptname>
               concept.</simpara>
+          </requires>
+
+          <!--expects--><requires>
+            <simpara><code>!empty()</code> and <code>!rhs.empty()</code>.
+              </simpara>
           </requires>
 
           <returns>
@@ -876,6 +930,11 @@
           concept.</simpara>
       </requires>
 
+      <!--expects--><requires>
+        <simpara><code>!rhs.empty()</code>.
+          </simpara>
+      </requires>
+
       <effects>
         <simpara>Calls <code>out &lt;&lt; x</code>, where <code>x</code> is
           the content of <code>rhs</code>.</simpara>
@@ -910,6 +969,11 @@
           fulfill the requirements of the
           <link linkend="variant.concepts.hashable"><emphasis>Hashable</emphasis></link>
           concept.</simpara>
+      </requires>
+
+      <!--expects--><requires>
+        <simpara><code>!rhs.empty()</code>.
+          </simpara>
       </requires>
 
       <effects>

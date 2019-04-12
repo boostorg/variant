@@ -1090,6 +1090,41 @@ private:
 #endif
 };
 
+class empty_check_visitor
+{
+public: // visitor typedefs
+
+    typedef bool result_type;
+
+public: // internal visitor interfaces
+
+    template <typename T>
+    result_type internal_visit(const T& operand, int)
+    {
+        return false;
+    }
+
+public: // internal visitor interfaces, cont.
+
+    template <typename T>
+    result_type internal_visit(const boost::recursive_wrapper<T>& operand, long)
+    {
+        return operand.empty();
+    }
+
+    template <typename T>
+    result_type internal_visit(const boost::detail::reference_content<T>& operand, long)
+    {
+        return internal_visit( operand.get(), 1L );
+    }
+
+    template <typename T>
+    result_type internal_visit(const boost::detail::variant::backup_holder<T>& operand, long)
+    {
+        return internal_visit( operand.get(), 1L );
+    }
+};
+
 }} // namespace detail::variant
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2200,7 +2235,12 @@ public: // queries
 
     bool empty() const BOOST_NOEXCEPT
     {
+#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
+        detail::variant::empty_check_visitor visitor;
+        return this->internal_apply_visitor(visitor);
+#else
         return false;
+#endif
     }
 
     const boost::typeindex::type_info& type() const
