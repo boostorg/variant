@@ -1100,7 +1100,7 @@ public: // visitor typedefs
 public: // internal visitor interfaces
 
     template <typename T>
-    result_type internal_visit(const T& operand, int)
+    result_type internal_visit(const T& /* operand */, int)
     {
         return false;
     }
