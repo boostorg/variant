@@ -62,22 +62,6 @@ public:
 
 };
 
-#ifndef BOOST_NO_CXX11_REF_QUALIFIERS // BOOST_NO_CXX11_RVALUE_REFERENCES is not enough for disabling buggy GCCs < 4.8
-struct rvalue_ref_visitor
-{
-    typedef int result_type;
-    int operator()(udt1&&) const { return 0; }
-    int operator()(udt2&&) const { return 1; }
-};
-#endif
-#ifdef BOOST_VARIANT_HAS_DECLTYPE_APPLY_VISITOR_RETURN_TYPE
-struct rvalue_ref_decltype_visitor
-{
-    int operator()(udt1&&) const { return 0; }
-    int operator()(udt2&&) const { return 1; }
-};
-#endif
-
 template <typename Checker, typename Variant>
 inline void unary_test(Variant& var, Checker* = 0)
 {
@@ -140,16 +124,7 @@ int main()
     unary_test< check2_t       >(var2);
     unary_test< check2_const_t >(cvar2);
 
-#ifndef BOOST_NO_CXX11_REF_QUALIFIERS // BOOST_NO_CXX11_RVALUE_REFERENCES is not enough for disabling buggy GCCs < 4.8
-    BOOST_TEST_EQ( (boost::apply_visitor(
-                        rvalue_ref_visitor(),
-                        boost::variant<udt1, udt2>(udt2()))), 1 );
-#endif
-#ifdef BOOST_VARIANT_HAS_DECLTYPE_APPLY_VISITOR_RETURN_TYPE
-    BOOST_TEST_EQ( (boost::apply_visitor(
-                        rvalue_ref_decltype_visitor(),
-                        boost::variant<udt1, udt2>(udt2()))), 1 );
-#endif
+    #include "unary_visit_helper.hpp"
 
     //
     // binary tests
