@@ -224,6 +224,44 @@ void test_cpp14_visitor(const variant_type& test_var, const variant_type& test_v
 #endif
 }
 
+void test_cpp14_visitor(variant_type& test_var)
+{
+    std::cout << "Testing lvalue visitable for c++14\n";
+
+    BOOST_TEST(boost::apply_visitor([](auto& v) { return lvalue_rvalue_detector()(v); }, test_var) == "lvalue reference");
+}
+
+void test_cpp14_mutable_visitor(variant_type& test_var)
+{
+    std::cout << "Testing lvalue visitable for c++14 with inline mutable lambda\n";
+
+    BOOST_TEST(boost::apply_visitor([](auto& v) mutable -> auto { return lvalue_rvalue_detector()(v); }, test_var) == "lvalue reference");
+}
+
+void test_cpp14_visitor(variant_type& test_var, variant_type& test_var2)
+{
+    std::cout << "Testing lvalue visitable for c++14\n";
+
+    BOOST_TEST(boost::apply_visitor([](auto& v, auto& vv) { return lvalue_rvalue_detector()(v, vv); }, test_var, test_var2)
+            == "lvalue reference, lvalue reference");
+}
+
+void test_cpp14_visitor(variant_type& test_var, variant_type& test_var2, variant_type& test_var3)
+{
+#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
+    std::cout << "Testing lvalue visitable for c++14\n";
+
+    auto result = boost::apply_visitor([](auto& v, auto& t, auto& p) { return lvalue_rvalue_detector()(v, t, p); },
+                test_var, test_var2, test_var3);
+    std::cout << "result: " << result << std::endl;
+    BOOST_TEST(result == "lvalue reference, lvalue reference, lvalue reference");
+#else
+    (void)test_var;
+    (void)test_var2;
+    (void)test_var3;
+#endif
+}
+
 void test_cpp14_visitor(variant_type&& test_var)
 {
     std::cout << "Testing rvalue visitable for c++14\n";
@@ -344,7 +382,13 @@ void run_cpp14_mixed_tests()
 void run_cpp14_tests()
 {
 #ifndef BOOST_NO_CXX14_DECLTYPE_AUTO
+    variant_type const c1(10), c2(20), c3(30);
     variant_type v1(10), v2(20), v3(30);
+
+    test_cpp14_visitor(c1);
+    test_cpp14_mutable_visitor(c1);
+    test_cpp14_visitor(c2, c3);
+    test_cpp14_visitor(c1, c2, c3);
 
     test_cpp14_visitor(v1);
     test_cpp14_mutable_visitor(v1);
