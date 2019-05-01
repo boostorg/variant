@@ -367,10 +367,6 @@
         given <code>variant</code>.</simpara>
       </requires>
 
-      <!--expects--><requires>
-        <simpara><code>(!operand.empty() &amp;&amp; ...)</code>.</simpara>
-      </requires>
-
       <throws>
         <simpara>The overloads accepting operands throw only if the given
         visitor throws when applied. The overload accepting only a visitor

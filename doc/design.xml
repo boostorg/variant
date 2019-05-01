@@ -30,16 +30,6 @@
         possibility of undefined <code>variant</code> content and the
         significant additional complexity-of-use attendant with such a
         possibility.</para>
-
-      <para>Note: The never-empty guarantee was designed before move semantics
-        were available and it is still in place with one exception of move
-        operations on <classname>variant</classname> which contains an active
-        value of recursive type. It was made because instead of a very cheap
-        pointer stealing the general procedure for throwing move operations
-        was applied. For migration purposes there is a compatibility macro
-        <macroname>BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING</macroname>
-        that reverts the previous behavior.
-      </para>
     </section>
 
     <section id="variant.design.never-empty.problem">
