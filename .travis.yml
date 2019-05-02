@@ -67,17 +67,18 @@ matrix:
 #          sources: ubuntu-toolchain-r-test
 #          packages: g++-8
 
-    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=clang-5 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
-      name: "Clang-5"
+    - env: B2_ARGS='cxxstd=14,1z toolset=clang-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
+      name: "Clang-8"
       sudo: required # Required by leak sanitizer
       addons:
         apt:
-          sources: llvm-toolchain-trusty-5.0
-          packages: clang-5.0
+          sources: llvm-toolchain-trusty-8
+          packages: clang-8
 
-    - env: B2_ARGS='cxxstd=03,11,14 toolset=clang-libc++ cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
+    # Sanitizers disabled for this toolset as they started causing link troubles: 
+    # hidden symbol `_ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE11__recommendEm' isn't defined
+    - env: B2_ARGS='cxxstd=03,11,14 toolset=clang-libc++ cxxflags="--coverage -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"'
       name: "Clang-3.8, libc++"
-      sudo: required # Required by leak sanitizer
       addons:
         apt:
           packages: libc++-dev
