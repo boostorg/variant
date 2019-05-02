@@ -45,11 +45,7 @@ public: // structors
     recursive_wrapper(const T& operand);
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES 
-#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
-    recursive_wrapper(recursive_wrapper&& operand) BOOST_NOEXCEPT;
-#else
     recursive_wrapper(recursive_wrapper&& operand);
-#endif
     recursive_wrapper(T&& operand);
 #endif
 
@@ -95,18 +91,11 @@ public: // modifiers
 
 public: // queries
 
-#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
-    bool empty() const BOOST_NOEXCEPT { return get_pointer() == NULL; }
-#else
-    bool empty() const BOOST_NOEXCEPT { return false; }
-#endif
+    T& get() { return *get_pointer(); }
+    const T& get() const { return *get_pointer(); }
 
-    // Expects: `!empty()`.
-    T& get() BOOST_NOEXCEPT { BOOST_ASSERT(!empty()); return *get_pointer(); }
-    const T& get() const BOOST_NOEXCEPT { BOOST_ASSERT(!empty()); return *get_pointer(); }
-
-    T* get_pointer() BOOST_NOEXCEPT { return p_; }
-    const T* get_pointer() const BOOST_NOEXCEPT { return p_; }
+    T* get_pointer() { return p_; }
+    const T* get_pointer() const { return p_; }
 
 };
 
@@ -135,20 +124,11 @@ recursive_wrapper<T>::recursive_wrapper(const T& operand)
 }
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES 
-#ifndef BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING
-template <typename T>
-recursive_wrapper<T>::recursive_wrapper(recursive_wrapper&& operand) BOOST_NOEXCEPT
-    : p_(operand.p_)
-{
-    operand.p_ = static_cast<T*>(NULL);
-}
-#else
 template <typename T>
 recursive_wrapper<T>::recursive_wrapper(recursive_wrapper&& operand)
     : p_(new T( detail::variant::move(operand.get()) ))
 {
 }
-#endif
 
 template <typename T>
 recursive_wrapper<T>::recursive_wrapper(T&& operand)

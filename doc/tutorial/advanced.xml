@@ -230,9 +230,8 @@ public:
   </para>
 
   <para><emphasis role="bold">Performance</emphasis>: <classname>boost::recursive_wrapper</classname>
-    will never be empty when <macroname>BOOST_VARIANT_NO_RECURSIVE_WRAPPER_POINTER_STEALING</macroname> is defined,
-    what makes its move constructor not optimal even when a wrapped type has non-throwing move constructor.
-    Consider using <code>std::unique_ptr</code> or some other safe pointer for better performance on C++11 compatible compilers.</para>
+    has no empty state, which makes its move constructor not very optimal. Consider using <code>std::unique_ptr</code> 
+    or some other safe pointer for better performance on C++11 compatible compilers.</para>
 
 </section>
 
