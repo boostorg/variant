@@ -98,9 +98,9 @@ addons:
 before_install:
   # Cloning minimal set of Boost libraries
   - BOOST=$HOME/boost-local
-  - git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git $BOOST
+  - git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $BOOST
   - cd $BOOST
-  - git submodule update --init --depth 1 tools/build tools/boostdep
+  - git submodule update --init --depth 10 tools/build tools/boostdep
 
   # Replacing Boost module with this project and installing Boost dependencies
   - echo "Testing $BOOST/libs/$BOOST_LIBS_FOLDER moved from $TRAVIS_BUILD_DIR, branch $BOOST_BRANCH"
@@ -120,7 +120,7 @@ before_install:
     echo "using clang : 5 : clang++-5.0 ;" >> ~/user-config.jam
     echo "using clang : 6 : clang++-6.0 ;" >> ~/user-config.jam
     echo "using clang : 7 : clang++-7.0 ;" >> ~/user-config.jam
-    echo "using clang : 8 : clang++-8.0 ;" >> ~/user-config.jam
+    echo "using clang : 8 : clang++-8 ;" >> ~/user-config.jam
     echo "using clang : libc++ : clang++-libc++ ;" >> ~/user-config.jam
   - cd $BOOST/libs/$BOOST_LIBS_FOLDER/test/
 
