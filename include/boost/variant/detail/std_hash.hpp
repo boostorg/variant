@@ -24,7 +24,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // macro BOOST_VARIANT_DO_NOT_SPECIALIZE_STD_HASH
 //
-// Define this macro if you do not with to have a std::hash specialization for
+// Define this macro if you do not wish to have a std::hash specialization for
 // boost::variant.
 
 #if !defined(BOOST_VARIANT_DO_NOT_SPECIALIZE_STD_HASH) && !defined(BOOST_NO_CXX11_HDR_FUNCTIONAL)
