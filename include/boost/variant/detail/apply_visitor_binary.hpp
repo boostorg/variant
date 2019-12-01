@@ -25,8 +25,7 @@
 #   include <boost/core/enable_if.hpp>
 #   include <boost/type_traits/is_lvalue_reference.hpp>
 #   include <boost/type_traits/is_same.hpp>
-#   include <boost/move/move.hpp>
-#   include <boost/move/utility.hpp>
+#   include <boost/move/utility_core.hpp> // for boost::move, boost::forward
 #endif
 
 namespace boost {
