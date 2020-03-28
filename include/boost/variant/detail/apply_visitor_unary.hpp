@@ -130,8 +130,9 @@ struct result_wrapper1
 template <typename Visitor, typename Visitable>
 inline decltype(auto) apply_visitor(Visitor&& visitor, Visitable&& visitable,
     typename boost::disable_if<
-        boost::detail::variant::has_result_type<Visitor>
-    >::type* = 0)
+        boost::detail::variant::has_result_type<Visitor>,
+        bool
+    >::type = true)
 {
     boost::detail::variant::result_wrapper1<Visitor, Visitable> cpp14_vis(::boost::forward<Visitor>(visitor));
     return ::boost::forward<Visitable>(visitable).apply_visitor(cpp14_vis);
