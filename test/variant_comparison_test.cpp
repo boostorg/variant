@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "boost/detail/workaround.hpp"
-#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x0551))
+#if BOOST_WORKAROUND(BOOST_BORLANDC, BOOST_TESTED_AT(0x0551))
 #    pragma warn -lvc // temporary used for parameter warning
 #endif
 
