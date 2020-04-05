@@ -98,6 +98,7 @@ addons:
 before_install:
   # Cloning minimal set of Boost libraries
   - BOOST=$HOME/boost-local
+  - echo "git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $BOOST"
   - git clone -b $BOOST_BRANCH --depth 10 https://github.com/boostorg/boost.git $BOOST
   - cd $BOOST
   - git submodule update --init --depth 10 tools/build tools/boostdep
