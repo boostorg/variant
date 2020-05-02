@@ -347,7 +347,7 @@ private: // helpers, for metafunction result (below)
           types, mpl::sizeof_<mpl::_1>
         >::type max_size;
 
-#if !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x0551))
+#if !BOOST_WORKAROUND(BOOST_BORLANDC, BOOST_TESTED_AT(0x0551))
 
     typedef typename mpl::fold<
           types
@@ -385,7 +385,7 @@ public: // visitor interfaces
     {
         operand.~T(); // must be noexcept
 
-#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x0551)) || \
+#if BOOST_WORKAROUND(BOOST_BORLANDC, BOOST_TESTED_AT(0x0551)) || \
     BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1600))
         (void)operand; // suppresses warnings
 #endif
@@ -1036,7 +1036,7 @@ public: // internal visitor interfaces
         return visitor_(operand);
     }
 
-#   if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x0564))
+#   if BOOST_WORKAROUND(BOOST_BORLANDC, BOOST_TESTED_AT(0x0564))
     template <typename T>
     result_type internal_visit(const T& operand, int)
     {
@@ -1423,7 +1423,7 @@ private: // helpers, for structors, cont. (below)
             return initializer::initialize(storage_, operand);
         }
 
-#   if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x0564))
+#   if BOOST_WORKAROUND(BOOST_BORLANDC, BOOST_TESTED_AT(0x0564))
         template <typename T>
         result_type internal_visit(const T& operand, int) const
         {
