@@ -36,14 +36,13 @@
 
 #include <boost/variant/detail/move.hpp>
 
-#include <boost/detail/no_exceptions_support.hpp>
 #include <boost/detail/reference_content.hpp>
-#include <boost/aligned_storage.hpp>
 #include <boost/blank.hpp>
 #include <boost/integer/common_factor_ct.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repeat.hpp>
+#include <boost/type_traits/aligned_storage.hpp>
 #include <boost/type_traits/alignment_of.hpp>
 #include <boost/type_traits/add_const.hpp>
 #include <boost/type_traits/has_nothrow_constructor.hpp>
@@ -55,8 +54,9 @@
 #include <boost/type_traits/is_rvalue_reference.hpp>
 #include <boost/type_traits/is_constructible.hpp>
 #include <boost/type_traits/add_lvalue_reference.hpp>
-#include <boost/utility/enable_if.hpp>
-#include <boost/utility/declval.hpp>
+#include <boost/type_traits/declval.hpp>
+#include <boost/core/no_exceptions_support.hpp>
+#include <boost/core/enable_if.hpp>
 #include <boost/variant/recursive_wrapper_fwd.hpp>
 #include <boost/variant/static_visitor.hpp>
 
