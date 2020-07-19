@@ -13,6 +13,8 @@
 #ifndef BOOST_VARIANT_BAD_VISIT_HPP
 #define BOOST_VARIANT_BAD_VISIT_HPP
 
+#include <boost/config.hpp>
+
 #include <exception>
 
 namespace boost {
