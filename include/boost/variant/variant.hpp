@@ -1018,7 +1018,7 @@ public: // internal visitor interfaces
     template <typename T>
     typename enable_if_c<MoveSemantics && is_same<T, T>::value, result_type>::type internal_visit(T&& operand, int)
     {
-        return visitor_(::boost::move<T>(operand));
+        return visitor_(::boost::move(operand));
     }
 
     //using workaround with is_same<T, T> to prenvent compilation error, because we need to use T in enable_if to make SFINAE work
