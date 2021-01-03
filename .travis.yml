@@ -17,14 +17,14 @@ os: linux
 # `--coverage` flags required to generate coverage info for Coveralls
 matrix:
   include:
-    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-6 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD -fno-rtti" linkflags="--coverage -lasan -lubsan"'
+    - env: B2_ARGS='cxxstd=98,03,11,14,1y toolset=gcc-6 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD -fno-rtti" linkflags="--coverage -lasan -lubsan"' GCOVTOOL='gcov-6'
       name: "GCC-6, no RTTI"
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: g++-6
 
-    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage  -lasan -lubsan"'
+    - env: B2_ARGS='cxxstd=98,03,11,14,1z toolset=gcc-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage  -lasan -lubsan"' GCOVTOOL='gcov-8'
       name: "GCC-8"
       sudo: required # Required by leak sanitizer
       addons:
@@ -32,7 +32,7 @@ matrix:
           sources: ubuntu-toolchain-r-test
           packages: g++-8
 
-    - env: B2_ARGS='cxxstd=98,0x toolset=gcc-4.6 cxxflags="--coverage -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"'
+    - env: B2_ARGS='cxxstd=98,0x toolset=gcc-4.6 cxxflags="--coverage -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"' GCOVTOOL='gcov-4.6'
       name: "GCC-4.6"
       addons:
         apt:
@@ -47,7 +47,7 @@ matrix:
 #          sources: ubuntu-toolchain-r-test
 #          packages: g++-8
 
-    - env: B2_ARGS='cxxstd=14,1z toolset=clang-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"'
+    - env: B2_ARGS='cxxstd=14,1z toolset=clang-8 cxxflags="--coverage -fsanitize=address,leak,undefined -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage -fsanitize=address,leak,undefined"' GCOVTOOL='gcov_for_clang.sh'
       name: "Clang-8"
       sudo: required # Required by leak sanitizer
       addons:
@@ -57,7 +57,7 @@ matrix:
 
     # Sanitizers disabled for this toolset as they started causing link troubles: 
     # hidden symbol `_ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE11__recommendEm' isn't defined
-    - env: B2_ARGS='cxxstd=03,11,14 toolset=clang-libc++ cxxflags="--coverage -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"'
+    - env: B2_ARGS='cxxstd=03,11,14 toolset=clang-libc++ cxxflags="--coverage -fno-sanitize-recover=undefined -DBOOST_TRAVISCI_BUILD" linkflags="--coverage"' GCOVTOOL='gcov_for_clang.sh'
       name: "Clang-3.8, libc++"
       addons:
         apt:
@@ -133,9 +133,12 @@ after_success:
   - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $TRAVIS_BUILD_DIR/coverals/ \;
   - find ../../../bin.v2/ -name "*.da" -exec cp "{}" $TRAVIS_BUILD_DIR/coverals/ \;
   - find ../../../bin.v2/ -name "*.no" -exec cp "{}" $TRAVIS_BUILD_DIR/coverals/ \;
-  - wget https://github.com/linux-test-project/lcov/archive/v1.12.zip
-  - unzip v1.12.zip
-  - LCOV="`pwd`/lcov-1.12/bin/lcov --gcov-tool gcov-6"
+  - wget https://github.com/linux-test-project/lcov/archive/v1.14.zip
+  - unzip v1.14.zip
+  - LCOV="`pwd`/lcov-1.14/bin/lcov --gcov-tool $GCOVTOOL"
+  - mkdir -p ~/.local/bin
+  - echo -e '#!/bin/bash\nexec llvm-cov gcov "$@"' > ~/.local/bin/gcov_for_clang.sh
+  - chmod 755 ~/.local/bin/gcov_for_clang.sh
 
   # Preparing Coveralls data by changind data format to a readable one
   - echo "$LCOV --directory $TRAVIS_BUILD_DIR/coverals --base-directory `pwd` --capture --output-file $TRAVIS_BUILD_DIR/coverals/coverage.info"
