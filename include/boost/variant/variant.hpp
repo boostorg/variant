@@ -1705,6 +1705,21 @@ private: // helpers, for structors, below
     }
 #endif
 
+    /// Forward types derived from variant
+    template <typename U>
+    typename boost::enable_if< boost::is_base_and_derived<variant, U> >::type
+    convert_construct( U& operand , long ) { convert_construct( operand, 1 ); }
+
+    template <typename U>
+    typename boost::enable_if< boost::is_base_and_derived<variant, U> >::type
+    convert_construct( const U& operand , long ) { convert_construct( operand, 1 ); }
+
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+    template <typename U>
+    typename boost::enable_if< mpl::and_<boost::is_base_and_derived<variant, U>, boost::is_rvalue_reference<U&&> >::type
+    convert_construct( U&& operand , long ) { convert_construct( detail::variant::move(operand), 1 ); }
+#endif
+
 public: // structors, cont.
 
     template <typename T>
