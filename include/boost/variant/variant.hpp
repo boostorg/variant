@@ -1716,7 +1716,7 @@ private: // helpers, for structors, below
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     template <typename U>
-    typename boost::enable_if< mpl::and_<boost::is_base_and_derived<variant, U>, boost::is_rvalue_reference<U&&> >::type
+    typename boost::enable_if< mpl::and_<boost::is_base_and_derived<variant, U>, boost::is_rvalue_reference<U&&> > >::type
     convert_construct( U&& operand , long ) { convert_construct( detail::variant::move(operand), 1 ); }
 #endif
 
