@@ -11,6 +11,7 @@
 import testing ;
 
 local below-c++14 = 98 03 0x 11 ;
+local since-c++20 = 2a 20 ;
 
 project
     : requirements
@@ -57,7 +58,7 @@ test-suite variant
     [ run auto_visitors.cpp ]
     [ run issue42.cpp ]
     [ run issue53.cpp ]
-    [ run overload_selection.cpp ]
+    [ run overload_selection.cpp : : : "<cxxstd>$(since-c++20)":<build>no  ]
     [ run recursive_wrapper_move_test.cpp ]
     [ run variant_over_joint_view_test.cpp ]
     [ run const_ref_apply_visitor.cpp ]
