@@ -6,10 +6,10 @@
 
 // Test case from https://svn.boost.org/trac10/ticket/8721
 
-#include <boost/config.hpp>
-#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-
 #include <boost/variant.hpp>
+
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
+
 #include <boost/fusion/include/vector.hpp>
 
 struct emptyList {};
@@ -30,4 +30,4 @@ IntList cons( int head, IntList tail )
   return IntList( boost::fusion::vector<int, IntList>( head, tail ) );
 }
 
-#endif // #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#endif // #if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
