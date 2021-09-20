@@ -10,6 +10,7 @@
 
 import testing ;
 
+local below_cpp11 = 98 03 ;
 local below_cpp14 = 98 03 0x 11 ;
 local since_cpp20 = 2a 20 latest ;
 
@@ -37,6 +38,7 @@ test-suite variant
     [ run variant_get_test.cpp ]
     [ compile-fail variant_rvalue_get_with_ampersand_test.cpp ]
     [ compile-fail no_rvalue_to_nonconst_visitation.cpp ]
+    [ compile fusion_interop.cpp : "<cxxstd>$(below_cpp11)"\:<build>no ]
     [ run variant_polymorphic_get_test.cpp ]
     [ run variant_multivisit_test.cpp ]
     [ run hash_variant_test.cpp ]
