@@ -355,10 +355,23 @@ void test_recursive_variant_over()
     BOOST_TEST(result5 == "( 3.5 ( 3 5 ( 3 5 ) 7 ) 17.25 ) ");
 }
 
+void test_recursive_variant_from_variant()
+{
+    // See https://github.com/boostorg/variant/issues/100
+
+    struct Nil {};
+    typedef boost::variant<Nil, double> Atom;
+    typedef boost::variant<Nil, boost::recursive_wrapper<Atom>> Variant;
+
+    BOOST_STATIC_ASSERT(!boost::is_constructible<Variant, Atom>::value);
+    BOOST_STATIC_ASSERT(boost::is_constructible<boost::variant<Nil, Atom>, Atom>::value);
+}
+
 int main()
 {
     test_recursive_variant();
     test_recursive_variant_over();
+    test_recursive_variant_from_variant();
 
     return boost::report_errors();
 }
