@@ -15,10 +15,10 @@
 #include <exception>
 
 #include <boost/config.hpp>
+#include <boost/core/addressof.hpp>
 #include <boost/detail/workaround.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/utility/addressof.hpp>
 #include <boost/variant/variant_fwd.hpp>
 #include <boost/variant/get.hpp>
 
