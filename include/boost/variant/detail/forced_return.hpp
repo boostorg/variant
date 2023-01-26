@@ -15,7 +15,9 @@
 
 #include <boost/config.hpp>
 #include <boost/assert.hpp>
-
+#if defined(BOOST_ASSERT_IS_VOID) && defined(BOOST_GCC) && BOOST_GCC_VERSION < 40500
+#include <cstdlib> // std::abort
+#endif
 
 #ifdef BOOST_MSVC
 # pragma warning( push )
@@ -39,6 +41,10 @@ forced_return()
 
     T (*dummy)() = 0;
     (void)dummy;
+#if defined(BOOST_ASSERT_IS_VOID) && defined(BOOST_GCC) && BOOST_GCC_VERSION < 40500
+    using namespace std;
+    abort(); // some implementations have no std::abort
+#endif
     BOOST_UNREACHABLE_RETURN(dummy());
 }
 
