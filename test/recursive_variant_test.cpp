@@ -363,7 +363,7 @@ void test_recursive_variant_from_variant()
     typedef boost::variant<Nil, double> Atom;
     typedef boost::variant<Nil, boost::recursive_wrapper<Atom> > Variant;
 
-    BOOST_STATIC_ASSERT(!boost::is_constructible<Variant, Atom>::value);
+    BOOST_STATIC_ASSERT(boost::is_constructible<Variant, Atom>::value);
     BOOST_STATIC_ASSERT(boost::is_constructible<boost::variant<Nil, Atom>, Atom>::value);
 }
 

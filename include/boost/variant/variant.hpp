@@ -55,6 +55,7 @@
 #include <boost/type_traits/is_constructible.hpp>
 #include <boost/type_traits/add_lvalue_reference.hpp>
 #include <boost/type_traits/declval.hpp>
+#include <boost/type_traits/make_void.hpp>
 #include <boost/core/no_exceptions_support.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/variant/recursive_wrapper_fwd.hpp>
@@ -70,6 +71,7 @@
 #include <boost/mpl/fold.hpp>
 #include <boost/mpl/front.hpp>
 #include <boost/mpl/identity.hpp>
+#include <boost/mpl/inherit_linearly.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/insert_range.hpp>
 #include <boost/mpl/int.hpp>
@@ -258,66 +260,170 @@ struct is_variant_move_noexcept_assignable {
 #endif // BOOST_NO_CXX11_NOEXCEPT
 
 ///////////////////////////////////////////////////////////////////////////////
-// (detail) metafunction is_variant_constructible_from
-//
-// Derives from true_type if at least one variant's type is constructible from T.
-//
-template <class T1, class T2>
-struct is_constructible_ext:
-    boost::mpl::or_<
-        boost::is_constructible<
-            T1,
-            T2
-        >,
-        boost::is_constructible<
-            T1,
-            typename boost::add_lvalue_reference<T2>::type
-        >
+template <typename T>
+struct add_clref
+{
+    typedef typename boost::add_lvalue_reference<
+        typename boost::add_const<T>::type
+    >::type type;
+};
+
+template <typename T>
+struct unwrap_reference_content
+{
+    typedef T type;
+};
+
+template <typename T>
+struct unwrap_reference_content<boost::detail::reference_content<T> >
+{
+    typedef T type;
+};
+
+template <typename T>
+struct wrapper
+{
+    typedef wrapper type;
+    typedef typename unwrap_reference_content<T>::type wrapped_type;
+};
+
+struct overload_FUN_base
+{
+    enum { value = 0 };
+    void fun();
+};
+
+template <typename T1, typename T2>
+struct overload_FUN : T1, T2
+{
+    typedef overload_FUN type;
+    enum { value = T1::value + 1 };
+    typedef char result[value];
+    using T1::fun;
+    static result& fun(typename T2::wrapped_type);
+};
+
+template <typename OverloadSet, typename T, typename Enabler = void>
+struct FUN_index
+{
+    enum { value = 0 };
+};
+
+template <typename OverloadSet, typename T>
+struct FUN_index<OverloadSet, T, typename boost::make_void<
+        mpl::size_t<sizeof(OverloadSet::fun(boost::declval<T>()))>
+    >::type>
+{
+    enum { value = sizeof(OverloadSet::fun(boost::declval<T>())) };
+};
+
+template <typename TypeList>
+struct make_FUN_overload_set:
+    mpl::inherit_linearly<
+        TypeList,
+        overload_FUN<mpl::_1, wrapper<mpl::_2> >,
+        overload_FUN_base
+    >
+{};
+
+template <class T, class Types>
+struct is_variant_constructible_from_type:
+    mpl::bool_<
+        FUN_index<typename make_FUN_overload_set<Types>::type, T>::value != 0
     >
 {};
 
 template <class T, class Types>
 struct is_variant_constructible_from:
-    boost::mpl::not_< boost::is_same<
-        typename boost::mpl::find_if<
-            Types,
-            is_constructible_ext<boost::mpl::_1, T>
-        >::type,
-        typename boost::mpl::end<Types>::type
-    > >
+    is_variant_constructible_from_type<T, Types>
 {};
 
-template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
-struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >:
+template <class VariantTypes, class Types>
+struct is_variant_constructible_from_variant:
     boost::is_same<
-        typename boost::mpl::find_if<
-            typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types,
-            mpl::not_< is_variant_constructible_from< boost::mpl::_1, Types> >
+        typename mpl::find_if<
+            VariantTypes,
+            mpl::not_< is_variant_constructible_from< mpl::_1, Types> >
         >::type,
-        typename boost::mpl::end< typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types >::type
+        typename mpl::end<VariantTypes>::type
     >
 {};
 
 template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
+struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >:
+    mpl::or_<
+        is_variant_constructible_from_type<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types>,
+        is_variant_constructible_from_variant<
+            typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types,
+            Types
+        >
+    >::type
+{};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
 struct is_variant_constructible_from< const boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>& , Types >:
-    is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >
+    mpl::or_<
+        is_variant_constructible_from_type<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types>,
+        is_variant_constructible_from_variant<
+            typename mpl::transform<
+                typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types,
+                add_clref<mpl::_1>
+            >::type,
+            Types
+        >
+    >::type
 {};
 
 template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
 struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>& , Types >:
-    is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >
+    mpl::or_<
+        is_variant_constructible_from_type<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types>,
+        is_variant_constructible_from_variant<
+            typename mpl::transform<
+                typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types,
+                boost::add_lvalue_reference<mpl::_1>
+            >::type,
+            Types
+        >
+    >::type
 {};
 
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 
+template <typename T>
+struct add_crref
+{
+    typedef typename boost::add_rvalue_reference<
+        typename boost::add_const<T>::type
+    >::type type;
+};
+
 template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
 struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>&& , Types >:
-    is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >
+    mpl::or_<
+        is_variant_constructible_from_type<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types>,
+        is_variant_constructible_from_variant<
+            typename mpl::transform<
+                typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types,
+                boost::add_rvalue_reference<mpl::_1>
+            >::type,
+            Types
+        >
+    >::type
 {};
 
 template <BOOST_VARIANT_ENUM_PARAMS(typename T), class Types>
 struct is_variant_constructible_from< boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const && , Types >:
-    is_variant_constructible_from<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types >
+    mpl::or_<
+        is_variant_constructible_from_type<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Types>,
+        is_variant_constructible_from_variant<
+            typename mpl::transform<
+                typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::recursive_enabled_types,
+                add_crref<mpl::_1>
+            >::type,
+            Types
+        >
+    >::type
 {};
 
 #endif // #ifndef BOOST_NO_CXX11_RVALUE_REFERENCE
