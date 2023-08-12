@@ -13,13 +13,11 @@ target_include_directories( boost_variant INTERFACE include )
 target_link_libraries( boost_variant
     INTERFACE
         Boost::assert
-        Boost::bind
         Boost::config
         Boost::container_hash
         Boost::core
         Boost::detail
         Boost::integer
-        Boost::move
         Boost::mpl
         Boost::preprocessor
         Boost::static_assert

@@ -13,22 +13,6 @@
   <para>Provides declarations of <functionname>apply_visitor</functionname> for three or more
     <code><classname>variant</classname></code> parameters.</para>
 
-    <macro name="BOOST_VARAINT_MAX_MULTIVIZITOR_PARAMS">
-      <purpose>
-        <simpara>Controls maximum amount of <code><classname>variant</classname></code>
-          parameters for multi visistors. Not used when <code>std::tuple</code> is available and
-          <code><macroname>BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES</macroname></code>
-          is not defined.</simpara>
-      </purpose>
-
-      <description>
-        <para><emphasis role="bold">Note</emphasis>: Default amount is 4. Define it 
-          to bigger value before including &lt;boost/variant/multivisitors.hpp&gt; to
-          increase maximum amount of <code><classname>variant</classname></code>
-          parameters for <functionname>apply_visitor</functionname>.</para>
-      </description>
-    </macro>
-
   <namespace name="boost">
     <overloaded-function name="apply_visitor /*three or more variant parameters*/">
       <description>

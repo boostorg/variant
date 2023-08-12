@@ -29,9 +29,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
 #include <tuple>
-#endif // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
 
 struct Nil {};
 
@@ -61,7 +59,6 @@ struct printer
         return ost.str();
     }
 
-#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
     template <int...> struct indices {};
     template <typename... Ts, int... Is>
     std::string operator()(const std::tuple<Ts...>& tup, indices<Is...>) const
@@ -83,7 +80,6 @@ struct printer
     {
         return printer()(tup, make_indices<sizeof...(Ts)>());
     }
-#endif // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
 
     template <typename T>
     std::string operator()(const T& operand) const
@@ -215,7 +211,6 @@ void test_recursive_variant()
         >::type var6_t;
     var6_t var6;
 
-#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
     typedef boost::make_recursive_variant<
           int,
           std::tuple<int, boost::recursive_variant_>
@@ -228,7 +223,6 @@ void test_recursive_variant()
 
     std::cout << "result7: " << result7 << '\n';
     BOOST_TEST(result7 == "( 2 ( 1 0 ) ) ");
-#endif // !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_HDR_TUPLE)
 }
 
 void test_recursive_variant_over()

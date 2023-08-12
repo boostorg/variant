@@ -386,7 +386,7 @@ inline void get_rvref_test()
   boost::variant<MoveonlyType, int> v;
 
   v = MoveonlyType();
-  boost::get<MoveonlyType>(boost::move(v));
+  boost::get<MoveonlyType>(std::move(v));
 
   v = 3;
 
@@ -396,7 +396,7 @@ inline void get_rvref_test()
   boost::relaxed_get<MoveonlyType&>(boost::variant<MoveonlyType, int>());
 
   v = MoveonlyType();
-  MoveonlyType moved_from_variant(boost::get<MoveonlyType>(boost::move(v)));
+  MoveonlyType moved_from_variant(boost::get<MoveonlyType>(std::move(v)));
 }
 #endif  // BOOST_NO_CXX11_RVALUE_REFERENCES
 
