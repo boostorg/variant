@@ -45,16 +45,6 @@
 
 #include <boost/variant/detail/substitute_fwd.hpp>
 
-#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) \
-  || (!defined(__clang__) && defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 7)) \
-  || (defined(_MSC_VER) && (_MSC_VER <= 1900)) \
-  || defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE) \
-  || defined (BOOST_VARIANT_NO_TYPE_SEQUENCE_SUPPORT)
-
-#error C++03 support was droped in Boost.Variant 1.84
-
-#endif
-
 #include <boost/preprocessor/seq/size.hpp>
 
 #define BOOST_VARIANT_CLASS_OR_TYPENAME_TO_SEQ_class class)(
