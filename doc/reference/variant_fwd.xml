@@ -19,36 +19,6 @@
     class templates and the <code>boost::recursive_variant_</code> tag type.
     Also defines several preprocessor symbols, as described below.</para>
 
-  <macro name="BOOST_VARIANT_LIMIT_TYPES">
-    <purpose>
-      <simpara>Expands to the length of the
-        template parameter list for
-        <code><classname>variant</classname></code>. Not used if
-        <code><macroname>BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES</macroname></code>
-        is not defined. 
-      </simpara>
-    </purpose>
-
-    <description>
-      <para><emphasis role="bold">Note</emphasis>: Conforming
-        implementations of <code>variant</code> must allow at least ten
-        template arguments. That is, BOOST_VARIANT_LIMIT_TYPES must be greater
-        or equal to <code>10</code>.</para>
-    </description>
-  </macro>
-
-  <macro name="BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES">
-    <purpose>
-      <simpara>If this macro is defined, then library won't use C++11 variadic templates.
-        Users may define this macro to make 
-        <code><macroname>BOOST_VARIANT_ENUM_PARAMS</macroname></code>
-        and <code><macroname>BOOST_VARIANT_ENUM_SHIFTED_PARAMS</macroname></code> expand
-        to a comma-separated sequence instead of variadic templates. Define this macro if
-        your compiler has problems with compilation of variadic templates.
-      </simpara>
-    </purpose>
-  </macro>
-
   <macro name="BOOST_VARIANT_ENUM_PARAMS" kind="functionlike">
     <macro-parameter name="param"/>
 
@@ -58,9 +28,7 @@
     </purpose>
 
     <description>
-      <para> When variadic templates are available and
-        <code><macroname>BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES</macroname></code>
-        is not defined, expands to variadic template list in the following manner:
+      <para> Expands to variadic template list in the following manner:
         <code><programlisting>
             BOOST_VARIANT_ENUM_PARAMS(T)                    => T0, TN...
             BOOST_VARIANT_ENUM_PARAMS(class T)              => class T0, class... TN
@@ -97,9 +65,7 @@
     </purpose>
 
     <description>
-      <para> When variadic templates are available and
-        <code><macroname>BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES</macroname></code>
-        is not defined, expands to variadic template list in the following manner:
+      <para> Expands to variadic template list in the following manner:
         <code><programlisting>
             BOOST_VARIANT_ENUM_SHIFTED_PARAMS(T)                    => TN...
             BOOST_VARIANT_ENUM_SHIFTED_PARAMS(class T)              => class... TN
