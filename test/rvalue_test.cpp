@@ -17,7 +17,6 @@
 #include "boost/mpl/bool.hpp"
 
 #include <boost/blank.hpp>
-#include <boost/swap.hpp>
 
 namespace swap_ambiguouty_test_ns {
     struct A {};
