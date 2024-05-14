@@ -10,13 +10,11 @@ import project ;
 project /boost/variant
     : common-requirements
         <library>/boost/assert//boost_assert
-        <library>/boost/bind//boost_bind
         <library>/boost/config//boost_config
         <library>/boost/container_hash//boost_container_hash
         <library>/boost/core//boost_core
         <library>/boost/detail//boost_detail
         <library>/boost/integer//boost_integer
-        <library>/boost/move//boost_move
         <library>/boost/mpl//boost_mpl
         <library>/boost/preprocessor//boost_preprocessor
         <library>/boost/static_assert//boost_static_assert
