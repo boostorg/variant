@@ -32,7 +32,7 @@ test-suite variant
     [ run test6.cpp : : : : variant_test6 ]
     [ run test7.cpp : : : : variant_test7 ]
     [ run test8.cpp : : : : variant_test8 ]
-    [ run test9.cpp : : : <source>/boost/fusion//boost_fusion : variant_test9 ]
+    [ run test9.cpp : : : <library>/boost/fusion//boost_fusion : variant_test9 ]
     [ run recursive_variant_test.cpp ]
     [ run variant_reference_test.cpp ]
     [ run variant_comparison_test.cpp ]
@@ -41,7 +41,7 @@ test-suite variant
     [ run variant_get_test.cpp ]
     [ compile-fail variant_rvalue_get_with_ampersand_test.cpp ]
     [ compile-fail no_rvalue_to_nonconst_visitation.cpp ]
-    [ compile fusion_interop.cpp : <source>/boost/fusion//boost_fusion ]
+    [ compile fusion_interop.cpp : <library>/boost/fusion//boost_fusion ]
     [ run variant_polymorphic_get_test.cpp ]
     [ run variant_multivisit_test.cpp ]
     [ run hash_variant_test.cpp ]
@@ -60,13 +60,13 @@ test-suite variant
     [ run recursive_variant_test.cpp : : : <rtti>off <define>BOOST_NO_RTTI <define>BOOST_NO_TYPEID : variant_no_rtti_test ]
     [ run hash_recursive_variant_test.cpp ]
     [ run variant_swap_test.cpp ]
-    [ run auto_visitors.cpp : : : <source>/boost/lexical_cast//boost_lexical_cast ]
+    [ run auto_visitors.cpp : : : <library>/boost/lexical_cast//boost_lexical_cast ]
     [ run issue42.cpp ]
-    [ run issue53.cpp : : : <source>/boost/thread//boost_thread ]
+    [ run issue53.cpp : : : <library>/boost/thread//boost_thread ]
     [ run overload_selection.cpp : : : "<cxxstd>$(since_cpp20)"\:<build>no ]
-    [ run recursive_wrapper_move_test.cpp : : : <source>/boost/array//boost_array ]
+    [ run recursive_wrapper_move_test.cpp : : : <library>/boost/array//boost_array ]
     [ run variant_over_joint_view_test.cpp ]
-    [ run const_ref_apply_visitor.cpp : : : <source>/boost/lexical_cast//boost_lexical_cast ]
-   ; 
+    [ run const_ref_apply_visitor.cpp : : : <library>/boost/lexical_cast//boost_lexical_cast ]
+   ;
 
 
