@@ -18,6 +18,7 @@ local since_cpp20 = 2a 20 latest ;
 
 project
     : requirements
+        <library>/boost/variant//boost_variant
         [ requires cxx11_rvalue_references ]
         <toolset>msvc:<asynch-exceptions>on
     ;
