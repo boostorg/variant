@@ -3,7 +3,7 @@
 // See http://www.boost.org for updates, documentation, and revision history.
 //-----------------------------------------------------------------------------
 //
-// Copyright (c) 2013-2022 Antony Polukhin
+// Copyright (c) 2013-2025 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -135,14 +135,12 @@ int main()
         arithmetics_t(true)
     );
 
-#if !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
     if_visitor if_vis;
     BOOST_TEST(
         boost::apply_visitor(if_vis)(v0, v1, v2)
         ==
         arithmetics_t(true)
     );
-#endif
 
 
     variant_noncopy_t vnonc[6];

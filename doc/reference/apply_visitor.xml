@@ -3,7 +3,7 @@
   "http://www.boost.org/tools/boostbook/dtd/boostbook.dtd">
 <!--
     Copyright 2003, Eric Friedman, Itay Maman.
-    Copyright 2013-2022 Antony Polukhin.
+    Copyright 2013-2025 Antony Polukhin.
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -91,8 +91,6 @@
             <code><functionname>apply_visitor</functionname></code> on the
             stored visitor using the given operands.</simpara>
           </description>
-          <notes>Version with variadic templates is used by default if
-          <macroname>BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES</macroname> is not defined.</notes>
         </overloaded-method>
       </method-group>
     </class>
@@ -111,8 +109,7 @@
         <simpara>See <code><classname>apply_visitor_delayed_t</classname></code>
             which is used when <code>Visitor</code> has <code>result_type</code>
             typedef.</simpara>
-        <simpara>Available only if macro
-          <macroname>BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES</macroname> is not defined and
+        <simpara>Available only if
           compiler supports <code>decltype(auto)</code> and <code>decltype(some-expression)</code>.</simpara>
       </description>
 

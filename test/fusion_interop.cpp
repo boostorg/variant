@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Antony Polukhin
+// Copyright (c) 2021-2025 Antony Polukhin
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -7,8 +7,6 @@
 // Test case from https://svn.boost.org/trac10/ticket/8721
 
 #include <boost/variant.hpp>
-
-#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
 
 #include <boost/fusion/include/vector.hpp>
 
@@ -29,5 +27,3 @@ IntList cons( int head, IntList tail )
 {
   return IntList( boost::fusion::vector<int, IntList>( head, tail ) );
 }
-
-#endif // #if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_VARIANT_DO_NOT_USE_VARIADIC_TEMPLATES)
