@@ -36,6 +36,7 @@ test-suite variant
     [ run test9.cpp : : : <library>/boost/fusion//boost_fusion : variant_test9 ]
     [ run recursive_variant_test.cpp ]
     [ run variant_reference_test.cpp ]
+    [ run variant_reference_visit_test.cpp ]
     [ run variant_comparison_test.cpp ]
     [ run variant_visit_internal_linkage.cpp : : : "<cxxstd>$(below_cpp14)"\:<build>no ]
     [ run variant_visit_test.cpp ]

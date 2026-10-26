@@ -1033,13 +1033,15 @@ public: // internal visitor interfaces, cont.
     template <typename T>
     result_type internal_visit(boost::detail::reference_content<T>& operand, long)
     {
-        return internal_visit( operand.get(), 1L );
+        invoke_visitor<Visitor, false> invoker(visitor_);
+        return invoker.internal_visit( operand.get(), 1L );
     }
 
     template <typename T>
     result_type internal_visit(const boost::detail::reference_content<T>& operand, long)
     {
-        return internal_visit( operand.get(), 1L );
+        invoke_visitor<Visitor, false> invoker(visitor_);
+        return invoker.internal_visit( operand.get(), 1L );
     }
 
     template <typename T>
